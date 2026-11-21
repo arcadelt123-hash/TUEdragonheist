@@ -527,6 +527,9 @@
     .ts-c { flex: none; width: 74px; margin-left: -24px; cursor: pointer; transform-origin: 50% 160%; transform: translateY(var(--y)) rotate(var(--r)); transition: transform .08s linear, filter .18s; filter: drop-shadow(0 4px 6px rgba(0,0,0,.5)); }
     .ts-c:first-child { margin-left: 0; } .ts-c:hover { transform: translateY(calc(var(--y) - 14px)) rotate(var(--r)); z-index: 5; }
     .ts-c.used { filter: grayscale(.7) brightness(.6); } .ts-c.cur { transform: translateY(calc(var(--y) - 12px)) rotate(var(--r)); filter: drop-shadow(0 0 8px #f6d58a); z-index: 4; }
+    #tcg-ov.has-strip .tcg-bar { display: none; } #tcg-strip { height: 168px; } #tcg-ov.has-strip { padding-bottom: 176px; }
+    .ts-arr { position: fixed; bottom: 70px; z-index: 5; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid #ca8a04; background: rgba(20,16,10,.8); color: #f6d58a; font-size: 1.4rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0 0 3px; } .ts-arr.l { left: 6px; } .ts-arr.r { right: 6px; }
+    .ts-c { transform-origin: 50% 230%; } .ts-c { width: 80px; margin-left: -34px; }
     .ts-ghost { position: fixed; z-index: 9999; width: 104px; pointer-events: none; filter: drop-shadow(0 10px 16px rgba(0,0,0,.6)); transform: rotate(-3deg); } .ts-ghost .pc-card { width: 100%; }
     .tcg-multi { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 8px; margin: auto; }
     .tcg-mc { width: var(--cw); flex: none; animation: tcgMIn .4s cubic-bezier(.2,.9,.25,1.05) both; } .tcg-mc.old { animation: tcgMShrink .4s cubic-bezier(.2,.9,.25,1.05) both; }
@@ -4665,7 +4668,7 @@
     }
     // 부채꼴에서 뽑은 카드 아래에, 남은 카드들을 부채꼴로 계속 보여줘서 이어서 뽑을 수 있게
     function tcgStrip(ov) {
-      ov.classList.remove('has-strip'); const old = document.getElementById('tcg-strip'), prevSL = old && tcgMulti.length > 1 ? old.scrollLeft : null; if (old) old.remove();
+      ov.querySelectorAll('.ts-arr').forEach(a => a.remove()); ov.classList.remove('has-strip'); const old = document.getElementById('tcg-strip'), prevSL = old && tcgMulti.length > 1 ? old.scrollLeft : null; if (old) old.remove();
       const sp = tcgSpec, pool = window.__fanPool || []; if (!window.__tcgFan || !sp || !sp.card || tcgPanel || pool.length < 2) return;
       const cur = sp.curKey, dr = window.__drawn = window.__drawn || new Set(); if (cur) dr.add(cur); const inMulti = k => tcgMulti.some(m => m.curKey === k);
       const cards = pool.map(c => { let f = ''; if (c.k === 'pc') { const i = pcIdx(c.id), p = (state.boardTex.pcs || [])[i]; if (!p) return null; f = pcCardHtml(p, i, true); } else { const n = (state.globalNpcs || []).find(x => x.id === c.id); if (!n) return null; f = pcCardHtml(npcCardObj(n), -1, true); } return { c, f, key: c.k + ':' + c.id }; }).filter(Boolean);
@@ -4673,9 +4676,13 @@
       el.innerHTML = '<div class="ts-in">' + cards.map((x, i) => { const r = (i - mid) * 2.2, y = Math.pow(i - mid, 2) * 0.35; return `<div class="ts-c${x.key === cur || inMulti(x.key) ? ' cur' : dr.has(x.key) ? ' used' : ''}" data-k="${x.c.k}" data-id="${escapeHtml(x.c.id)}" style="--r:${r}deg;--y:${y}px" onclick="tcgStripPick('${x.c.k}','${escapeHtml(x.c.id)}',this)" title="눌러서 뽑기 · 위로 끌어 함께 펼치기"><div class="ts-f">${x.f}</div></div>`; }).join('') + '</div>';
       ov.classList.add('has-strip'); ov.appendChild(el);
       const c = el.querySelector('.cur'); if (prevSL != null) el.scrollLeft = prevSL; else if (c) el.scrollLeft = c.offsetLeft + c.offsetWidth / 2 - el.clientWidth / 2;
+      ['l', 'r'].forEach(sd => { const b = document.createElement('button'); b.className = 'ts-arr ' + sd; b.textContent = sd === 'l' ? '‹' : '›'; b.setAttribute('aria-label', sd === 'l' ? '이전 카드' : '다음 카드'); b.onclick = ev => { ev.stopPropagation(); tcgStripGo(sd === 'l' ? -1 : 1); }; ov.appendChild(b); });
       tcgStripFan(el); let raf = 0; el.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; tcgStripFan(el); }); }, { passive: true });
     }
-    function tcgStripFan(el) { const half = el.clientWidth / 2 || 1; el.querySelectorAll('.ts-c').forEach(c => { const d = Math.max(-2.2, Math.min(2.2, (c.offsetLeft + c.offsetWidth / 2 - el.scrollLeft - half) / half)); c.style.setProperty('--r', (d * 13).toFixed(1) + 'deg'); c.style.setProperty('--y', (d * d * 12).toFixed(1) + 'px'); }); }
+    function tcgStripCenter() { const el = document.getElementById('tcg-strip'); if (!el) return null; const cs = [...el.querySelectorAll('.ts-c')], mid = el.scrollLeft + el.clientWidth / 2; let bi = 0, bd = 1e9; cs.forEach((c, i) => { const d = Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid); if (d < bd) { bd = d; bi = i; } }); return { el, cs, bi }; }
+    function tcgStripGo(dir) { const o = tcgStripCenter(); if (!o) return; const i = Math.max(0, Math.min(o.cs.length - 1, o.bi + dir)), c = o.cs[i]; o.el.scrollTo({ left: c.offsetLeft + c.offsetWidth / 2 - o.el.clientWidth / 2, behavior: 'smooth' }); }
+    document.addEventListener('keydown', e => { if (!document.getElementById('tcg-strip') || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName || '')) return; if (e.key === 'ArrowLeft') tcgStripGo(-1); else if (e.key === 'ArrowRight') tcgStripGo(1); else if (e.key === 'Enter') { const o = tcgStripCenter(); if (o) o.cs[o.bi].click(); } else return; e.preventDefault(); });
+    function tcgStripFan(el) { const half = el.clientWidth / 2 || 1; el.querySelectorAll('.ts-c').forEach(c => { const d = Math.max(-2.2, Math.min(2.2, (c.offsetLeft + c.offsetWidth / 2 - el.scrollLeft - half) / half)); c.style.setProperty('--r', (d * 20).toFixed(1) + 'deg'); c.style.setProperty('--y', (d * d * 22).toFixed(1) + 'px'); }); }
     // 부채꼴 카드를 위로 끌어 올리면 지금 카드 옆에 함께 펼침 (최대 5장)
     let tcgMulti = [];
     function tcgStripAdd(k, id) {
