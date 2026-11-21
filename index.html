@@ -546,6 +546,17 @@
     @media (max-width: 760px), (pointer: coarse) { #tcg-ov .tcg-wrap:not(.wide) .tcg-bar .b-brush, #tcg-ov .tcg-wrap:not(.wide) .tcg-bar .b-close { display: none; } }
     .ts-f .pc-card { width: 100%; pointer-events: none; }
     .cardlock-btn { display: none; } @media (pointer: coarse) { .cardlock-btn { display: inline-flex; } }
+    .qboard { scrollbar-width: none; -ms-overflow-style: none; } .qboard::-webkit-scrollbar { display: none; width: 0; height: 0; }
+    .qb-bar { position: fixed; z-index: 60; display: none; user-select: none; touch-action: none; }
+    .qb-bar.v { width: 22px; } .qb-bar.h { height: 22px; }
+    .qb-bar .qb-sh { position: absolute; background: linear-gradient(90deg, #2c241c, #6f5d49 50%, #2c241c); border-radius: 2px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
+    .qb-bar.v .qb-sh { left: 50%; width: 4px; top: 14px; bottom: 12px; transform: translateX(-50%); }
+    .qb-bar.h .qb-sh { top: 50%; height: 4px; left: 12px; right: 14px; transform: translateY(-50%); background: linear-gradient(180deg, #2c241c, #6f5d49 50%, #2c241c); }
+    .qb-bar svg { position: absolute; width: 18px; height: 26px; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
+    .qb-bar.v .qb-hd { left: 2px; top: -4px; } .qb-bar.v .qb-fl { left: 2px; bottom: -6px; }
+    .qb-bar.h .qb-hd { right: -4px; top: -2px; transform: rotate(90deg); } .qb-bar.h .qb-fl { left: -6px; top: -2px; transform: rotate(90deg); }
+    .qb-th { position: absolute; background: radial-gradient(ellipse at 50% 50%, rgba(205,232,248,.62), rgba(180,215,240,.34) 70%, rgba(180,215,240,.12)); border: 1px solid rgba(255,255,255,.45); border-radius: 46%; box-shadow: 0 0 10px rgba(150,200,235,.45); cursor: grab; backdrop-filter: blur(1.5px); }
+    .qb-bar.v .qb-th { left: 0; right: 0; } .qb-bar.h .qb-th { top: 0; bottom: 0; }
     .qnote, .qmemo, .qnpc, .mb-card, .q-tile, .npc-card, .pc-card, .qboard { -webkit-touch-callout: none; }
     body.card-unlocked .qnote, body.card-unlocked .qmemo, body.card-unlocked .qnpc { touch-action: none; }
     body.card-locked .mb-card { touch-action: pan-x pan-y; }
@@ -1649,7 +1660,8 @@
     .ctx-menu .cx-i:hover img, .ctx-menu .cx-arrow:hover img, .ctx-menu .cx-pcimg:hover img, .ctx-menu .cx-stb:hover img, .ctx-menu .tl-swb:hover .tl-swc { transform: scale(1.1); }
     .ctx-menu .cx-i.sel img, .ctx-menu .cx-b.on img, .ctx-menu .cx-stb.on img, .ctx-menu .cx-pcimg.on img, .ctx-menu .tl-swb.on .tl-swc { transform: scale(1.3); filter: drop-shadow(0 0 2px rgba(255,214,90,.95)) drop-shadow(0 0 7px rgba(255,190,40,.85)) drop-shadow(0 0 14px rgba(255,170,0,.55)); }
     .ctx-menu .cx-tools .cx-arrow img, .ctx-menu .cx-tools .cx-arrow img.lk { width: 30px !important; height: 30px !important; object-fit: contain; } .ctx-menu .cx-tools .cx-arrow { padding: 2px !important; min-width: 0 !important; } .ctx-menu .cx-tools .cx-blank { width: 26px !important; height: 26px !important; }
-    .ctx-menu .cx-ico .cx-i { width: 28px !important; height: 28px !important; padding: 1px !important; } .ctx-menu .cx-ico { justify-content: flex-start !important; gap: 10px; } .ctx-menu.slim { width: auto; min-width: 0; padding: 6px 10px; } .ctx-menu.slim .cx-fold input[type=range] { width: 110px; } .ctx-menu.slim .cx-sec { margin-left: 0; margin-right: 0; } .ctx-menu.slim .cx-ico { gap: 10px !important; } .ctx-menu.slim .cx-ico .cx-i { width: 36px !important; height: 36px !important; } .ctx-menu .cx-ico .cx-i img { width: 100% !important; height: 100% !important; object-fit: contain; } .ctx-menu .cx-tools { flex-wrap: nowrap !important; gap: 4px; justify-content: flex-start; }
+    .ctx-menu .cx-ico .cx-i { width: 28px !important; height: 28px !important; padding: 1px !important; } .ctx-menu .cx-ico { justify-content: flex-start !important; gap: 10px; } .cx-pup { display: flex; align-items: center; justify-content: center; background: #f1f5f9; } .cx-pup img, .cx-pup svg { width: 70%; height: 70%; object-fit: contain; }
+    .ctx-menu.slim { width: auto; min-width: 0; padding: 6px 10px; } .ctx-menu.slim .cx-fold input[type=range] { width: 110px; } .ctx-menu.slim .cx-sec { margin-left: 0; margin-right: 0; } .ctx-menu.slim .cx-ico { gap: 10px !important; } .ctx-menu.slim .cx-ico .cx-i { width: 36px !important; height: 36px !important; } .ctx-menu .cx-ico .cx-i img { width: 100% !important; height: 100% !important; object-fit: contain; } .ctx-menu .cx-tools { flex-wrap: nowrap !important; gap: 4px; justify-content: flex-start; }
     /* v186 아이콘 메뉴 공통 규칙: 앞으로 추가되는 아이콘 버튼도 자동 적용 (테두리 없음 · 선택/누름 시 금빛 강조) */
     .ctx-menu button:has(> img), .ctx-menu button:has(> svg), .tcg-ctxp button { border: 0 !important; background: transparent !important; box-shadow: none !important; outline: none !important; }
     .ctx-menu button > img, .tcg-ctxp button > img, .tcg-ctxp button > svg { transition: transform .18s, filter .18s; }
@@ -3504,10 +3516,40 @@
     }
     function boardZoomStep(d) { setBoardZoom(bz() * (d > 0 ? 1.15 : 1 / 1.15)); }
     function boardZoomReset() { setBoardZoom(1); }
+
+    // ---- 보드 화살 스크롤바 ----
+    (function initQbBars() {
+      const HEAD = '<svg class="qb-hd" viewBox="0 0 18 26"><path d="M9 0 L16 18 L9 14 L2 18 Z" fill="#9aa3ab" stroke="#4b5258" stroke-width="1" stroke-linejoin="round"/><path d="M9 0 L9 14" stroke="#e9eef2" stroke-width="1"/></svg>';
+      const FLET = '<svg class="qb-fl" viewBox="0 0 18 26"><path d="M9 4 L9 26 M9 8 L2 2 L3 14 M9 8 L16 2 L15 14 M9 15 L3 10 L4 22 M9 15 L15 10 L14 22" fill="#3a3028" stroke="#2c241c" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+      const mk = k => { const d = document.createElement('div'); d.className = 'qb-bar ' + k; d.innerHTML = '<div class="qb-sh"></div>' + HEAD + FLET + '<div class="qb-th"></div>'; document.body.appendChild(d); return d; };
+      let V = null, H = null;
+      const ensure = () => { if (!V) { V = mk('v'); H = mk('h'); wire(V, 'v'); wire(H, 'h'); } };
+      function wire(bar, k) {
+        const th = bar.querySelector('.qb-th'); let g = null;
+        th.addEventListener('pointerdown', e => { const b = document.getElementById('qboard'); if (!b) return; e.preventDefault(); e.stopPropagation(); g = { id: e.pointerId, p: k === 'v' ? e.clientY : e.clientX, s: k === 'v' ? b.scrollTop : b.scrollLeft, b }; th.setPointerCapture(e.pointerId); th.style.cursor = 'grabbing'; });
+        th.addEventListener('pointermove', e => { if (!g || e.pointerId !== g.id) return; const tl = k === 'v' ? bar.clientHeight - 26 : bar.clientWidth - 26, tot = k === 'v' ? g.b.scrollHeight - g.b.clientHeight : g.b.scrollWidth - g.b.clientWidth, ratio = tot / Math.max(1, tl - th['offset' + (k === 'v' ? 'Height' : 'Width')]); const d = ((k === 'v' ? e.clientY : e.clientX) - g.p) * ratio; if (k === 'v') g.b.scrollTop = g.s + d; else g.b.scrollLeft = g.s + d; });
+        const end = e => { if (g && e.pointerId === g.id) { g = null; th.style.cursor = ''; } }; th.addEventListener('pointerup', end); th.addEventListener('pointercancel', end);
+        bar.addEventListener('pointerdown', e => { if (e.target === th) return; const b = document.getElementById('qboard'); if (!b) return; const r = th.getBoundingClientRect(), dir = (k === 'v' ? e.clientY < r.top : e.clientX < r.left) ? -1 : 1; b.scrollBy({ [k === 'v' ? 'top' : 'left']: dir * (k === 'v' ? b.clientHeight : b.clientWidth) * 0.8, behavior: 'smooth' }); });
+      }
+      function update() {
+        const b = document.getElementById('qboard'); ensure();
+        const vis = b && b.offsetParent !== null && b.clientWidth > 80;
+        if (!vis) { V.style.display = H.style.display = 'none'; return; }
+        const r = b.getBoundingClientRect(), needV = b.scrollHeight > b.clientHeight + 2, needH = b.scrollWidth > b.clientWidth + 2;
+        if (needV) { const top = Math.max(r.top, 0) + 8, bot = Math.min(r.bottom, innerHeight) - (needH ? 34 : 12), len = Math.max(40, bot - top), th = V.querySelector('.qb-th'), tl = len - 26, thh = Math.max(34, tl * b.clientHeight / b.scrollHeight), mx = b.scrollHeight - b.clientHeight;
+          V.style.display = 'block'; V.style.left = (r.right - 24) + 'px'; V.style.top = top + 'px'; V.style.height = len + 'px'; th.style.height = thh + 'px'; th.style.top = (13 + (tl - thh) * (mx ? b.scrollTop / mx : 0)) + 'px'; } else V.style.display = 'none';
+        if (needH) { const left = r.left + 8, rt = r.right - (needV ? 34 : 12), len = Math.max(40, rt - left), th = H.querySelector('.qb-th'), tl = len - 26, thw = Math.max(34, tl * b.clientWidth / b.scrollWidth), mx = b.scrollWidth - b.clientWidth, bt = Math.min(r.bottom, innerHeight);
+          H.style.display = 'block'; H.style.top = (bt - 24) + 'px'; H.style.left = left + 'px'; H.style.width = len + 'px'; th.style.width = thw + 'px'; th.style.left = (13 + (tl - thw) * (mx ? b.scrollLeft / mx : 0)) + 'px'; } else H.style.display = 'none';
+      }
+      window.qbBarsUpdate = update;
+      document.addEventListener('scroll', e => { if (e.target && (e.target.id === 'qboard' || e.target === document)) update(); }, true);
+      window.addEventListener('resize', update); setInterval(update, 400);
+    })();
     (function initBoardZoomPan() {
       document.addEventListener('wheel', e => {
         const b = e.target.closest && e.target.closest('#qboard');
-        if (!b || !(e.ctrlKey || e.metaKey)) return;
+        if (!b) return;
+        if (!(e.ctrlKey || e.metaKey) && e.target.closest('textarea, input, select') && e.target.scrollHeight > e.target.clientHeight) return;
         e.preventDefault();
         const r = b.getBoundingClientRect();
         setBoardZoom(bz() * (e.deltaY < 0 ? 1.1 : 1 / 1.1), e.clientX - r.left, e.clientY - r.top);
@@ -3605,18 +3647,33 @@
     }
     function memoPaper(id, key) {
       const m = memoById(id); if (!m) return;
-      m.paper = key;
+      m.paper = key; delete m.paperImg; delete m.paperAr;
       const mp = NOTE_MEMO[key];
       if (mp) m.h = Math.max(70, Math.round(m.w / mp.ar));
       persistState(); refreshMemoEl(id); sizeBoardCanvas();
       if (ctxId === id) buildCtx();
     }
+    function memoPaperImg(id, src) {
+      const m = memoById(id); if (!m) return;
+      const im = new Image(); if (!/^data:|^blob:/.test(src)) im.crossOrigin = 'anonymous';
+      im.onload = () => {
+        let url = src; const ar = (im.naturalWidth || 1) / (im.naturalHeight || 1);
+        try { const sc = Math.min(1, 700 / Math.max(im.naturalWidth, im.naturalHeight)), c = document.createElement('canvas'); c.width = Math.round(im.naturalWidth * sc); c.height = Math.round(im.naturalHeight * sc); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); url = c.toDataURL('image/webp', 0.88); } catch (e) {}
+        m.paperImg = url; m.paperAr = Number(ar.toFixed(3)); m.h = Math.max(70, Math.round(m.w / m.paperAr));
+        persistState(); refreshMemoEl(id); sizeBoardCanvas(); if (ctxId === id) buildCtx();
+      };
+      im.onerror = () => { if (im.crossOrigin) { const i2 = new Image(); i2.onload = () => { m.paperImg = src; m.paperAr = Number(((i2.naturalWidth || 1) / (i2.naturalHeight || 1)).toFixed(3)); m.h = Math.max(70, Math.round(m.w / m.paperAr)); persistState(); refreshMemoEl(id); sizeBoardCanvas(); if (ctxId === id) buildCtx(); }; i2.onerror = () => showToast('이미지를 불러오지 못했어요.'); i2.src = src; } else showToast('이미지를 불러오지 못했어요.'); };
+      im.src = src;
+    }
+    function memoPaperFile(id) { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.onchange = () => { const f = inp.files && inp.files[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => memoPaperImg(id, String(rd.result)); rd.readAsDataURL(f); }; inp.click(); }
+    function memoPaperUrl(id) { const u = prompt('종이로 쓸 이미지 주소를 넣어 주세요'); if (u && u.trim()) memoPaperImg(id, u.trim()); }
     function buildMemo(m) {
       const el = document.createElement('div');
       const key = memoPaperKey(m);
       const pk = Object.keys(NOTE_MEMO);
       let mp = NOTE_MEMO[key];
       if (!mp) { let hh = 0; for (const ch of String(m.id)) hh = (hh * 31 + ch.charCodeAt(0)) | 0; mp = NOTE_MEMO[pk[Math.abs(hh) % pk.length]]; }
+      if (m.paperImg) mp = { url: m.paperImg, ar: m.paperAr || 0.8, pad: [.08, .08, .08, .08] };
       const sti = 0;
       el.className = 'qmemo pp';
       el.dataset.mid = m.id;
@@ -3901,11 +3958,10 @@
       if (ctxKind === 'memo') {
         const m = memoById(id); if (!m) { closeCtx(); return; }
         const key = memoPaperKey(m);
-        const pap = Object.keys(NOTE_MEMO).map(k => `<div class="cx-p${key === k ? ' sel' : ''}" style="background-image:url('${NOTE_MEMO[k].url}')" onclick="memoPaper('${id}','${k}')" title="${NOTE_MEMO[k].name}"></div>`).join('');
+        const pap = Object.keys(NOTE_MEMO).map(k => `<div class="cx-p${!m.paperImg && key === k ? ' sel' : ''}" style="background-image:url('${NOTE_MEMO[k].url}')" onclick="memoPaper('${id}','${k}')" title="${NOTE_MEMO[k].name}"></div>`).join('') + (m.paperImg ? `<div class="cx-p sel" style="background-image:url('${m.paperImg}')" title="내 이미지"></div>` : '') + `<div class="cx-p cx-pup" title="이미지 올리기" onclick="memoPaperFile('${id}')"><img src="${IC_POTS}" alt=""></div><div class="cx-p cx-pup" title="URL로 연결" onclick="memoPaperUrl('${id}')">${SVG_CHAIN}</div>`;
         h = `<div class="cx-sec"><div class="cx-t">종이</div><div class="cx-papers">${pap}</div></div>
           <div class="cx-sec"><div class="cx-t">종이 투명도</div><div class="cx-row"><input type="range" min="0" max="100" value="${Math.round((m.op == null ? 1 : m.op) * 100)}" oninput="memoSet('${id}','op',this.value/100)"></div></div>
-          <div class="cx-sec"><div class="cx-row"><button class="cx-b cx-arrow" title="다른 카드와 선 연결" aria-label="다른 카드와 선 연결" onclick="startLink('${id}')"><img class="lk" src="${IC_ARROW}" alt=""></button></div></div>
-          <div class="cx-sec"><button class="cx-b red" data-label="떼기" onclick="armDel(this,()=>memoDel('${id}'))">떼기</button></div>` + layerHtml(id);
+          <div class="cx-sec"><div class="cx-row" style="justify-content:flex-start;gap:12px;"><button class="cx-b cx-arrow" title="다른 카드와 선 연결" aria-label="다른 카드와 선 연결" onclick="startLink('${id}')"><img class="lk" src="${IC_ARROW}" alt=""></button><button class="cx-i" title="메모 떼기" aria-label="메모 떼기" onclick="closeCtx();if(confirm('이 메모를 뗄까요?'))memoDel('${id}')"><img src="${IC_RUNE}" alt=""></button></div></div>` + layerHtml(id);
       } else if (ctxKind === 'npc') {
         const nc = (state.boardTex.npcs || []).find(n => n.id === id);
         const stb = (k, t) => `<button class="cx-b cx-stb${nc && nc.status === k ? ' on' : ''}" title="${t}" aria-label="${t}" onclick="npcStatus('${id}','${nc && nc.status === k ? '' : k}')"><img src="${ST_ICON[k]}" alt=""></button>`;
