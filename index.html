@@ -522,10 +522,21 @@
     .tt-pile .s2 { transform: translate(5px, -5px); } .tt-pile .s3 { transform: translate(10px, -10px); } .tt-pile em { font-style: normal; color: #f6d58a; font-size: 1.6rem; }
     #tcg-ov.has-strip { padding-bottom: 150px; }
     #tcg-strip { position: fixed; left: 0; right: 0; bottom: 0; z-index: 3; height: 138px; overflow-x: auto; overflow-y: hidden; background: linear-gradient(transparent, rgba(0,0,0,.72) 45%); }
-    #tcg-strip .ts-in { display: flex; align-items: flex-end; width: max-content; margin: 0 auto; padding: 18px 24px 8px; }
-    .ts-c { flex: none; width: 74px; margin-left: -24px; cursor: pointer; transform-origin: 50% 160%; transform: translateY(var(--y)) rotate(var(--r)); transition: transform .18s, filter .18s; filter: drop-shadow(0 4px 6px rgba(0,0,0,.5)); }
-    .ts-c:first-child { margin-left: 0; } .ts-c:hover { transform: translateY(-16px) rotate(0); z-index: 5; }
-    .ts-c.used { filter: grayscale(.7) brightness(.6); } .ts-c.cur { transform: translateY(-14px) rotate(0); filter: drop-shadow(0 0 8px #f6d58a); z-index: 4; }
+    #tcg-strip { touch-action: pan-x; scrollbar-width: none; -webkit-overflow-scrolling: touch; user-select: none; -webkit-user-select: none; } #tcg-strip::-webkit-scrollbar { display: none; }
+    #tcg-strip .ts-in { display: flex; align-items: flex-end; width: max-content; margin: 0; padding: 18px calc(50vw - 37px) 8px; }
+    .ts-c { flex: none; width: 74px; margin-left: -24px; cursor: pointer; transform-origin: 50% 160%; transform: translateY(var(--y)) rotate(var(--r)); transition: transform .08s linear, filter .18s; filter: drop-shadow(0 4px 6px rgba(0,0,0,.5)); }
+    .ts-c:first-child { margin-left: 0; } .ts-c:hover { transform: translateY(calc(var(--y) - 14px)) rotate(var(--r)); z-index: 5; }
+    .ts-c.used { filter: grayscale(.7) brightness(.6); } .ts-c.cur { transform: translateY(calc(var(--y) - 12px)) rotate(var(--r)); filter: drop-shadow(0 0 8px #f6d58a); z-index: 4; }
+    .ts-ghost { position: fixed; z-index: 9999; width: 104px; pointer-events: none; filter: drop-shadow(0 10px 16px rgba(0,0,0,.6)); transform: rotate(-3deg); } .ts-ghost .pc-card { width: 100%; }
+    .tcg-multi { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 8px; margin: auto; }
+    .tcg-mc { width: var(--cw); flex: none; animation: tcgMIn .4s cubic-bezier(.2,.9,.25,1.05) both; } .tcg-mc.old { animation: tcgMShrink .4s cubic-bezier(.2,.9,.25,1.05) both; }
+    @keyframes tcgMIn { from { opacity: 0; transform: translateY(55vh) scale(.5); } to { opacity: 1; transform: none; } }
+    @keyframes tcgMShrink { from { transform: scale(1.55); } to { transform: none; } }
+    .tcg-multi .tbk { font-size: .6rem; padding: 7px; border-radius: 10px; line-height: 1.35; } .tcg-multi .tbk-h { font-size: .72rem; } .tcg-multi .tc-sk { filter: drop-shadow(0 8px 12px rgba(0,0,0,.55)); }
+    .tcg-multi .tcg-flip:not(.flip) { touch-action: none; }
+    .tcg-ask { position: fixed; left: 50%; top: 38%; transform: translate(-50%, -50%); z-index: 6; background: #1c150b; border: 2px solid #ca8a04; color: #f6d58a; border-radius: 14px; padding: 14px 16px; text-align: center; box-shadow: 0 12px 30px rgba(0,0,0,.7); animation: tmIn .25s both; }
+    .tcg-ask div { display: flex; gap: 8px; justify-content: center; margin-top: 10px; } .tcg-ask button { border: 1.5px solid #ca8a04; background: rgba(40,30,15,.9); color: #f6d58a; border-radius: 999px; padding: 5px 16px; cursor: pointer; }
+    @media (max-width: 760px), (pointer: coarse) { #tcg-ov .tcg-wrap:not(.wide) .tcg-bar .b-brush, #tcg-ov .tcg-wrap:not(.wide) .tcg-bar .b-close { display: none; } }
     .ts-f .pc-card { width: 100%; pointer-events: none; }
     .cardlock-btn { display: none; } @media (pointer: coarse) { .cardlock-btn { display: inline-flex; } }
     .qnote, .qmemo, .qnpc, .mb-card, .q-tile, .npc-card, .pc-card, .qboard { -webkit-touch-callout: none; }
@@ -4639,7 +4650,7 @@
       return `<div class="tc tc-th-${th}${anim && d.anim !== 0 ? ' anim' : ''}" style="--rc:${escapeHtml(rc)}"><i class="tc-cn a"></i><i class="tc-cn b"></i><i class="tc-cn c"></i><i class="tc-cn d"></i>${d.foil !== 0 ? '<div class="tc-foil"></div>' : ''}<div class="tc-art">${sp.img ? `<img src="${escapeHtml(sp.img)}" alt="">` : `<span class="tc-noimg">${ICONS.npc}</span>`}</div><div class="tc-name">${escapeHtml(sp.name || '이름 없음')}</div>${band ? `<div class="tc-band">${band}</div>` : ''}${sp.desc ? `<div class="tc-desc">${escapeHtml(sp.desc)}</div>` : ''}${sp.tags ? `<div class="tc-foot">${sp.tags}</div>` : ''}</div>`;
     }
     function tcgRender(anim) {
-      const ov = document.getElementById('tcg-ov'); if (!ov || !tcgSpec) return; const sp = tcgSpec, d = sp.deco;
+      const ov = document.getElementById('tcg-ov'); if (!ov || !tcgSpec) return; if (tcgMulti.length > 1) return tcgRenderMulti(anim); const sp = tcgSpec, d = sp.deco;
       const panel = tcgPanel ? `<div class="tcg-panel"><div class="th">${TCG_TH.map(t => `<i class="${(d.th || 'dark') === t[0] ? 'on' : ''}" title="${t[2]}" style="background:${t[1]}" onclick="tcgSet('th','${t[0]}')"></i>`).join('')}<label style="margin-left:6px;">강조색 <input type="color" value="${d.ac || sp.rc || '#b8893a'}" oninput="tcgSet('ac',this.value,true)"></label>${d.ac ? '<button class="tcg-mini" onclick="tcgSet(\'ac\',\'\')">원래 색</button>' : ''}</div><div class="th"><label><input type="checkbox" ${d.foil !== 0 ? 'checked' : ''} onchange="tcgSet('foil',this.checked?1:0)"> 반짝임</label><label><input type="checkbox" ${d.anim !== 0 ? 'checked' : ''} onchange="tcgSet('anim',this.checked?1:0)"> 뽑기 연출</label></div></div>` : '';
       const rgS = (lab, k, min, max, step, def) => `<label class="pcc-sl"><span>${lab}</span><input type="range" min="${min}" max="${max}" step="${step}" value="${d[k] == null ? def : d[k]}" oninput="tcgSkinSet('${k}',Number(this.value))"></label>`;
       const sk = tcgSkin(sp);
@@ -4649,28 +4660,54 @@
         <div class="pcc-cols pcc-cols3"><div class="pcc-c pcc-c2"><b class="pcc-h">조절</b>${sliders}</div>
           <div class="pcc-c pcc-c3"><b class="pcc-h">틀</b><div class="pcc-grid">${frameList().filter(f => !isHid('fr', f.k)).map(f => `<button class="${d.frame === frUrl(f) ? 'on' : ''}" title="${f.n}" onclick="tcgUseFrame('${f.k}')"><img src="${escapeHtml(frUrl(f))}" alt="${f.n}" loading="lazy"></button>`).join('')}</div></div>
           <div class="pcc-c pcc-c4"><b class="pcc-h">배경</b><div class="pcc-grid pcc-grid-bg"><label class="pcc-col" title="배경 색"><input type="color" value="${d.fBgc || '#f4ecd8'}" oninput="tcgSkinSet('fBgc',this.value)"></label>${patList().filter(x => !isHid('bg', 'i_' + x.k)).map(x => `<button class="${d.fBgi === bgUrl(x) ? 'on' : ''}" title="${x.n}" onclick="tcgToggleBg('${x.k}')"><img src="${escapeHtml(bgUrl(x))}" alt="${x.n}" loading="lazy" style="aspect-ratio:1;object-fit:cover;"></button>`).join('')}</div></div></div></div></div>` : '';
-      ov.innerHTML = `<div class="tcg-wrap${tcgPanel ? ' wide' : ''}"><div class="tcg-l">${tcgHtml(sp, anim)}<div class="tcg-bar"><button class="tcg-ib" onclick="tcgPanelToggle()" title="꾸미기" aria-label="꾸미기"><img src="${IC_BRUSH}" alt=""></button>${sp.edit ? (sp.editLabel === '내용 수정' ? `<button class="tcg-ib" onclick="tcgEdit()" title="내용 수정" aria-label="내용 수정"><img src="${IC_FEATHER}" alt=""></button>` : `<button class="tcg-ib" onclick="tcgEdit()" title="${sp.editLabel || '수정'}" aria-label="${sp.editLabel || '수정'}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#f6d58a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M8 9h7M8 13h5"/></svg></button>`) : ''}<button class="tcg-ib" onclick="tcgClose()" title="닫기" aria-label="닫기"><img src="${IC_BROOM}" alt=""></button></div></div>${right}</div>`;
+      ov.innerHTML = `<div class="tcg-wrap${tcgPanel ? ' wide' : ''}"><div class="tcg-l">${tcgHtml(sp, anim)}<div class="tcg-bar"><button class="tcg-ib b-brush" onclick="tcgPanelToggle()" title="꾸미기" aria-label="꾸미기"><img src="${IC_BRUSH}" alt=""></button>${sp.edit ? (sp.editLabel === '내용 수정' ? `<button class="tcg-ib" onclick="tcgEdit()" title="내용 수정" aria-label="내용 수정"><img src="${IC_FEATHER}" alt=""></button>` : `<button class="tcg-ib" onclick="tcgEdit()" title="${sp.editLabel || '수정'}" aria-label="${sp.editLabel || '수정'}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#f6d58a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M8 9h7M8 13h5"/></svg></button>`) : ''}<button class="tcg-ib b-close" onclick="tcgClose()" title="닫기" aria-label="닫기"><img src="${IC_BROOM}" alt=""></button></div></div>${right}</div>`;
       tcgStrip(ov);
     }
     // 부채꼴에서 뽑은 카드 아래에, 남은 카드들을 부채꼴로 계속 보여줘서 이어서 뽑을 수 있게
     function tcgStrip(ov) {
-      ov.classList.remove('has-strip'); const old = document.getElementById('tcg-strip'); if (old) old.remove();
+      ov.classList.remove('has-strip'); const old = document.getElementById('tcg-strip'), prevSL = old && tcgMulti.length > 1 ? old.scrollLeft : null; if (old) old.remove();
       const sp = tcgSpec, pool = window.__fanPool || []; if (!window.__tcgFan || !sp || !sp.card || tcgPanel || pool.length < 2) return;
-      const cur = sp.curKey, dr = window.__drawn = window.__drawn || new Set(); if (cur) dr.add(cur);
+      const cur = sp.curKey, dr = window.__drawn = window.__drawn || new Set(); if (cur) dr.add(cur); const inMulti = k => tcgMulti.some(m => m.curKey === k);
       const cards = pool.map(c => { let f = ''; if (c.k === 'pc') { const i = pcIdx(c.id), p = (state.boardTex.pcs || [])[i]; if (!p) return null; f = pcCardHtml(p, i, true); } else { const n = (state.globalNpcs || []).find(x => x.id === c.id); if (!n) return null; f = pcCardHtml(npcCardObj(n), -1, true); } return { c, f, key: c.k + ':' + c.id }; }).filter(Boolean);
       const mid = (cards.length - 1) / 2, el = document.createElement('div'); el.id = 'tcg-strip';
-      el.innerHTML = '<div class="ts-in">' + cards.map((x, i) => { const r = (i - mid) * 2.2, y = Math.pow(i - mid, 2) * 0.35; return `<div class="ts-c${x.key === cur ? ' cur' : dr.has(x.key) ? ' used' : ''}" style="--r:${r}deg;--y:${y}px" onclick="tcgStripPick('${x.c.k}','${escapeHtml(x.c.id)}')" title="눌러서 뽑기"><div class="ts-f">${x.f}</div></div>`; }).join('') + '</div>';
+      el.innerHTML = '<div class="ts-in">' + cards.map((x, i) => { const r = (i - mid) * 2.2, y = Math.pow(i - mid, 2) * 0.35; return `<div class="ts-c${x.key === cur || inMulti(x.key) ? ' cur' : dr.has(x.key) ? ' used' : ''}" data-k="${x.c.k}" data-id="${escapeHtml(x.c.id)}" style="--r:${r}deg;--y:${y}px" onclick="tcgStripPick('${x.c.k}','${escapeHtml(x.c.id)}',this)" title="눌러서 뽑기 · 위로 끌어 함께 펼치기"><div class="ts-f">${x.f}</div></div>`; }).join('') + '</div>';
       ov.classList.add('has-strip'); ov.appendChild(el);
-      const c = el.querySelector('.cur'); if (c) c.scrollIntoView({ inline: 'center', block: 'nearest' });
+      const c = el.querySelector('.cur'); if (prevSL != null) el.scrollLeft = prevSL; else if (c) el.scrollLeft = c.offsetLeft + c.offsetWidth / 2 - el.clientWidth / 2;
+      tcgStripFan(el); let raf = 0; el.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; tcgStripFan(el); }); }, { passive: true });
     }
-    function tcgStripPick(k, id) { window.__tcgFan = 1; if (k === 'pc') tcgPc(id); else tcgNpc(id); }
+    function tcgStripFan(el) { const half = el.clientWidth / 2 || 1; el.querySelectorAll('.ts-c').forEach(c => { const d = Math.max(-2.2, Math.min(2.2, (c.offsetLeft + c.offsetWidth / 2 - el.scrollLeft - half) / half)); c.style.setProperty('--r', (d * 13).toFixed(1) + 'deg'); c.style.setProperty('--y', (d * d * 12).toFixed(1) + 'px'); }); }
+    // 부채꼴 카드를 위로 끌어 올리면 지금 카드 옆에 함께 펼침 (최대 5장)
+    let tcgMulti = [];
+    function tcgStripAdd(k, id) {
+      const key = k + ':' + id; if (!tcgSpec) return;
+      if ((tcgMulti.length ? tcgMulti : [tcgSpec]).some(m => m.curKey === key)) { showToast('이미 펼쳐진 카드예요'); return; }
+      if (tcgMulti.length >= 5) { showToast('한 번에 5장까지 볼 수 있어요'); return; }
+      if (!tcgMulti.length) { tcgSpec.fl = tcgFlipped; tcgMulti = [tcgSpec]; tcgMulti[0].old = 1; } else tcgMulti.forEach(m => { m.old = 1; });
+      window.__tcgFan = 1; window.__tcgAdd = 1; try { if (k === 'pc') tcgPc(id); else tcgNpc(id); } finally { window.__tcgAdd = 0; }
+    }
+    function tcgRenderMulti() {
+      const ov = document.getElementById('tcg-ov'); if (!ov) return; const n = tcgMulti.length, rows = n <= 3 ? 1 : 2, cols = Math.ceil(n / rows);
+      const ah = innerHeight - 170 - 20, cw = Math.max(70, Math.min(370, (innerWidth - 28 - 8 * (cols - 1)) / cols, (ah / rows - 8) * 0.72));
+      ov.innerHTML = `<div class="tcg-multi" style="--cw:${cw.toFixed(0)}px;max-width:${(cw * cols + 8 * cols).toFixed(0)}px">${tcgMulti.map((sp, i) => { const bk = sp.backFn ? sp.backFn() : ''; return `<div class="tcg-mc${sp.old && !sp.fresh ? ' old' : ''}"><div class="tcg-flip${sp.fl ? ' flip' : ''}" data-mi="${i}"><div class="tf-in"><div class="tf-f">${tcgFront(sp, false)}</div><div class="tf-b">${bk}</div></div></div></div>`; }).join('')}</div>`;
+      tcgMulti.forEach(m => { m.old = 0; });
+      tcgStrip(ov);
+    }
+    let _tcgAskT = 0;
+    function tcgAskDeco() {
+      const ov = document.getElementById('tcg-ov'); if (!ov || tcgMulti.length > 1 || !tcgSpec || tcgPanel) return; const o = ov.querySelector('.tcg-ask'); if (o) o.remove();
+      const a = document.createElement('div'); a.className = 'tcg-ask'; a.innerHTML = '카드를 꾸밀까요?<div><button data-y="1">꾸미기</button><button>취소</button></div>';
+      a.onclick = e => { const b = e.target.closest('button'); if (!b) return; e.stopPropagation(); a.remove(); if (b.dataset.y) tcgPanelToggle(); }; ov.appendChild(a);
+    }
+    function tcgStripPick(k, id, el) { if (el && Date.now() - Number(el.dataset.sw || 0) < 450) return; tcgMulti = []; window.__tcgFan = 1; if (k === 'pc') tcgPc(id); else tcgNpc(id); }
     function tcgOpen(sp) {
       sp.curKey = window.__curKey; window.__curKey = '';
-      tcgSpec = sp; tcgPanel = false; tcgFlipped = false; let ov = document.getElementById('tcg-ov');
-      if (!ov) { ov = document.createElement('div'); ov.id = 'tcg-ov'; ov.onclick = e => { if (e.target === ov) tcgClose(); }; document.body.appendChild(ov); }
+      if (window.__tcgAdd && document.getElementById('tcg-ov') && tcgMulti.length) { window.__tcgAdd = 0; sp.fl = false; sp.fresh = 0; tcgMulti.push(sp); tcgSpec = sp; tcgPanel = false; tcgRenderMulti(); return; }
+      tcgMulti = []; tcgSpec = sp; tcgPanel = false; tcgFlipped = false; let ov = document.getElementById('tcg-ov');
+      if (!ov) { ov = document.createElement('div'); ov.id = 'tcg-ov'; ov.onclick = e => { if (ov._lp) { ov._lp = 0; return; } if (tcgPanel || e.target.closest('.tcg-flip,.tcg-bar,.tcg-r,.tcg-panel,#tcg-strip,.tcg-ask')) return; tcgClose(); };
+        ov.addEventListener('pointerdown', e => { if (tcgPanel || tcgMulti.length > 1 || e.target.closest('.tcg-flip,.tcg-bar,.tcg-r,.tcg-panel,#tcg-strip,.tcg-ask')) return; const x = e.clientX, y = e.clientY; clearTimeout(_tcgAskT); _tcgAskT = setTimeout(() => { ov._lp = 1; tcgAskDeco(); }, 600); const mv = ev => { if (Math.hypot(ev.clientX - x, ev.clientY - y) > 10) { clearTimeout(_tcgAskT); } }, up = () => { clearTimeout(_tcgAskT); ov.removeEventListener('pointermove', mv); ov.removeEventListener('pointerup', up); ov.removeEventListener('pointercancel', up); }; ov.addEventListener('pointermove', mv); ov.addEventListener('pointerup', up); ov.addEventListener('pointercancel', up); }); document.body.appendChild(ov); }
       tcgRender(true);
     }
-    function tcgClose() { const ov = document.getElementById('tcg-ov'); if (ov) ov.remove(); tcgSpec = null; window.__tcgFan = 0; window.__drawn = null; }
+    function tcgClose() { const ov = document.getElementById('tcg-ov'); if (ov) ov.remove(); tcgSpec = null; tcgMulti = []; window.__tcgFan = 0; window.__drawn = null; }
     function tcgReplay() { tcgRender(false); requestAnimationFrame(() => tcgRender(true)); }
     function tcgPanelToggle() { tcgPanel = !tcgPanel; tcgRender(false); }
     function tcgSet(k, v, keepFocus) {
@@ -4688,7 +4725,7 @@
     function tcgSkinClear() { const d = tcgSpec && tcgSpec.deco; if (!d) return; ['frame', 'fBg', 'fHole', 'frameR', 'fBgc', 'fBgi', 'wx', 'wy', 'ww', 'wh', 'wr', 'imgZ', 'imgY', 'imgX'].forEach(x => { delete d[x]; }); tcgSave(); tcgRender(false); }
     function tcgTxtFree() { const d = tcgSpec && tcgSpec.deco; if (!d) return; if (d.tx != null) { delete d.tx; delete d.ty; } else { d.tx = 50; d.ty = 86; } tcgSave(); tcgRender(false); }
     function tcgUpOpen() { if (!tcgSpec) return; if (tcgSpec.card) { pccVirt = null; pccNpc = !!tcgSpec.npc; pccId = tcgSpec.card.id; pcUpOpen(); return; } pccVirt = tcgSpec.deco; pccVirt.id = 'tcgx'; pccId = 'tcgx'; pccNpc = false; pcUpOpen(); }
-    function tcgEdit() { const sp = tcgSpec; tcgClose(); if (sp && sp.edit) sp.edit(); }
+    function tcgEdit(i) { const sp = (i != null && tcgMulti[i]) ? tcgMulti[i] : tcgSpec; tcgClose(); if (sp && sp.edit) sp.edit(); }
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('tcg-ov')) tcgClose(); });
     // ---- 카드 뒷면: 시트/상세 정보 ----
     function tcgBk(title, inner) { return `<div class="tbk"><div class="tbk-h">${escapeHtml(title)}</div>${inner || '<div style="opacity:.6;text-align:center;">기록된 내용이 없어요.</div>'}</div>`; }
@@ -4726,7 +4763,7 @@
     (function initFlipDrag() {
       let f = null;
       document.addEventListener('pointerdown', e => {
-        const el = e.target.closest && e.target.closest('.tcg-flip'); if (!el || e.button > 0) return; if (el.closest('#tcg-ov') && tcgPanel) return;
+        const el = e.target.closest && e.target.closest('.tcg-flip'); if (!el || e.button > 0) return; if (el.closest('#tcg-ov') && tcgPanel) return; clearTimeout(_tcgAskT);
         if (e.target.closest('.tm-cover')) return;
         const tin = el.querySelector('.tf-in'); f = { el, tin, x: e.clientX, y: e.clientY, id: e.pointerId, base: el.classList.contains('flip') ? 180 : 0, w: el.getBoundingClientRect().width || 200, moved: false, a: 0 };
       }, true);
@@ -4734,7 +4771,7 @@
         if (!f || e.pointerId !== f.id) return; const dx = e.clientX - f.x, dy = e.clientY - f.y;
         if (Math.hypot(dx, dy) > 8) f.drag = true;
         if (!f.moved && !f.up) {
-          const up = f.el.id === 'tcg-flip' && !f.el.classList.contains('flip') && tcgSpec && tcgSpec.card && dy < -8 && Math.abs(dy) > Math.abs(dx);
+          const up = ((f.el.id === 'tcg-flip' && tcgSpec && tcgSpec.card) || (f.el.dataset.mi != null && (tcgMulti[f.el.dataset.mi] || {}).card)) && !f.el.classList.contains('flip') && dy < -8 && Math.abs(dy) > Math.abs(dx);
           if (up) { f.up = true; try { f.el.setPointerCapture(e.pointerId); } catch (x) {} }
           else { if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy)) return; f.moved = true; f.tin.style.transition = 'none'; try { f.el.setPointerCapture(e.pointerId); } catch (x) {} }
         }
@@ -4743,10 +4780,26 @@
       }, true);
       const end = e => {
         if (!f || e.pointerId !== f.id) return; const g = f; f = null;
-        const fin = (flip) => { g.tin.style.transition = ''; void g.tin.offsetWidth; g.tin.style.transform = ''; g.el.classList.toggle('flip', flip); if (g.el.id === 'tcg-flip') tcgFlipped = flip; };
-        if (g.up) { g.el.style.transition = 'transform .25s, opacity .25s'; g.el.style.transform = ''; g.el.style.opacity = ''; setTimeout(() => { g.el.style.transition = ''; }, 280); g.el.dataset.sw = Date.now(); if (g.dy < -90 && e.type === 'pointerup') tcgEdit(); return; }
+        const fin = (flip) => { g.tin.style.transition = ''; void g.tin.offsetWidth; g.tin.style.transform = ''; g.el.classList.toggle('flip', flip); if (g.el.id === 'tcg-flip') tcgFlipped = flip; else if (g.el.dataset.mi != null && tcgMulti[g.el.dataset.mi]) tcgMulti[g.el.dataset.mi].fl = flip; };
+        if (g.up) { g.el.style.transition = 'transform .25s, opacity .25s'; g.el.style.transform = ''; g.el.style.opacity = ''; setTimeout(() => { g.el.style.transition = ''; }, 280); g.el.dataset.sw = Date.now(); if (g.dy < -90 && e.type === 'pointerup') { if (g.el.dataset.mi != null) tcgEdit(Number(g.el.dataset.mi)); else tcgEdit(); } return; }
         if (g.moved) { const n = ((g.a % 360) + 360) % 360; fin(n > 90 && n < 270); g.el.dataset.sw = Date.now(); }
         else if (e.type === 'pointerup' && !g.drag && !e.target.closest('.tbk-s,button,a')) fin(!g.el.classList.contains('flip'));
+      };
+      document.addEventListener('pointerup', end, true); document.addEventListener('pointercancel', end, true);
+    })();
+    (function initStripDrag() {
+      let g = null;
+      document.addEventListener('pointerdown', e => { const c = e.target.closest && e.target.closest('#tcg-strip .ts-c'); if (!c || e.button > 0) return; const st = document.getElementById('tcg-strip'); g = { c, st, x: e.clientX, y: e.clientY, id: e.pointerId, sl: st.scrollLeft, mode: '', t: e.pointerType }; }, true);
+      document.addEventListener('pointermove', e => {
+        if (!g || e.pointerId !== g.id) return; const dx = e.clientX - g.x, dy = e.clientY - g.y;
+        if (!g.mode) { if (Math.hypot(dx, dy) < 8) return; if (dy < 0 && Math.abs(dy) > Math.abs(dx) * 1.1) { g.mode = 'up'; try { g.st.setPointerCapture(e.pointerId); } catch (x) {} const gh = document.createElement('div'); gh.className = 'ts-ghost'; gh.innerHTML = g.c.querySelector('.ts-f').outerHTML; document.body.appendChild(gh); g.gh = gh; g.c.style.opacity = '.3'; } else g.mode = 'x'; }
+        if (g.mode === 'up') { g.dy = dy; g.gh.style.left = (e.clientX - 52) + 'px'; g.gh.style.top = (e.clientY - 80) + 'px'; g.gh.style.opacity = dy < -60 ? '1' : '.75'; }
+        else if (g.mode === 'x' && g.t === 'mouse') { g.st.scrollLeft = g.sl - dx; }
+      }, true);
+      const end = e => {
+        if (!g || e.pointerId !== g.id) return; const o = g; g = null; if (o.gh) o.gh.remove(); o.c.style.opacity = '';
+        if (o.mode) o.c.dataset.sw = Date.now();
+        if (o.mode === 'up' && o.dy < -60 && e.type === 'pointerup') tcgStripAdd(o.c.dataset.k, o.c.dataset.id);
       };
       document.addEventListener('pointerup', end, true); document.addEventListener('pointercancel', end, true);
     })();
