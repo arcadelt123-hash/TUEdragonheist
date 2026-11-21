@@ -1258,6 +1258,7 @@
     .iv-quill img { width: 22px; height: 22px; }
     .iv-x { position: absolute; top: 8px; left: 8px; width: 30px; height: 30px; padding: 0; border-radius: 50%; border: 1.5px solid #b8893a; background: #fff; cursor: pointer; font-size: 1rem; line-height: 1; color: #4a3414; }
 
+    .q-sub-in { margin: 0 0 0 4px !important; flex: none; } .q-sub-in .btn-tab { padding: 2px 6px; }
     .q-sub { display: flex; gap: 6px; margin: 0 0 12px; align-items: center; }
     .q-cnt { margin-left: 6px; font-size: .78rem; font-weight: 800; opacity: .75; }
     .bs-ic { padding: 4px 8px !important; min-width: 48px; justify-content: center; }
@@ -4124,7 +4125,7 @@
     function srchVal(ctx) { return ctx === 'quests' ? (state.questSearch || '') : ctx === 'npcs' ? (state.npcSearchQuery || '') : (SRCH[ctx] || {}).q || ''; }
     function srchHtml(ctx) {
       const s = SRCH[ctx] = SRCH[ctx] || { open: false, q: '', res: [] }, q = srchVal(ctx), open = s.open || (SRCH_FILTER[ctx] && !!q);
-      return `<span class="srch${open ? ' open' : ''}${SRCH_FILTER[ctx] ? ' fl' : ''}" data-ctx="${ctx}"><button type="button" class="srch-b${open ? ' on' : ''}" onclick="srchToggle('${ctx}', this)" title="검색" aria-label="검색">${SRCH_SVG}</button>${ctx === 'quests' ? `<button type="button" class="srch-b bm${state.folderBarCollapsed ? '' : ' on'}" onclick="toggleFolderBarBox(); this.classList.toggle('on', !state.folderBarCollapsed)" title="폴더·태그" aria-label="폴더·태그">${BM_SVG}</button>` : ''}<input class="srch-i" type="text" value="${escapeHtml(q)}" placeholder="검색…" aria-label="검색" autocomplete="off" oninput="srchInput('${ctx}', this)" onkeydown="srchKey(event, '${ctx}', this)">${ctx === 'quests' ? `<select class="srch-sort" onchange="setSortMode(this.value)" title="정렬" aria-label="정렬">${[['custom','기본'],['session-asc','1~N'],['session-desc','N~1'],['name-asc','ㄱ~ㅎ'],['name-desc','ㅎ~ㄱ']].map(([v,t]) => `<option value="${v}"${state.sortMode === v ? ' selected' : ''}>${t}</option>`).join('')}</select>` : ''}<div class="srch-r"></div></span>`;
+      return `<span class="srch${open ? ' open' : ''}${SRCH_FILTER[ctx] ? ' fl' : ''}" data-ctx="${ctx}"><button type="button" class="srch-b${open ? ' on' : ''}" onclick="srchToggle('${ctx}', this)" title="검색" aria-label="검색">${SRCH_SVG}</button>${ctx === 'quests' ? `<button type="button" class="srch-b bm${state.folderBarCollapsed ? '' : ' on'}" onclick="toggleFolderBarBox(); this.classList.toggle('on', !state.folderBarCollapsed)" title="폴더·태그" aria-label="폴더·태그">${BM_SVG}</button>` : ''}${ctx === 'quests' ? questStatusBtns() : ''}<input class="srch-i" type="text" value="${escapeHtml(q)}" placeholder="검색…" aria-label="검색" autocomplete="off" oninput="srchInput('${ctx}', this)" onkeydown="srchKey(event, '${ctx}', this)">${ctx === 'quests' ? `<select class="srch-sort" onchange="setSortMode(this.value)" title="정렬" aria-label="정렬">${[['custom','기본'],['session-asc','1~N'],['session-desc','N~1'],['name-asc','ㄱ~ㅎ'],['name-desc','ㅎ~ㄱ']].map(([v,t]) => `<option value="${v}"${state.sortMode === v ? ' selected' : ''}>${t}</option>`).join('')}</select>` : ''}<div class="srch-r"></div></span>`;
     }
     function srchSlots() {
       [['quest-srch-slot', 'quests'], ['npc-srch-slot', 'npcs']].forEach(([id, ctx]) => { const e = document.getElementById(id); if (e && !e.contains(document.activeElement)) e.innerHTML = srchHtml(ctx); });
@@ -6343,10 +6344,11 @@
     }
 
     function setStatusFilter(k) { state.statusFilter = k; renderAll(); }
-    function questStatusBar() {
+    function questStatusBar() { return ''; }
+    function questStatusBtns() {
       const sf = state.statusFilter, n = k => state.quests.filter(q => k === 'all' || q.status === k).length;
       const it = (k, ic, t) => `<button class="btn btn-tab ${sf === k ? 'active' : ''}" onclick="setStatusFilter('${k}')" title="${t}" aria-label="${t}">${ic}<span class="q-cnt">${n(k)}</span></button>`;
-      return `<div class="q-sub">${it('all', `<img class="ico-img tab-ico" src="${IC_SCROLLS}" alt="">`, '전체 퀘스트')}${it('active', `<img class="ico-img tab-ico" src="${SCROLL_OPEN}" alt="">`, '진행 중')}${it('completed', `<img class="ico-img tab-ico" src="${SCROLL_CLOSED}" alt="">`, '완료')}</div>`;
+      return `<span class="q-sub q-sub-in">${it('all', `<img class="ico-img tab-ico" src="${IC_SCROLLS}" alt="">`, '전체 퀘스트')}${it('active', `<img class="ico-img tab-ico" src="${SCROLL_OPEN}" alt="">`, '진행 중')}${it('completed', `<img class="ico-img tab-ico" src="${SCROLL_CLOSED}" alt="">`, '완료')}</span>`;
     }
     function renderQuests() {
       if (state.sortMode === 'date-asc') state.sortMode = 'custom';
