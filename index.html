@@ -531,7 +531,7 @@
     #tcg-ov.has-strip .tcg-bar, #tcg-ov .tcg-wrap:not(.wide) .tcg-bar { display: none; }
     .tcg-ctxp { position: fixed; z-index: 9800; display: flex; gap: 8px; padding: 8px 10px; background: rgba(20,16,10,.92); border: 1.5px solid #ca8a04; border-radius: 999px; box-shadow: 0 8px 22px rgba(0,0,0,.6); animation: tmIn .18s both; } .tcg-ctxp .tcg-ib { border: 1.5px solid #ca8a04; background: rgba(40,30,15,.9); border-radius: 999px; padding: 3px 10px; display: inline-flex; align-items: center; cursor: pointer; } .tcg-ctxp .tcg-ib img { height: 30px; width: auto; max-width: 40px; object-fit: contain; } #tcg-strip { height: 168px; } #tcg-ov.has-strip { padding-bottom: 176px; }
     .ts-arr { position: fixed; bottom: 70px; z-index: 5; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid #ca8a04; background: rgba(20,16,10,.8); color: #f6d58a; font-size: 1.4rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0 0 3px; } .ts-arr.l { left: 6px; } .ts-arr.r { right: 6px; }
-    .ts-c { transform-origin: 50% 50%; width: 80px; margin-left: -44px; transform: translate(var(--x, 0px), var(--y, 0px)) rotate(var(--r, 0deg)) scale(var(--s, 1)); }
+    .ts-c { transform-origin: 50% 50%; width: 80px; margin-left: -36px; transform: translate(var(--x, 0px), var(--y, 0px)) rotate(var(--r, 0deg)) scale(var(--s, 1)); }
     #tcg-strip .ts-in { padding-top: 120px; } #tcg-strip { height: 250px; } #tcg-ov.has-strip { padding-bottom: 225px; } .ts-arr { bottom: 100px; }
     .ts-c:hover, .ts-c.cur { transform: translate(var(--x, 0px), var(--y, 0px)) rotate(var(--r, 0deg)) scale(var(--s, 1)); }
     .ts-ghost { position: fixed; z-index: 9999; width: 104px; pointer-events: none; filter: drop-shadow(0 10px 16px rgba(0,0,0,.6)); transform: rotate(-3deg); } .ts-ghost .pc-card { width: 100%; }
@@ -1634,7 +1634,7 @@
     .ctx-menu .cx-i img, .ctx-menu .cx-arrow img, .ctx-menu .cx-pcimg img, .ctx-menu .cx-stb img, .ctx-menu .tl-swc { transition: transform .18s, filter .18s; }
     .ctx-menu .cx-i:hover img, .ctx-menu .cx-arrow:hover img, .ctx-menu .cx-pcimg:hover img, .ctx-menu .cx-stb:hover img, .ctx-menu .tl-swb:hover .tl-swc { transform: scale(1.1); }
     .ctx-menu .cx-i.sel img, .ctx-menu .cx-b.on img, .ctx-menu .cx-stb.on img, .ctx-menu .cx-pcimg.on img, .ctx-menu .tl-swb.on .tl-swc { transform: scale(1.3); filter: drop-shadow(0 0 2px rgba(255,214,90,.95)) drop-shadow(0 0 7px rgba(255,190,40,.85)) drop-shadow(0 0 14px rgba(255,170,0,.55)); }
-    .ctx-menu .cx-tools .cx-arrow img, .ctx-menu .cx-tools .cx-arrow img.lk { width: 34px !important; height: 34px !important; object-fit: contain; } .ctx-menu .cx-tools .cx-arrow { padding: 2px !important; } .ctx-menu .cx-tools .cx-blank { width: 30px !important; height: 30px !important; }
+    .ctx-menu .cx-tools .cx-arrow img, .ctx-menu .cx-tools .cx-arrow img.lk { width: 30px !important; height: 30px !important; object-fit: contain; } .ctx-menu .cx-tools .cx-arrow { padding: 2px !important; min-width: 0 !important; } .ctx-menu .cx-tools .cx-blank { width: 26px !important; height: 26px !important; }
     .ctx-menu .cx-ico .cx-i { width: 28px !important; height: 28px !important; padding: 1px !important; } .ctx-menu.slim { width: auto; } .ctx-menu.slim .cx-ico { gap: 16px !important; } .ctx-menu.slim .cx-ico .cx-i { width: 36px !important; height: 36px !important; } .ctx-menu .cx-ico .cx-i img { width: 100% !important; height: 100% !important; object-fit: contain; } .ctx-menu .cx-tools { flex-wrap: nowrap !important; gap: 4px; justify-content: flex-start; }
     /* v186 아이콘 메뉴 공통 규칙: 앞으로 추가되는 아이콘 버튼도 자동 적용 (테두리 없음 · 선택/누름 시 금빛 강조) */
     .ctx-menu button:has(> img), .ctx-menu button:has(> svg), .tcg-ctxp button { border: 0 !important; background: transparent !important; box-shadow: none !important; outline: none !important; }
@@ -1695,9 +1695,9 @@
     .tcg-skinp .pcc-grid { max-height: 440px; } .tcg-skinp .pcc-c { border-left-color: #ca8a0455; color: #f1e6c8; }
 
     /* v154 두 줄 카루셀 카드 보기 */
-    .fan-stage { --cw: 240px; position: relative; height: calc(var(--cw) * 1.75); margin: 6px 0 0; overflow: hidden; } .fan-stage.two { height: calc(var(--cw) * 2.6); }
+    .fan-stage { --cw: 240px; position: relative; height: calc(var(--cw) * 1.4); margin: 6px 0 0; overflow: hidden; } .fan-stage.two { height: calc(var(--cw) * 2.2); }
     .fan-row { position: absolute; left: 0; right: 0; top: 0; height: calc(var(--cw) * 1.75); pointer-events: none; transition: filter .3s; filter: brightness(.82) saturate(.85); } .fan-row.act { filter: none; }
-    .fan-row[data-r="npc"] { top: 0; } .fan-stage.two .fan-row[data-r="npc"] { top: calc(var(--cw) * 0.85); }
+    .fan-row[data-r="npc"] { top: 0; } .fan-stage.two .fan-row[data-r="npc"] { top: calc(var(--cw) * 1.05); }
     .fan-row .fan-c { pointer-events: auto; }
     .fan-stage { touch-action: pan-y; }
     .fan-lab { position: absolute; left: 10px; top: 8px; font-weight: 800; letter-spacing: .08em; color: #5a4524; font-size: .8rem; z-index: 400; }
@@ -4762,9 +4762,9 @@
     function tcgStripCenter() { const el = document.getElementById('tcg-strip'); if (!el) return null; const cs = [...el.querySelectorAll('.ts-c')], mid = el.scrollLeft + el.clientWidth / 2; let bi = 0, bd = 1e9; cs.forEach((c, i) => { const d = Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid); if (d < bd) { bd = d; bi = i; } }); return { el, cs, bi }; }
     function tcgStripGo(dir) { const o = tcgStripCenter(); if (!o) return; const i = Math.max(0, Math.min(o.cs.length - 1, o.bi + dir)), c = o.cs[i]; o.el.scrollTo({ left: c.offsetLeft + c.offsetWidth / 2 - o.el.clientWidth / 2, behavior: 'smooth' }); }
     document.addEventListener('keydown', e => { if (!document.getElementById('tcg-strip') || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName || '')) return; if (e.key === 'ArrowLeft') tcgStripGo(-1); else if (e.key === 'ArrowRight') tcgStripGo(1); else if (e.key === 'Enter') { const o = tcgStripCenter(); if (o) o.cs[o.bi].click(); } else return; e.preventDefault(); });
-    function tcgStripFan(el) { const half = el.clientWidth / 2 || 1, RX = 187, RY = 187; el.querySelectorAll('.ts-c').forEach(c => { const dp = c.offsetLeft + c.offsetWidth / 2 - el.scrollLeft - half, dq = dp + 18, th = Math.max(-100, Math.min(100, dq / 36 * 11)), rd = th * Math.PI / 180, f = Math.max(0, 1 - Math.abs(dp) / 60), hid = Math.abs(th) > 58, rot = Math.atan2(RY * Math.sin(rd), RX * Math.cos(rd)) * 180 / Math.PI;
+    function tcgStripFan(el) { const half = el.clientWidth / 2 || 1, RX = 229, RY = 229; el.querySelectorAll('.ts-c').forEach(c => { const dp = c.offsetLeft + c.offsetWidth / 2 - el.scrollLeft - half, dq = dp + 22, th = Math.max(-100, Math.min(100, dq / 44 * 11)), rd = th * Math.PI / 180, f = Math.max(0, 1 - Math.abs(dp) / 60), sv = dp / 44, dd = Math.max(-3 - sv, sv - 2, 0), op = Math.max(0, 1 - dd * 2), hid = op <= 0, rot = Math.atan2(RY * Math.sin(rd), RX * Math.cos(rd)) * 180 / Math.PI;
       c.style.setProperty('--r', rot.toFixed(1) + 'deg'); c.style.setProperty('--x', (RX * Math.sin(rd) - dp).toFixed(1) + 'px'); c.style.setProperty('--y', (RY * (1 - Math.cos(rd)) - 20 - f * 34).toFixed(1) + 'px'); c.style.setProperty('--s', (1 + f * .16).toFixed(3));
-      c.style.zIndex = Math.round(100 - Math.abs(th) + f * 20); c.style.opacity = hid ? '0' : '1'; c.style.pointerEvents = hid ? 'none' : ''; }); }
+      c.style.zIndex = Math.round(100 - Math.abs(th) + f * 20); c.style.opacity = op.toFixed(2); c.style.pointerEvents = hid ? 'none' : ''; }); }
     // 부채꼴 카드를 위로 끌어 올리면 지금 카드 옆에 함께 펼침 (최대 5장)
     let tcgMulti = [];
     function tcgStripAdd(k, id) {
@@ -6230,15 +6230,15 @@
     }
     function npcStatDel(id) { const n = state.globalNpcs.find(x => x.id === id); if (!n) return; delete n.stats; persistState(); npcRefresh(); }
     let fanIdx = { pc: -1, npc: -1 }, fanAct = 'pc', fanCW = 240;
-    function fanLayout() { const st = document.querySelector('.fan-stage'); if (!st) return; const w = st.parentElement ? st.parentElement.clientWidth : 900; fanCW = Math.max(170, Math.min(300, Math.round(w * 0.27))); st.style.setProperty('--cw', fanCW + 'px'); }
+    function fanLayout() { const st = document.querySelector('.fan-stage'); if (!st) return; const w = st.parentElement ? st.parentElement.clientWidth : 900; fanCW = Math.max(130, Math.min(260, Math.round(w * 0.2))); st.style.setProperty('--cw', fanCW + 'px'); }
     function fanApply(instant) {
       const st = document.querySelector('.fan-stage'); if (!st) return; const cw = fanCW;
       st.querySelectorAll('.fan-row').forEach(row => { const r = row.dataset.r, act = r === fanAct, idx = fanIdx[r]; row.classList.toggle('act', act); row.style.zIndex = act ? 20 : 10;
         row.querySelectorAll('.fan-c').forEach(el => { const o = Number(el.dataset.i) - idx, a = Math.abs(o), sg = Math.sign(o);
-          const th = Math.max(-7.5, Math.min(7.5, o + 0.5)) * 11, rd = th * Math.PI / 180, R = cw * 0.42 / (11 * Math.PI / 180), x = R * Math.sin(rd), rot = th, sc = o === 0 ? 1.06 : 1, y = R * (1 - Math.cos(rd)) + 34 - (o === 0 ? 30 : 0);
+          const th = Math.max(-3.5, Math.min(3.5, o + 0.5)) * 11, rd = th * Math.PI / 180, R = cw * 0.54 / (11 * Math.PI / 180), x = R * Math.sin(rd), rot = th, sc = o === 0 ? 1.06 : 1, y = R * (1 - Math.cos(rd)) + cw * 0.22 - (o === 0 ? 30 : 0);
           if (instant) el.style.transition = 'none';
           el.style.transform = `translateX(calc(-50% + ${x}px)) translateY(${y}px) rotate(${rot}deg) scale(${sc})`;
-          el.style.zIndex = o === 0 ? 200 : 100 - a; el.style.opacity = a > 8 ? 0 : (1 - Math.max(0, a - 4) * .1); el.style.pointerEvents = a > 8 ? 'none' : 'auto'; el.classList.toggle('sel', o === 0);
+          el.style.zIndex = o === 0 ? 200 : 100 - a; const vis = o >= -3 && o <= 2; el.style.opacity = vis ? 1 : 0; el.style.pointerEvents = vis ? 'auto' : 'none'; el.classList.toggle('sel', o === 0);
           if (instant) { void el.offsetWidth; el.style.transition = ''; } }); });
       const cap = document.getElementById('fan-cap'), F = window.__fan || {}; if (cap) cap.innerHTML = ((F[fanAct] || {}).caps || [])[fanIdx[fanAct]] || '';
     }
