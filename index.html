@@ -247,7 +247,7 @@
     .top-bar .btn-tab, .top-bar .btn-icon-top, .top-bar .btn-tab:has(.tab-ico), .top-bar .btn-tab:has(.ico-pair) { min-width: 0 !important; flex: 0 1 auto; padding-left: 6px !important; padding-right: 6px !important; }
     .top-bar .tab-ico, .top-bar .btn-icon-top img, .top-bar .btn-tab img { flex: 0 1 auto; min-width: 12px; max-width: 100%; object-fit: contain; }
     .top-bar .nav-hide-btn { flex: none; }
-    @media (min-width: 1000px) { .top-bar .tab-group { gap: 14px !important; } .top-bar .action-group { gap: 12px !important; } .top-bar .btn-icon-top .top-ico, .top-bar .btn-icon-top img { width: 34px; height: 34px; } .top-bar .btn-tab:not(.cal-chip), .top-bar .btn-icon-top { flex: none !important; } .top-bar .tab-ico, .top-bar .btn-icon-top img, .top-bar .btn-tab:not(.cal-chip) img { flex: none; max-width: none; } .top-bar { justify-content: flex-start !important; } .top-bar .tab-group { margin-left: auto; } .top-bar .action-group { margin-left: auto; } }
+    @media (min-width: 1000px) { .top-bar .tab-group { gap: 8px !important; } .top-bar .action-group { gap: 8px !important; } .top-bar .btn-icon-top .top-ico, .top-bar .btn-icon-top img { width: 34px; height: 34px; } .top-bar .btn-tab:not(.cal-chip), .top-bar .btn-icon-top { flex: none !important; } .top-bar .tab-ico, .top-bar .btn-icon-top img, .top-bar .btn-tab:not(.cal-chip) img { flex: none; max-width: none; } .top-bar { justify-content: flex-start !important; } .top-bar .tab-group { margin-left: auto; } .top-bar .action-group { margin-left: auto; } }
 
     .btn {
       border: 1px solid transparent;
@@ -475,9 +475,9 @@
     .qt-add img { height: 28px; }
     .qt-add input { flex: 1 1 100%; padding: 4px 8px; border: 1.5px solid #b8893a; border-radius: 8px; font-size: .8rem; }
     #pcc-prev .pt-win > img, #pcc-prev .pp-art > img, .tc-sk .pt-win > img, .tc-sk .pp-art > img { pointer-events: auto; cursor: move; touch-action: none; }
-    .top-bar > .cal-chip { margin-left: 10px; margin-right:2px; flex: 0 1 auto; min-width:0; background: transparent; border-color: transparent; }
-    .cal-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 260px; font-size: .78rem; padding: 4px 10px; white-space: nowrap; }
-    .cal-chip svg { flex: none; } .cal-chip span { overflow: hidden; text-overflow: ellipsis; }
+    .top-bar > .cal-chip { margin-left: 8px; margin-right:0; flex: none; min-width:0; max-width: none; padding-left: 4px !important; padding-right: 4px !important; background: transparent; border-color: transparent; }
+    .cal-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 260px; font-size: .78rem; padding: 4px 10px; white-space: nowrap; text-align: center; line-height: 1.3; }
+    .cal-chip svg { flex: none; } .cal-chip span { overflow: visible; }
     .cal-chip.soon { color: #b8893a; font-weight: 700; }
     @media (max-width: 760px) { .cal-chip { max-width: 120px; } }
     /* 좁은 화면: 검색창이 열려도 아이콘이 화면 밖으로 밀리지 않게 */
@@ -2511,8 +2511,9 @@
         if (!ev) { tx.textContent = '예정된 일정 없음'; chip.classList.remove('soon'); return; }
         const d = new Date(ev.s), t0 = new Date(); t0.setHours(0, 0, 0, 0); const dd = Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - t0) / 864e5), dow = ['일', '월', '화', '수', '목', '금', '토'][d.getDay()];
         const dl = ev.s <= now ? '진행 중' : dd <= 0 ? '오늘' : 'D-' + dd, tm = ev.e.allDay ? '' : ' ' + calP2(d.getHours()) + ':' + calP2(d.getMinutes());
-        tx.textContent = dl + ' · ' + (d.getMonth() + 1) + '/' + d.getDate() + '(' + dow + ')' + tm + ' ' + (ev.e.title || '');
-        chip.title = '다음 일정: ' + tx.textContent + ' — 눌러서 월 달력 펼치기'; chip.classList.toggle('soon', dd <= 1);
+        const l1 = dl + ' · ' + (d.getMonth() + 1) + '/' + d.getDate() + '(' + dow + ')', l2 = (tm + ' ' + (ev.e.title || '')).trim();
+        tx.innerHTML = escapeHtml(l1) + (l2 ? '<br>' + escapeHtml(l2) : '');
+        chip.title = '다음 일정: ' + l1 + (l2 ? ' ' + l2 : '') + ' — 눌러서 월 달력 펼치기'; chip.classList.toggle('soon', dd <= 1);
       }).catch(() => { tx.textContent = '일정'; });
     }
     setTimeout(calNext, 3500); setInterval(calNext, 300000);
