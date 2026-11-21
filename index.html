@@ -531,7 +531,7 @@
     #tcg-ov.has-strip .tcg-bar, #tcg-ov .tcg-wrap:not(.wide) .tcg-bar { display: none; }
     .tcg-ctxp { position: fixed; z-index: 9800; display: flex; gap: 8px; padding: 8px 10px; background: rgba(20,16,10,.92); border: 1.5px solid #ca8a04; border-radius: 999px; box-shadow: 0 8px 22px rgba(0,0,0,.6); animation: tmIn .18s both; } .tcg-ctxp .tcg-ib { border: 1.5px solid #ca8a04; background: rgba(40,30,15,.9); border-radius: 999px; padding: 3px 10px; display: inline-flex; align-items: center; cursor: pointer; } .tcg-ctxp .tcg-ib img { height: 30px; width: auto; max-width: 40px; object-fit: contain; } #tcg-strip { height: 168px; } #tcg-ov.has-strip { padding-bottom: 176px; }
     .ts-arr { position: fixed; bottom: 70px; z-index: 5; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid #ca8a04; background: rgba(20,16,10,.8); color: #f6d58a; font-size: 1.4rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0 0 3px; } .ts-arr.l { left: 6px; } .ts-arr.r { right: 6px; }
-    .ts-c { transform-origin: 50% 50%; width: 80px; margin-left: -36px; transform: translate(var(--x, 0px), var(--y, 0px)) rotate(var(--r, 0deg)) scale(var(--s, 1)); }
+    .ts-c { transform-origin: 50% 50%; width: 112px; margin-left: -22px; transform: translate(var(--x, 0px), var(--y, 0px)) rotate(var(--r, 0deg)) scale(var(--s, 1)); }
     #tcg-strip .ts-in { padding-top: 120px; } #tcg-strip { height: 250px; } #tcg-ov.has-strip { padding-bottom: 225px; } .ts-arr { bottom: 100px; }
     .ts-c:hover, .ts-c.cur { transform: translate(var(--x, 0px), var(--y, 0px)) rotate(var(--r, 0deg)) scale(var(--s, 1)); }
     .ts-ghost { position: fixed; z-index: 9999; width: 104px; pointer-events: none; filter: drop-shadow(0 10px 16px rgba(0,0,0,.6)); transform: rotate(-3deg); } .ts-ghost .pc-card { width: 100%; }
@@ -1649,7 +1649,7 @@
     .ctx-menu .cx-i:hover img, .ctx-menu .cx-arrow:hover img, .ctx-menu .cx-pcimg:hover img, .ctx-menu .cx-stb:hover img, .ctx-menu .tl-swb:hover .tl-swc { transform: scale(1.1); }
     .ctx-menu .cx-i.sel img, .ctx-menu .cx-b.on img, .ctx-menu .cx-stb.on img, .ctx-menu .cx-pcimg.on img, .ctx-menu .tl-swb.on .tl-swc { transform: scale(1.3); filter: drop-shadow(0 0 2px rgba(255,214,90,.95)) drop-shadow(0 0 7px rgba(255,190,40,.85)) drop-shadow(0 0 14px rgba(255,170,0,.55)); }
     .ctx-menu .cx-tools .cx-arrow img, .ctx-menu .cx-tools .cx-arrow img.lk { width: 30px !important; height: 30px !important; object-fit: contain; } .ctx-menu .cx-tools .cx-arrow { padding: 2px !important; min-width: 0 !important; } .ctx-menu .cx-tools .cx-blank { width: 26px !important; height: 26px !important; }
-    .ctx-menu .cx-ico .cx-i { width: 28px !important; height: 28px !important; padding: 1px !important; } .ctx-menu .cx-ico { justify-content: flex-start !important; gap: 10px; } .ctx-menu.slim { width: auto; } .ctx-menu.slim .cx-ico { gap: 10px !important; } .ctx-menu.slim .cx-ico .cx-i { width: 36px !important; height: 36px !important; } .ctx-menu .cx-ico .cx-i img { width: 100% !important; height: 100% !important; object-fit: contain; } .ctx-menu .cx-tools { flex-wrap: nowrap !important; gap: 4px; justify-content: flex-start; }
+    .ctx-menu .cx-ico .cx-i { width: 28px !important; height: 28px !important; padding: 1px !important; } .ctx-menu .cx-ico { justify-content: flex-start !important; gap: 10px; } .ctx-menu.slim { width: auto; min-width: 0; padding: 6px 10px; } .ctx-menu.slim .cx-fold input[type=range] { width: 110px; } .ctx-menu.slim .cx-sec { margin-left: 0; margin-right: 0; } .ctx-menu.slim .cx-ico { gap: 10px !important; } .ctx-menu.slim .cx-ico .cx-i { width: 36px !important; height: 36px !important; } .ctx-menu .cx-ico .cx-i img { width: 100% !important; height: 100% !important; object-fit: contain; } .ctx-menu .cx-tools { flex-wrap: nowrap !important; gap: 4px; justify-content: flex-start; }
     /* v186 아이콘 메뉴 공통 규칙: 앞으로 추가되는 아이콘 버튼도 자동 적용 (테두리 없음 · 선택/누름 시 금빛 강조) */
     .ctx-menu button:has(> img), .ctx-menu button:has(> svg), .tcg-ctxp button { border: 0 !important; background: transparent !important; box-shadow: none !important; outline: none !important; }
     .ctx-menu button > img, .tcg-ctxp button > img, .tcg-ctxp button > svg { transition: transform .18s, filter .18s; }
@@ -1709,9 +1709,9 @@
     .tcg-skinp .pcc-grid { max-height: 440px; } .tcg-skinp .pcc-c { border-left-color: #ca8a0455; color: #f1e6c8; }
 
     /* v154 두 줄 카루셀 카드 보기 */
-    .fan-stage { --cw: 240px; position: relative; height: calc(var(--cw) * 1.4); margin: 6px 0 0; overflow: hidden; } .fan-stage.two { height: calc(var(--cw) * 2.2); }
+    .fan-stage { --cw: 240px; position: relative; height: calc(var(--cw) * 2.2); margin: 6px 0 0; overflow: hidden; } .fan-stage.two { height: calc(var(--cw) * 4.4); }
     .fan-row { position: absolute; left: 0; right: 0; top: 0; height: calc(var(--cw) * 1.75); pointer-events: none; transition: filter .3s; filter: brightness(.82) saturate(.85); } .fan-row.act { filter: none; }
-    .fan-row[data-r="npc"] { top: 0; } .fan-stage.two .fan-row[data-r="npc"] { top: calc(var(--cw) * 1.05); }
+    .fan-row[data-r="npc"] { top: 0; } .fan-stage.two .fan-row[data-r="npc"] { top: calc(var(--cw) * 2.2); }
     .fan-row .fan-c { pointer-events: auto; }
     .fan-stage { touch-action: pan-y; }
     .fan-lab { position: absolute; left: 10px; top: 8px; font-weight: 800; letter-spacing: .08em; color: #5a4524; font-size: .8rem; z-index: 400; }
@@ -3954,8 +3954,8 @@
       closeCtx(); ctxKind = kind; ctxId = id; ctxAt = at || null;
       const menu = document.createElement('div'); menu.id = 'ctx-menu'; menu.className = 'ctx-menu';
       menu.addEventListener('contextmenu', ev => ev.preventDefault());
-      if (kind === 'qtile') menu.classList.add('slim');
       document.body.appendChild(menu); buildCtx();
+      if (menu.querySelector('.cx-ico') && !menu.querySelector('input:not([type=range]), .cx-papers, .cx-tools, .cx-pcs, .cx-pcimg, .cx-stb')) menu.classList.add('slim');
       const w = menu.offsetWidth, hh = menu.offsetHeight;
       menu.style.left = Math.max(8, Math.min(x, innerWidth - w - 8)) + 'px';
       menu.style.top = Math.max(8, Math.min(y, innerHeight - hh - 8)) + 'px';
@@ -4644,10 +4644,11 @@
     function mbShowCtx(html, x, y) {
       closeCtx(); const menu = document.createElement('div'); menu.id = 'ctx-menu'; menu.className = 'ctx-menu'; menu.addEventListener('contextmenu', e => e.preventDefault());
       menu.innerHTML = html; document.body.appendChild(menu);
+      if (menu.querySelector('.cx-ico') && !menu.querySelector('input, .cx-papers')) menu.classList.add('slim');
       const w = menu.offsetWidth, hh = menu.offsetHeight; menu.style.left = Math.max(8, Math.min(x, innerWidth - w - 8)) + 'px'; menu.style.top = Math.max(8, Math.min(y, innerHeight - hh - 8)) + 'px';
     }
     function mbCtx(kind, id, x, y) {
-      if (kind === 'store') { mbShowCtx(`<div class="cx-sec"><button class="cx-b" onclick="closeCtx();openItemView('${id}','store')">세부 보기</button></div><div class="cx-sec"><button class="cx-b red" data-label="떼기" onclick="armDel(this,()=>mbDel('store','${id}'))">떼기</button></div>`, x, y); return; }
+      if (kind === 'store') { const ib = (src, t, fn) => `<button class="cx-i" title="${t}" aria-label="${t}" onclick="${fn}"><img src="${src}" alt=""></button>`; mbShowCtx(`<div class="cx-sec"><div class="cx-row cx-ico" style="justify-content:flex-start;gap:10px;">${ib(IC_BRUSH, '꾸미기', `closeCtx();openItemView('${id}','store');tcgPanelToggle()`)}${ib(IC_FEATHER, '내용 수정', `closeCtx();openItemModal('${id}',{mode:'store'})`)}${ib(IC_RUNE, '떼기', `closeCtx();if(confirm('이 카드를 창고에서 뗄까요?'))mbDel('store','${id}')`)}</div></div>`, x, y); return; }
       const c = mbById('clue', id); if (!c) return;
       if (c.type) { mbShowCtx(`<div class="cx-sec"><div class="cx-row"><button class="cx-b cx-arrow" title="다른 메모와 선 연결" aria-label="선 연결" onclick="mbStartLink('${id}')"><img class="lk" src="${IC_ARROW}" alt=""></button>${c.type === 'img' ? `<button class="cx-b cx-arrow" title="내용 수정" aria-label="내용 수정" onclick="closeCtx();openItemModal('${id}',{mode:'clue'})"><img src="${IC_FEATHER}" alt="" style="width:22px;height:22px;"></button>` : ''}<button class="cx-b" onclick="mbRename('${id}')">이름 바꾸기</button></div></div><div class="cx-sec"><button class="cx-b red" data-label="떼기" onclick="armDel(this,()=>mbDel('clue','${id}'))">떼기</button></div>`, x, y); return; }
       const pap = Object.keys(NOTE_MEMO).map(k => `<div class="cx-p${(c.paper || '') === k ? ' sel' : ''}" style="background-image:url('${NOTE_MEMO[k].url}')" onclick="mbSetPaper('${id}','${k}')" title="${NOTE_MEMO[k].name}"></div>`).join('');
@@ -4776,8 +4777,8 @@
     function tcgStripCenter() { const el = document.getElementById('tcg-strip'); if (!el) return null; const cs = [...el.querySelectorAll('.ts-c')], mid = el.scrollLeft + el.clientWidth / 2; let bi = 0, bd = 1e9; cs.forEach((c, i) => { const d = Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid); if (d < bd) { bd = d; bi = i; } }); return { el, cs, bi }; }
     function tcgStripGo(dir) { const o = tcgStripCenter(); if (!o) return; const i = Math.max(0, Math.min(o.cs.length - 1, o.bi + dir)), c = o.cs[i]; o.el.scrollTo({ left: c.offsetLeft + c.offsetWidth / 2 - o.el.clientWidth / 2, behavior: 'smooth' }); }
     document.addEventListener('keydown', e => { if (!document.getElementById('tcg-strip') || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName || '')) return; if (e.key === 'ArrowLeft') tcgStripGo(-1); else if (e.key === 'ArrowRight') tcgStripGo(1); else if (e.key === 'Enter') { const o = tcgStripCenter(); if (o) o.cs[o.bi].click(); } else return; e.preventDefault(); });
-    function tcgStripFan(el) { const half = el.clientWidth / 2 || 1, RX = 229, RY = 229; el.querySelectorAll('.ts-c').forEach(c => { const dp = c.offsetLeft + c.offsetWidth / 2 - el.scrollLeft - half, dq = dp + 22, th = Math.max(-100, Math.min(100, dq / 44 * 11)), rd = th * Math.PI / 180, f = Math.max(0, 1 - Math.abs(dp) / 60), sv = dp / 44, dd = Math.max(-3 - sv, sv - 2, 0), op = Math.max(0, 1 - dd * 2), hid = op <= 0, rot = Math.atan2(RY * Math.sin(rd), RX * Math.cos(rd)) * 180 / Math.PI;
-      c.style.setProperty('--r', rot.toFixed(1) + 'deg'); c.style.setProperty('--x', (RX * Math.sin(rd) - dp).toFixed(1) + 'px'); c.style.setProperty('--y', (RY * (1 - Math.cos(rd)) - 20 - f * 34).toFixed(1) + 'px'); c.style.setProperty('--s', (1 + f * .16).toFixed(3));
+    function tcgStripFan(el) { const half = el.clientWidth / 2 || 1, RX = 573, RY = 573; el.querySelectorAll('.ts-c').forEach(c => { const dp = c.offsetLeft + c.offsetWidth / 2 - el.scrollLeft - half, dq = dp + 45, th = Math.max(-100, Math.min(100, dq / 90 * 9)), rd = th * Math.PI / 180, f = Math.max(0, 1 - Math.abs(dp) / 80), sv = dp / 90, dd = Math.max(-3 - sv, sv - 2, 0), op = Math.max(0, 1 - dd * 2), hid = op <= 0, rot = Math.atan2(RY * Math.sin(rd), RX * Math.cos(rd)) * 180 / Math.PI;
+      c.style.setProperty('--r', rot.toFixed(1) + 'deg'); c.style.setProperty('--x', (RX * Math.sin(rd) - dp).toFixed(1) + 'px'); c.style.setProperty('--y', (RY * (1 - Math.cos(rd)) * 0.55 - 86 - f * 30).toFixed(1) + 'px'); c.style.setProperty('--s', (1 + f * .16).toFixed(3));
       c.style.zIndex = Math.round(100 - Math.abs(th) + f * 20); c.style.opacity = op.toFixed(2); c.style.pointerEvents = hid ? 'none' : ''; }); }
     // 부채꼴 카드를 위로 끌어 올리면 지금 카드 옆에 함께 펼침 (최대 5장)
     let tcgMulti = [];
@@ -4905,7 +4906,7 @@
     (function initEdgeRot() {
       let vx = 0, raf = 0, last = 0;
       const loop = t => { raf = 0; if (!vx) return; const st = document.getElementById('tcg-strip');
-        if (st) st.scrollLeft += vx * 3.2; else if (document.querySelector('.fan-stage') && !document.querySelector('.modal-backdrop.open, #sheet-ov.open') && state.viewMode === 'npcs') { if (t - last > 1150 - Math.abs(vx) * 750) { last = t; fanGo(vx > 0 ? 1 : -1); } }
+        if (st) st.scrollLeft += vx * 1.5; else if (document.querySelector('.fan-stage') && !document.querySelector('.modal-backdrop.open, #sheet-ov.open') && state.viewMode === 'npcs') { if (t - last > 2000 - Math.abs(vx) * 900) { last = t; fanGo(vx > 0 ? 1 : -1); } }
         raf = requestAnimationFrame(loop); };
       document.addEventListener('pointermove', e => {
         if (e.pointerType !== 'mouse' || e.buttons) { vx = 0; return; } const W = innerWidth, z = W * .28;
@@ -6249,7 +6250,7 @@
       const st = document.querySelector('.fan-stage'); if (!st) return; const cw = fanCW;
       st.querySelectorAll('.fan-row').forEach(row => { const r = row.dataset.r, act = r === fanAct, idx = fanIdx[r]; row.classList.toggle('act', act); row.style.zIndex = act ? 20 : 10;
         row.querySelectorAll('.fan-c').forEach(el => { const o = Number(el.dataset.i) - idx, a = Math.abs(o), sg = Math.sign(o);
-          const th = Math.max(-3.5, Math.min(3.5, o + 0.5)) * 11, rd = th * Math.PI / 180, R = cw * 0.54 / (11 * Math.PI / 180), x = R * Math.sin(rd), rot = th, sc = o === 0 ? 1.06 : 1, y = R * (1 - Math.cos(rd)) + cw * 0.22 - (o === 0 ? 30 : 0);
+          const th = Math.max(-3.5, Math.min(3.5, o + 0.5)) * 11, rd = th * Math.PI / 180, R = cw * 0.54 / (11 * Math.PI / 180), x = R * Math.sin(rd), rot = th, sc = o === 0 ? 1.06 : 1, y = R * (1 - Math.cos(rd)) * 0.5 + 34 - (o === 0 ? 30 : 0);
           if (instant) el.style.transition = 'none';
           el.style.transform = `translateX(calc(-50% + ${x}px)) translateY(${y}px) rotate(${rot}deg) scale(${sc})`;
           el.style.zIndex = o === 0 ? 200 : 100 - a; const vis = o >= -3 && o <= 2; el.style.opacity = vis ? 1 : 0; el.style.pointerEvents = vis ? 'auto' : 'none'; el.classList.toggle('sel', o === 0);
