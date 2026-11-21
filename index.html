@@ -547,16 +547,11 @@
     .ts-f .pc-card { width: 100%; pointer-events: none; }
     .cardlock-btn { display: none; } @media (pointer: coarse) { .cardlock-btn { display: inline-flex; } }
     .qboard { scrollbar-width: none; -ms-overflow-style: none; } .qboard::-webkit-scrollbar { display: none; width: 0; height: 0; }
-    .qb-bar { position: fixed; z-index: 60; display: none; user-select: none; touch-action: none; }
-    .qb-bar.v { width: 22px; } .qb-bar.h { height: 22px; }
-    .qb-bar .qb-sh { position: absolute; background: linear-gradient(90deg, #2c241c, #6f5d49 50%, #2c241c); border-radius: 2px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
-    .qb-bar.v .qb-sh { left: 50%; width: 4px; top: 14px; bottom: 12px; transform: translateX(-50%); }
-    .qb-bar.h .qb-sh { top: 50%; height: 4px; left: 12px; right: 14px; transform: translateY(-50%); background: linear-gradient(180deg, #2c241c, #6f5d49 50%, #2c241c); }
-    .qb-bar svg { position: absolute; width: 18px; height: 26px; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
-    .qb-bar.v .qb-hd { left: 2px; top: -4px; } .qb-bar.v .qb-fl { left: 2px; bottom: -6px; }
-    .qb-bar.h .qb-hd { right: -4px; top: -2px; transform: rotate(90deg); } .qb-bar.h .qb-fl { left: -6px; top: -2px; transform: rotate(90deg); }
-    .qb-th { position: absolute; background: radial-gradient(ellipse at 50% 50%, rgba(205,232,248,.62), rgba(180,215,240,.34) 70%, rgba(180,215,240,.12)); border: 1px solid rgba(255,255,255,.45); border-radius: 46%; box-shadow: 0 0 10px rgba(150,200,235,.45); cursor: grab; backdrop-filter: blur(1.5px); }
-    .qb-bar.v .qb-th { left: 0; right: 0; } .qb-bar.h .qb-th { top: 0; bottom: 0; }
+    .qb-bar { position: fixed; z-index: 60; display: none; user-select: none; touch-action: none; background: transparent; }
+    .qb-bar.v { width: 32px; } .qb-bar.h { height: 32px; }
+    .qb-th { position: absolute; background-repeat: no-repeat; background-size: 100% 100%; cursor: grab; filter: drop-shadow(0 0 4px rgba(90,160,210,.7)); }
+    .qb-bar.h .qb-th { top: 0; width: 150px; height: 32px; background-image: url(img/img_42ac1e58.png); }
+    .qb-bar.v .qb-th { left: 0; height: 150px; width: 32px; background-image: url(img/img_7d4c2c95.png); }
     .qnote, .qmemo, .qnpc, .mb-card, .q-tile, .npc-card, .pc-card, .qboard { -webkit-touch-callout: none; }
     body.card-unlocked .qnote, body.card-unlocked .qmemo, body.card-unlocked .qnpc { touch-action: none; }
     body.card-locked .mb-card { touch-action: pan-x pan-y; }
@@ -3519,15 +3514,13 @@
 
     // ---- 보드 화살 스크롤바 ----
     (function initQbBars() {
-      const HEAD = '<svg class="qb-hd" viewBox="0 0 18 26"><path d="M9 0 L16 18 L9 14 L2 18 Z" fill="#9aa3ab" stroke="#4b5258" stroke-width="1" stroke-linejoin="round"/><path d="M9 0 L9 14" stroke="#e9eef2" stroke-width="1"/></svg>';
-      const FLET = '<svg class="qb-fl" viewBox="0 0 18 26"><path d="M9 4 L9 26 M9 8 L2 2 L3 14 M9 8 L16 2 L15 14 M9 15 L3 10 L4 22 M9 15 L15 10 L14 22" fill="#3a3028" stroke="#2c241c" stroke-width="1.4" stroke-linejoin="round"/></svg>';
-      const mk = k => { const d = document.createElement('div'); d.className = 'qb-bar ' + k; d.innerHTML = '<div class="qb-sh"></div>' + HEAD + FLET + '<div class="qb-th"></div>'; document.body.appendChild(d); return d; };
+      const mk = k => { const d = document.createElement('div'); d.className = 'qb-bar ' + k; d.innerHTML = '<div class="qb-th"></div>'; document.body.appendChild(d); return d; };
       let V = null, H = null;
       const ensure = () => { if (!V) { V = mk('v'); H = mk('h'); wire(V, 'v'); wire(H, 'h'); } };
       function wire(bar, k) {
         const th = bar.querySelector('.qb-th'); let g = null;
         th.addEventListener('pointerdown', e => { const b = document.getElementById('qboard'); if (!b) return; e.preventDefault(); e.stopPropagation(); g = { id: e.pointerId, p: k === 'v' ? e.clientY : e.clientX, s: k === 'v' ? b.scrollTop : b.scrollLeft, b }; th.setPointerCapture(e.pointerId); th.style.cursor = 'grabbing'; });
-        th.addEventListener('pointermove', e => { if (!g || e.pointerId !== g.id) return; const tl = k === 'v' ? bar.clientHeight - 26 : bar.clientWidth - 26, tot = k === 'v' ? g.b.scrollHeight - g.b.clientHeight : g.b.scrollWidth - g.b.clientWidth, ratio = tot / Math.max(1, tl - th['offset' + (k === 'v' ? 'Height' : 'Width')]); const d = ((k === 'v' ? e.clientY : e.clientX) - g.p) * ratio; if (k === 'v') g.b.scrollTop = g.s + d; else g.b.scrollLeft = g.s + d; });
+        th.addEventListener('pointermove', e => { if (!g || e.pointerId !== g.id) return; const tl = k === 'v' ? bar.clientHeight : bar.clientWidth, tot = k === 'v' ? g.b.scrollHeight - g.b.clientHeight : g.b.scrollWidth - g.b.clientWidth, ratio = tot / Math.max(1, tl - th['offset' + (k === 'v' ? 'Height' : 'Width')]); const d = ((k === 'v' ? e.clientY : e.clientX) - g.p) * ratio; if (k === 'v') g.b.scrollTop = g.s + d; else g.b.scrollLeft = g.s + d; });
         const end = e => { if (g && e.pointerId === g.id) { g = null; th.style.cursor = ''; } }; th.addEventListener('pointerup', end); th.addEventListener('pointercancel', end);
         bar.addEventListener('pointerdown', e => { if (e.target === th) return; const b = document.getElementById('qboard'); if (!b) return; const r = th.getBoundingClientRect(), dir = (k === 'v' ? e.clientY < r.top : e.clientX < r.left) ? -1 : 1; b.scrollBy({ [k === 'v' ? 'top' : 'left']: dir * (k === 'v' ? b.clientHeight : b.clientWidth) * 0.8, behavior: 'smooth' }); });
       }
@@ -3536,10 +3529,10 @@
         const vis = b && b.offsetParent !== null && b.clientWidth > 80;
         if (!vis) { V.style.display = H.style.display = 'none'; return; }
         const r = b.getBoundingClientRect(), needV = b.scrollHeight > b.clientHeight + 2, needH = b.scrollWidth > b.clientWidth + 2;
-        if (needV) { const top = Math.max(r.top, 0) + 8, bot = Math.min(r.bottom, innerHeight) - (needH ? 34 : 12), len = Math.max(40, bot - top), th = V.querySelector('.qb-th'), tl = len - 26, thh = Math.max(34, tl * b.clientHeight / b.scrollHeight), mx = b.scrollHeight - b.clientHeight;
-          V.style.display = 'block'; V.style.left = (r.right - 24) + 'px'; V.style.top = top + 'px'; V.style.height = len + 'px'; th.style.height = thh + 'px'; th.style.top = (13 + (tl - thh) * (mx ? b.scrollTop / mx : 0)) + 'px'; } else V.style.display = 'none';
-        if (needH) { const left = r.left + 8, rt = r.right - (needV ? 34 : 12), len = Math.max(40, rt - left), th = H.querySelector('.qb-th'), tl = len - 26, thw = Math.max(34, tl * b.clientWidth / b.scrollWidth), mx = b.scrollWidth - b.clientWidth, bt = Math.min(r.bottom, innerHeight);
-          H.style.display = 'block'; H.style.top = (bt - 24) + 'px'; H.style.left = left + 'px'; H.style.width = len + 'px'; th.style.width = thw + 'px'; th.style.left = (13 + (tl - thw) * (mx ? b.scrollLeft / mx : 0)) + 'px'; } else H.style.display = 'none';
+        if (needV) { const top = Math.max(r.top, 0) + 8, bot = Math.min(r.bottom, innerHeight) - (needH ? 44 : 12), len = Math.max(40, bot - top), th = V.querySelector('.qb-th'), tl = len, thh = 150, mx = b.scrollHeight - b.clientHeight;
+          V.style.display = 'block'; V.style.left = (r.right - 34) + 'px'; V.style.top = top + 'px'; V.style.height = len + 'px'; th.style.top = ((tl - thh) * (mx ? b.scrollTop / mx : 0)) + 'px'; } else V.style.display = 'none';
+        if (needH) { const left = r.left + 8, rt = r.right - (needV ? 44 : 12), len = Math.max(40, rt - left), th = H.querySelector('.qb-th'), tl = len, thw = 150, mx = b.scrollWidth - b.clientWidth, bt = Math.min(r.bottom, innerHeight);
+          H.style.display = 'block'; H.style.top = (bt - 34) + 'px'; H.style.left = left + 'px'; H.style.width = len + 'px'; th.style.left = ((tl - thw) * (mx ? b.scrollLeft / mx : 0)) + 'px'; } else H.style.display = 'none';
       }
       window.qbBarsUpdate = update;
       document.addEventListener('scroll', e => { if (e.target && (e.target.id === 'qboard' || e.target === document)) update(); }, true);
