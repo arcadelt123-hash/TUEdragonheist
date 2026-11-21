@@ -502,6 +502,7 @@
     .fan-draw button { border: 1.5px solid #8a6a2c; background: rgba(255,248,230,.85); color: #5a4524; border-radius: 999px; padding: 3px 12px; cursor: pointer; font-size: .78rem; }
     .bk-list { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .82rem; color: #f1e6c8; } .bk-list label { display: inline-flex; gap: 4px; align-items: center; cursor: pointer; }
     .tcg-flip { touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+    #tcg-flip:not(.flip) { touch-action: none; }
     .tm-wrap { min-height: 100%; justify-content: space-between; }
     .tt-table { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; align-content: flex-start; min-height: 260px; padding-top: 6px; }
     .tt-hint { color: #d9c79a; font-size: .85rem; opacity: .8; align-self: center; text-align: center; padding: 20px; }
@@ -519,6 +520,13 @@
     .tt-pile .s { position: absolute; inset: 0; border-radius: 10px; border: 3px solid #b8893a; box-shadow: 0 4px 10px rgba(0,0,0,.5); background: repeating-linear-gradient(45deg, #1d3a5e 0 7px, #16304f 7px 14px); display: flex; align-items: center; justify-content: center; }
     .tt-pile.npc .s { background: repeating-linear-gradient(45deg, #5e2a1d 0 7px, #4a2016 7px 14px); }
     .tt-pile .s2 { transform: translate(5px, -5px); } .tt-pile .s3 { transform: translate(10px, -10px); } .tt-pile em { font-style: normal; color: #f6d58a; font-size: 1.6rem; }
+    #tcg-ov.has-strip { padding-bottom: 150px; }
+    #tcg-strip { position: fixed; left: 0; right: 0; bottom: 0; z-index: 3; height: 138px; overflow-x: auto; overflow-y: hidden; background: linear-gradient(transparent, rgba(0,0,0,.72) 45%); }
+    #tcg-strip .ts-in { display: flex; align-items: flex-end; width: max-content; margin: 0 auto; padding: 18px 24px 8px; }
+    .ts-c { flex: none; width: 74px; margin-left: -24px; cursor: pointer; transform-origin: 50% 160%; transform: translateY(var(--y)) rotate(var(--r)); transition: transform .18s, filter .18s; filter: drop-shadow(0 4px 6px rgba(0,0,0,.5)); }
+    .ts-c:first-child { margin-left: 0; } .ts-c:hover { transform: translateY(-16px) rotate(0); z-index: 5; }
+    .ts-c.used { filter: grayscale(.7) brightness(.6); } .ts-c.cur { transform: translateY(-14px) rotate(0); filter: drop-shadow(0 0 8px #f6d58a); z-index: 4; }
+    .ts-f .pc-card { width: 100%; pointer-events: none; }
     .cardlock-btn { display: none; } @media (pointer: coarse) { .cardlock-btn { display: inline-flex; } }
     .qnote, .qmemo, .qnpc, .mb-card, .q-tile, .npc-card, .pc-card, .qboard { -webkit-touch-callout: none; }
     body.card-unlocked .qnote, body.card-unlocked .qmemo, body.card-unlocked .qnpc { touch-action: none; }
@@ -4641,14 +4649,28 @@
         <div class="pcc-cols pcc-cols3"><div class="pcc-c pcc-c2"><b class="pcc-h">조절</b>${sliders}</div>
           <div class="pcc-c pcc-c3"><b class="pcc-h">틀</b><div class="pcc-grid">${frameList().filter(f => !isHid('fr', f.k)).map(f => `<button class="${d.frame === frUrl(f) ? 'on' : ''}" title="${f.n}" onclick="tcgUseFrame('${f.k}')"><img src="${escapeHtml(frUrl(f))}" alt="${f.n}" loading="lazy"></button>`).join('')}</div></div>
           <div class="pcc-c pcc-c4"><b class="pcc-h">배경</b><div class="pcc-grid pcc-grid-bg"><label class="pcc-col" title="배경 색"><input type="color" value="${d.fBgc || '#f4ecd8'}" oninput="tcgSkinSet('fBgc',this.value)"></label>${patList().filter(x => !isHid('bg', 'i_' + x.k)).map(x => `<button class="${d.fBgi === bgUrl(x) ? 'on' : ''}" title="${x.n}" onclick="tcgToggleBg('${x.k}')"><img src="${escapeHtml(bgUrl(x))}" alt="${x.n}" loading="lazy" style="aspect-ratio:1;object-fit:cover;"></button>`).join('')}</div></div></div></div></div>` : '';
-      ov.innerHTML = `<div class="tcg-wrap${tcgPanel ? ' wide' : ''}"><div class="tcg-l">${tcgHtml(sp, anim)}<div class="tcg-bar">${(sp.backFn || sp.back) ? '<button class="tcg-ib" onclick="tcgFlip()" title="앞면 · 뒷면 뒤집기" aria-label="뒤집기"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#f6d58a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg></button>' : ''}<button class="tcg-ib" onclick="tcgPanelToggle()" title="꾸미기" aria-label="꾸미기"><img src="${IC_BRUSH}" alt=""></button>${sp.edit ? (sp.editLabel === '내용 수정' ? `<button class="tcg-ib" onclick="tcgEdit()" title="내용 수정" aria-label="내용 수정"><img src="${IC_FEATHER}" alt=""></button>` : `<button class="tcg-ib" onclick="tcgEdit()" title="${sp.editLabel || '수정'}" aria-label="${sp.editLabel || '수정'}">'''+SHEET+'''</button>`) : ''}<button class="tcg-ib" onclick="tcgClose()" title="닫기" aria-label="닫기"><img src="${IC_BROOM}" alt=""></button></div></div>${right}</div>`;
+      ov.innerHTML = `<div class="tcg-wrap${tcgPanel ? ' wide' : ''}"><div class="tcg-l">${tcgHtml(sp, anim)}<div class="tcg-bar"><button class="tcg-ib" onclick="tcgPanelToggle()" title="꾸미기" aria-label="꾸미기"><img src="${IC_BRUSH}" alt=""></button>${sp.edit ? (sp.editLabel === '내용 수정' ? `<button class="tcg-ib" onclick="tcgEdit()" title="내용 수정" aria-label="내용 수정"><img src="${IC_FEATHER}" alt=""></button>` : `<button class="tcg-ib" onclick="tcgEdit()" title="${sp.editLabel || '수정'}" aria-label="${sp.editLabel || '수정'}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#f6d58a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M8 9h7M8 13h5"/></svg></button>`) : ''}<button class="tcg-ib" onclick="tcgClose()" title="닫기" aria-label="닫기"><img src="${IC_BROOM}" alt=""></button></div></div>${right}</div>`;
+      tcgStrip(ov);
     }
+    // 부채꼴에서 뽑은 카드 아래에, 남은 카드들을 부채꼴로 계속 보여줘서 이어서 뽑을 수 있게
+    function tcgStrip(ov) {
+      ov.classList.remove('has-strip'); const old = document.getElementById('tcg-strip'); if (old) old.remove();
+      const sp = tcgSpec, pool = window.__fanPool || []; if (!window.__tcgFan || !sp || !sp.card || tcgPanel || pool.length < 2) return;
+      const cur = sp.curKey, dr = window.__drawn = window.__drawn || new Set(); if (cur) dr.add(cur);
+      const cards = pool.map(c => { let f = ''; if (c.k === 'pc') { const i = pcIdx(c.id), p = (state.boardTex.pcs || [])[i]; if (!p) return null; f = pcCardHtml(p, i, true); } else { const n = (state.globalNpcs || []).find(x => x.id === c.id); if (!n) return null; f = pcCardHtml(npcCardObj(n), -1, true); } return { c, f, key: c.k + ':' + c.id }; }).filter(Boolean);
+      const mid = (cards.length - 1) / 2, el = document.createElement('div'); el.id = 'tcg-strip';
+      el.innerHTML = '<div class="ts-in">' + cards.map((x, i) => { const r = (i - mid) * 2.2, y = Math.pow(i - mid, 2) * 0.35; return `<div class="ts-c${x.key === cur ? ' cur' : dr.has(x.key) ? ' used' : ''}" style="--r:${r}deg;--y:${y}px" onclick="tcgStripPick('${x.c.k}','${escapeHtml(x.c.id)}')" title="눌러서 뽑기"><div class="ts-f">${x.f}</div></div>`; }).join('') + '</div>';
+      ov.classList.add('has-strip'); ov.appendChild(el);
+      const c = el.querySelector('.cur'); if (c) c.scrollIntoView({ inline: 'center', block: 'nearest' });
+    }
+    function tcgStripPick(k, id) { window.__tcgFan = 1; if (k === 'pc') tcgPc(id); else tcgNpc(id); }
     function tcgOpen(sp) {
+      sp.curKey = window.__curKey; window.__curKey = '';
       tcgSpec = sp; tcgPanel = false; tcgFlipped = false; let ov = document.getElementById('tcg-ov');
       if (!ov) { ov = document.createElement('div'); ov.id = 'tcg-ov'; ov.onclick = e => { if (e.target === ov) tcgClose(); }; document.body.appendChild(ov); }
       tcgRender(true);
     }
-    function tcgClose() { const ov = document.getElementById('tcg-ov'); if (ov) ov.remove(); tcgSpec = null; }
+    function tcgClose() { const ov = document.getElementById('tcg-ov'); if (ov) ov.remove(); tcgSpec = null; window.__tcgFan = 0; window.__drawn = null; }
     function tcgReplay() { tcgRender(false); requestAnimationFrame(() => tcgRender(true)); }
     function tcgPanelToggle() { tcgPanel = !tcgPanel; tcgRender(false); }
     function tcgSet(k, v, keepFocus) {
@@ -4700,41 +4722,6 @@
       if (st) (st.boxes || []).forEach((x, i) => { if ((x.title || x.text) && bkOn(o, 'box' + i)) h += `<div class="tbk-t">${e(x.title || '')}</div><div>${e(x.text || '')}</div>`; });
       return tcgBk(n.name || '이름 없음', h);
     }
-    // ---- 뽑기 테이블: 덱에서 한 장씩 뽑거나, 덱을 끌어서 한꺼번에 펼치기 ----
-    let TT = null;
-    const ttShuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-    function tcgTable(reset) {
-      const pool = window.__fanPool || []; if (!pool.length) return showToast('뽑을 카드가 없어요.');
-      if (!TT || reset) TT = { piles: { pc: ttShuffle(pool.filter(c => c.k === 'pc').map(c => c.id)), npc: ttShuffle(pool.filter(c => c.k === 'npc').map(c => c.id)) }, table: [], n: 0 };
-      let ov = document.getElementById('tcgm-ov'); if (!ov) { ov = document.createElement('div'); ov.id = 'tcgm-ov'; document.body.appendChild(ov); }
-      ttRender();
-    }
-    function tcgTableClose() { const ov = document.getElementById('tcgm-ov'); if (ov) ov.remove(); }
-    function ttTile(t) {
-      let front = '', back = '';
-      if (t.k === 'pc') { const idx = pcIdx(t.id), p = (state.boardTex.pcs || [])[idx]; if (!p) return ''; front = pcCardHtml(p, idx, true); back = tcgBackPc(p); }
-      else { const nn = state.globalNpcs.find(x => x.id === t.id); if (!nn) return ''; front = pcCardHtml(npcCardObj(nn), -1, true); back = tcgBackNpc(nn); }
-      const anim = t.fresh ? ` style="animation-delay:${(t.delay || 0) * 90}ms"` : '';
-      return `<div class="tm-c${t.fresh ? ' fresh' : ''}" data-tid="${t.tid}"${anim}><div class="tm-box"><div class="tcg-flip" title="눌러서 · 끌어서 뒤집기"><div class="tf-in"><div class="tf-f"><div class="tm-fr">${front}</div></div><div class="tf-b">${back}</div></div></div>${t.down ? `<div class="tm-cover ${t.k}" onclick="ttReveal('${t.tid}')" title="눌러서 앞면 보기"><i>✦</i></div>` : ''}</div><div class="tm-act"><button class="tm-big" onclick="ttBig('${t.tid}')">크게</button><button class="tm-big" onclick="ttSheet('${t.tid}')" title="시트로 바로 가기" aria-label="시트"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#f6d58a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M8 9h7M8 13h5"/></svg></button></div></div>`;
-    }
-    function ttRender() {
-      const ov = document.getElementById('tcgm-ov'); if (!ov || !TT) return; const P = TT.piles, left = P.pc.length + P.npc.length;
-      const pile = (k, lab) => P[k].length ? `<div class="tt-pile ${k}" data-k="${k}" title="눌러서 한 장 뽑기 · 끌어서 모두 펼치기"><i class="s s3"></i><i class="s s2"></i><i class="s s1"><em>✦</em></i><b>${lab} ${P[k].length}</b></div>` : '';
-      ov.innerHTML = `<div class="tm-wrap"><div class="tt-table">${TT.table.length ? TT.table.map(ttTile).join('') : '<div class="tt-hint">아래 덱을 눌러 한 장 뽑거나, 끌어올려 한꺼번에 펼쳐요.</div>'}</div><div class="tt-decks">${pile('pc', 'PC 덱')}${pile('npc', 'NPC 덱')}${left ? '' : '<div class="tt-hint">덱이 비었어요. 다시 섞기를 눌러 주세요.</div>'}</div><div class="tcg-bar"><button onclick="tcgTable(true)">다시 섞기</button><button onclick="ttAll()">모두 뒤집기</button><button class="tcg-ib" onclick="tcgTableClose()" title="닫기" aria-label="닫기"><img src="${IC_BROOM}" alt=""></button></div></div>`;
-      TT.table.forEach(t => { t.fresh = false; });
-    }
-    function ttAdd(k, n0) { const P = TT.piles[k], ids = n0 == null ? P.splice(0, P.length) : [P.splice(Math.floor(Math.random() * P.length), 1)[0]]; const out = ids.map((id, i) => ({ tid: 't' + (++TT.n), k, id, down: true, fresh: true, delay: i })); TT.table.push(...out); ttRender(); return out; }
-    function ttReveal(tid) { const t = TT && TT.table.find(x => x.tid === tid); if (!t || !t.down) return; t.down = false; const c = document.querySelector('#tcgm-ov [data-tid="' + tid + '"] .tm-cover'); if (c) { c.classList.add('gone'); setTimeout(() => c.remove(), 520); } }
-    function ttAll() { const down = TT.table.filter(t => t.down); if (down.length) { down.forEach((t, i) => setTimeout(() => ttReveal(t.tid), i * 120)); } else document.querySelectorAll('#tcgm-ov .tcg-flip').forEach(e => e.classList.toggle('flip')); }
-    function ttBig(tid) { const t = TT.table.find(x => x.tid === tid); if (t) { if (t.k === 'pc') tcgPc(t.id); else tcgNpc(t.id); } }
-    function ttSheet(tid) { const t = TT.table.find(x => x.tid === tid); if (!t) return; tcgTableClose(); if (t.k === 'pc') openSheet(t.id); else npcViewOpen(t.id); }
-    (function initTT() {
-      let d = null;
-      document.addEventListener('pointerdown', e => { const pl = e.target.closest && e.target.closest('.tt-pile'); if (!pl || e.button > 0) return; d = { el: pl, k: pl.dataset.k, x: e.clientX, y: e.clientY, id: e.pointerId, spread: false }; try { pl.setPointerCapture(e.pointerId); } catch (x) {} });
-      document.addEventListener('pointermove', e => { if (!d || e.pointerId !== d.id) return; const dx = e.clientX - d.x, dy = e.clientY - d.y; if (Math.hypot(dx, dy) > 8) { d.el.style.transform = `translate(${dx}px,${dy}px)`; d.el.style.transition = 'none'; d.el.style.zIndex = 5; } if (!d.spread && Math.hypot(dx, dy) > 70) { d.spread = true; const k = d.k; d = null; ttAdd(k); } });
-      const up = e => { if (!d || e.pointerId !== d.id) return; const k = d.k, moved = Math.hypot(e.clientX - d.x, e.clientY - d.y); d.el.style.transform = ''; d.el.style.transition = ''; d.el.style.zIndex = ''; d = null; if (moved <= 8 && TT && TT.piles[k].length) { const t = ttAdd(k, 1)[0]; setTimeout(() => ttReveal(t.tid), 650); } };
-      document.addEventListener('pointerup', up); document.addEventListener('pointercancel', e => { if (d && e.pointerId === d.id) { d.el.style.transform = ''; d = null; } });
-    })();
     // ---- 카드 드래그로 뒤집기 (단일 카드 · 뽑기 테이블 공용) ----
     (function initFlipDrag() {
       let f = null;
@@ -4745,23 +4732,32 @@
       }, true);
       document.addEventListener('pointermove', e => {
         if (!f || e.pointerId !== f.id) return; const dx = e.clientX - f.x, dy = e.clientY - f.y;
-        if (!f.moved) { if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy)) return; f.moved = true; f.tin.style.transition = 'none'; try { f.el.setPointerCapture(e.pointerId); } catch (x) {} }
+        if (Math.hypot(dx, dy) > 8) f.drag = true;
+        if (!f.moved && !f.up) {
+          const up = f.el.id === 'tcg-flip' && !f.el.classList.contains('flip') && tcgSpec && tcgSpec.card && dy < -8 && Math.abs(dy) > Math.abs(dx);
+          if (up) { f.up = true; try { f.el.setPointerCapture(e.pointerId); } catch (x) {} }
+          else { if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy)) return; f.moved = true; f.tin.style.transition = 'none'; try { f.el.setPointerCapture(e.pointerId); } catch (x) {} }
+        }
+        if (f.up) { f.dy = Math.min(0, dy); f.el.style.transform = `translateY(${f.dy}px) scale(${1 + f.dy / 1500})`; f.el.style.opacity = String(Math.max(.35, 1 + f.dy / 400)); return; }
         f.a = f.base + dx / f.w * 200; f.tin.style.transform = `rotateY(${f.a}deg)`;
       }, true);
       const end = e => {
         if (!f || e.pointerId !== f.id) return; const g = f; f = null;
         const fin = (flip) => { g.tin.style.transition = ''; void g.tin.offsetWidth; g.tin.style.transform = ''; g.el.classList.toggle('flip', flip); if (g.el.id === 'tcg-flip') tcgFlipped = flip; };
+        if (g.up) { g.el.style.transition = 'transform .25s, opacity .25s'; g.el.style.transform = ''; g.el.style.opacity = ''; setTimeout(() => { g.el.style.transition = ''; }, 280); g.el.dataset.sw = Date.now(); if (g.dy < -90 && e.type === 'pointerup') tcgEdit(); return; }
         if (g.moved) { const n = ((g.a % 360) + 360) % 360; fin(n > 90 && n < 270); g.el.dataset.sw = Date.now(); }
-        else if (e.type === 'pointerup' && !e.target.closest('.tbk-s,button,a')) fin(!g.el.classList.contains('flip'));
+        else if (e.type === 'pointerup' && !g.drag && !e.target.closest('.tbk-s,button,a')) fin(!g.el.classList.contains('flip'));
       };
       document.addEventListener('pointerup', end, true); document.addEventListener('pointercancel', end, true);
     })();
     function tcgPc(id) {
+      window.__curKey = 'pc:' + id;
       const i = pcIdx(id), p = (state.boardTex.pcs || [])[i]; if (!p) return; const sh = p.sheet || {}, info = pcInfoLines(p);
       const boxes = (sh.boxes || []).filter(b => b && (b.title || b.content)).slice(0, 2).map(b => (b.title ? b.title + '\n' : '') + (b.content || '')).join('\n\n');
       tcgOpen({ img: p.art || p.img || sh.artUrl || '', name: p.name || 'PC', band: info.map(escapeHtml), desc: '', backFn: () => tcgBackPc(p), bkItems: () => tcgBkItemsPc(p), rc: p.cBorder || '#b8893a', card: p, deco: p, save: () => persistState(), edit: () => openSheet(p.id), editLabel: '시트 열기' });
     }
     function tcgNpc(id) {
+      window.__curKey = 'npc:' + id;
       const n = state.globalNpcs.find(x => x.id === id); if (!n) return; const st = npcInfoNorm(n), boxes = st ? (st.boxes || []).filter(x => x.title || x.text).map(x => (x.title ? x.title + ': ' : '') + (x.text || '')).join('\n') : '';
       const o = npcCardObj(n);
       tcgOpen({ img: n.image || '', name: n.name || '이름 없음', band: [], desc: '', backFn: () => tcgBackNpc(n), bkItems: () => tcgBkItemsNpc(n), rc: o.cBorder || '#b8893a', card: o, npc: true, deco: o, save: () => persistState(), edit: () => npcViewOpen(n.id), editLabel: '상세 보기' });
@@ -6072,7 +6068,7 @@
     function fanSet(i) { const n = fanRowN(fanAct); if (!n) return; fanIdx[fanAct] = Math.max(0, Math.min(n - 1, i)); fanApply(); }
     function fanGo(d) { fanSet(fanIdx[fanAct] + d); }
     function fanRow(r) { if (fanRowN(r)) { fanAct = r; fanApply(); } }
-    function fanClick(r, i) { if (r !== fanAct) { fanAct = r; fanIdx[r] = i; fanApply(); return; } if (i === fanIdx[r]) { const a = ((window.__fan || {})[r] || {}).acts; if (a && a[i]) (0, eval)(a[i]); } else { fanIdx[r] = i; fanApply(); } }
+    function fanClick(r, i) { if (r !== fanAct) { fanAct = r; fanIdx[r] = i; fanApply(); return; } if (i === fanIdx[r]) { const a = ((window.__fan || {})[r] || {}).acts; if (a && a[i]) { window.__tcgFan = 1; (0, eval)(a[i]); } } else { fanIdx[r] = i; fanApply(); } }
     let fanWT = 0;
     // 부채꼴 카드: 좌우 스와이프로 넘기기
     (function initFanSwipe() {
@@ -6120,7 +6116,7 @@
         window.__fan = {}; ['pc', 'npc'].forEach(r => { window.__fan[r] = { acts: rows[r].map(c => c.act), caps: rows[r].map(c => `<div class="fan-nm">${escapeHtml(c.name)}</div>${c.desc ? `<div class="fan-ds">${escapeHtml(c.desc)}</div>` : ''}`) }; if (fanIdx[r] < 0 || fanIdx[r] >= rows[r].length) fanIdx[r] = Math.floor((rows[r].length - 1) / 2); });
         if (!rows[fanAct].length) fanAct = rows.pc.length ? 'pc' : 'npc';
         const two = rows.pc.length && rows.npc.length;
-        area.innerHTML = `<div class="fan-stage${two ? ' two' : ''}" onwheel="fanWheel(event)">${['pc', 'npc'].filter(r => rows[r].length).map(r => `<div class="fan-row" data-r="${r}"><button class="fan-arr l" onclick="fanGo(-1)" aria-label="이전">‹</button><button class="fan-arr r" onclick="fanGo(1)" aria-label="다음">›</button>${rows[r].map((c, i) => `<div class="fan-c" data-i="${i}" onclick="fanClick('${r}',${i})">${c.html}</div>`).join('')}</div>`).join('')}</div><div class="fan-draw"><button onclick="tcgTable(true)">뽑기 테이블 열기</button></div><div id="fan-cap"></div>`;
+        area.innerHTML = `<div class="fan-stage${two ? ' two' : ''}" onwheel="fanWheel(event)">${['pc', 'npc'].filter(r => rows[r].length).map(r => `<div class="fan-row" data-r="${r}"><button class="fan-arr l" onclick="fanGo(-1)" aria-label="이전">‹</button><button class="fan-arr r" onclick="fanGo(1)" aria-label="다음">›</button>${rows[r].map((c, i) => `<div class="fan-c" data-i="${i}" onclick="fanClick('${r}',${i})">${c.html}</div>`).join('')}</div>`).join('')}</div><div id="fan-cap"></div>`;
         fanLayout(); fanApply(true);
         return;
       }
