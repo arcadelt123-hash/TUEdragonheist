@@ -3886,6 +3886,11 @@
       } else if (ctxKind === 'npc') {
         const nc = (state.boardTex.npcs || []).find(n => n.id === id);
         const stb = (k, t) => `<button class="cx-b cx-stb${nc && nc.status === k ? ' on' : ''}" title="${t}" aria-label="${t}" onclick="npcStatus('${id}','${nc && nc.status === k ? '' : k}')"><img src="${ST_ICON[k]}" alt=""></button>`;
+        if (nc && nc.img && nc.kind !== 'img') {
+          const ib = (src, t, fn) => `<button class="cx-i" title="${t}" aria-label="${t}" onclick="${fn}"><img src="${src}" alt=""></button>`;
+          h = `<div class="cx-sec"><div class="cx-row cx-ico" style="justify-content:flex-start;gap:8px;">${ib(IC_BRUSH, '꾸미기', `closeCtx();openItemView('${id}','board');tcgPanelToggle()`)}${ib(IC_FEATHER, '내용 수정', `closeCtx();openItemModal('${id}',{mode:'board'})`)}${ib(IC_RUNE, '보드에서 떼기', `closeCtx();if(confirm('이 아이템 카드를 보드에서 뗄까요?'))npcDel('${id}')`)}</div></div>` + layerHtml(id);
+          menu.innerHTML = h; return;
+        }
         h = (nc && nc.img ? `<div class="cx-sec"><div class="cx-row" style="gap:4px;"><button class="cx-b cx-arrow cx-stb" title="내용 수정" aria-label="내용 수정" onclick="closeCtx();openItemModal('${id}',{mode:'board'})"><img src="${IC_FEATHER}" alt="" style="width:22px;height:22px;"></button></div></div>` : '') + `<div class="cx-sec"><div class="cx-row" style="flex-wrap:nowrap;gap:4px;">${['out', 'cap', 'foe', 'gray'].concat(nc && nc.status === 'dead' ? ['dead'] : []).map(k => stb(k, ST_NAME[k])).join('')}</div></div>` + `<div class="cx-sec"><button class="cx-b red" data-label="떼기" onclick="armDel(this,()=>npcDel('${id}'))">떼기</button></div>` + layerHtml(id);
       } else if (ctxKind === 'conn') {
         const c = connById(id); if (!c) { closeCtx(); return; }
