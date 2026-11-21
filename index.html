@@ -2056,7 +2056,7 @@
     </div>
   </div>
 
-  <script>/* 같은 GitHub 계정의 다른 사이트와 브라우저 저장소가 섞이지 않게 키에 접두어를 붙임 */(function(){var P='pandelver:',g=Storage.prototype.getItem,st=Storage.prototype.setItem,r=Storage.prototype.removeItem;Storage.prototype.getItem=function(k){return g.call(this,P+k)};Storage.prototype.setItem=function(k,v){return st.call(this,P+k,v)};Storage.prototype.removeItem=function(k){return r.call(this,P+k)};})();</script>
+  <script>/* 같은 GitHub 계정의 다른 사이트와 브라우저 저장소가 섞이지 않게 키에 접두어를 붙임 */(function(){var P='weekday:',g=Storage.prototype.getItem,st=Storage.prototype.setItem,r=Storage.prototype.removeItem;Storage.prototype.getItem=function(k){return g.call(this,P+k)};Storage.prototype.setItem=function(k,v){return st.call(this,P+k,v)};Storage.prototype.removeItem=function(k){return r.call(this,P+k)};})();</script>
   <script>
     (function () {
       function show(msg) {
@@ -2144,7 +2144,7 @@
 
 
     // ===== 서버 연결: google.script.run 이 응답 없으면 같은 주소로 직접 요청(fetch)으로 자동 전환 =====
-    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxcGGnAwI48X01t9YmBoI2CLrgzyZ6s6loOPi8eZdI_jOMivREqNwuG7bSJkHD1M6s/exec';
+    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxjxFvq0tnmU14rf-Gq_KI2QBc5zvjtnPIhmidRggdK71Rwqa8bw-3mrLsIfY5a28Se/exec';
     function execUrl() { try { return localStorage.getItem('adventure_exec_url') || EXEC_URL_DEFAULT; } catch (e) { return EXEC_URL_DEFAULT; } }
     function diagShow(msg) { try { console.info('[sync]', msg); } catch (e) {} }
     function fetchT(url, opt, ms) {
