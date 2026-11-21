@@ -1627,6 +1627,11 @@
     .j-tabs .btn, .j-tabs .btn:hover { background: transparent !important; border-color: transparent !important; box-shadow: none !important; color: var(--text-muted); font-weight: 700; transition: transform .18s, text-shadow .18s; }
     .j-tabs .btn.btn-primary { color: #7a4a00; transform: scale(1.18); text-shadow: 0 0 2px rgba(255,214,90,.95), 0 0 7px rgba(255,190,40,.85), 0 0 14px rgba(255,170,0,.55); }
 
+    /* v183 우클릭 메뉴 아이콘: 테두리 없이, 선택하면 메뉴 탭처럼 빛나게 */
+    .ctx-menu .cx-i, .ctx-menu button.cx-b.cx-arrow, .ctx-menu button.cx-b.cx-pcimg, .ctx-menu button.cx-b.cx-stb, .ctx-menu .tl-swb { border: 0 !important; background: transparent !important; box-shadow: none !important; outline: none !important; }
+    .ctx-menu .cx-i img, .ctx-menu .cx-arrow img, .ctx-menu .cx-pcimg img, .ctx-menu .cx-stb img, .ctx-menu .tl-swc { transition: transform .18s, filter .18s; }
+    .ctx-menu .cx-i:hover img, .ctx-menu .cx-arrow:hover img, .ctx-menu .cx-pcimg:hover img, .ctx-menu .cx-stb:hover img, .ctx-menu .tl-swb:hover .tl-swc { transform: scale(1.1); }
+    .ctx-menu .cx-i.sel img, .ctx-menu .cx-b.on img, .ctx-menu .cx-stb.on img, .ctx-menu .cx-pcimg.on img, .ctx-menu .tl-swb.on .tl-swc { transform: scale(1.3); filter: drop-shadow(0 0 2px rgba(255,214,90,.95)) drop-shadow(0 0 7px rgba(255,190,40,.85)) drop-shadow(0 0 14px rgba(255,170,0,.55)); }
     /* v148 부채꼴 카드 보기 */
     .fan-title { font-weight: 800; color: #4a3414; text-shadow: 0 1px 0 rgba(255,255,255,.7); margin: 6px 4px 0; letter-spacing: .08em; }
     .fan-row { display: flex; justify-content: center; align-items: flex-end; padding: 34px 40px 36px; min-height: 330px; overflow: visible; }
@@ -3622,13 +3627,13 @@
       arr.push(c); placeAbove(c.id, qid);
       persistState(); renderBoard();
     }
-    function ctxImage(qid) {
+    function ctxImage(qid, kind) {
       closeCtx();
       const u = prompt('이미지 주소(URL)를 붙여넣으세요.\n(비워 두고 확인을 누르면 내 컴퓨터에서 파일을 고를 수 있어요)', '');
       if (u === null) return;
       if (u.trim()) {
         const url = u.trim(), im = new Image();
-        const go = r => openItemModal(null, { mode: 'new', qid, data: url, ratio: r || 1 });
+        const go = r => openItemModal(null, { mode: 'new', qid, data: url, ratio: r || 1, kind });
         im.onload = () => go(im.width / (im.height || 1)); im.onerror = () => go(1); im.src = url;
         return;
       }
@@ -3641,7 +3646,7 @@
           im.onload = () => {
             const M = 480, k = Math.min(1, M / Math.max(im.width, im.height)), c = document.createElement('canvas');
             c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
-            openItemModal(null, { mode: 'new', qid, data: c.toDataURL('image/webp', 0.85), ratio: im.width / im.height });
+            openItemModal(null, { mode: 'new', qid, data: c.toDataURL('image/webp', 0.85), ratio: im.width / im.height, kind });
           };
           im.src = String(rd.result);
         };
@@ -3892,7 +3897,9 @@
           </div></div>`;
         const toolRow = `<div class="cx-sec"><div class="cx-row">
             <button class="cx-b cx-arrow" title="다른 카드와 선 연결" aria-label="다른 카드와 선 연결" onclick="startLink('${id}')"><img class="lk" src="${IC_ARROW}" alt=""></button>
-            <button class="cx-b cx-arrow" title="이미지 붙이기 (얻은 아이템 등)" aria-label="이미지 붙이기" onclick="ctxImage('${id}')"><img src="${IC_ITEMADD}" alt="" style="width:26px;height:26px;object-fit:contain;"></button>
+            <button class="cx-b cx-arrow" title="아이템 붙이기" aria-label="아이템 붙이기" onclick="ctxImage('${id}','item')"><img src="${IC_K_ITEM}" alt="" style="width:26px;height:26px;object-fit:contain;"></button>
+            <button class="cx-b cx-arrow" title="기타 이미지 붙이기" aria-label="기타 이미지 붙이기" onclick="ctxImage('${id}','img')"><img src="${IC_K_OTHER}" alt="" style="width:26px;height:26px;object-fit:contain;"></button>
+            <button class="cx-b cx-arrow" title="인물 붙이기" aria-label="인물 붙이기" onclick="ctxImage('${id}','npc')"><img src="${IC_K_NPC}" alt="" style="width:26px;height:26px;object-fit:contain;"></button>
             <button class="cx-b cx-arrow" title="이름 없는 메모 추가" aria-label="이름 없는 메모 추가" onclick="ctxMemo('')"><span class="cx-blank" style="width:22px;height:22px;"></span></button>
             ${Array.isArray(state.boardTex.members) ? `<button class="cx-b" onclick="boardUnpick('${id}')">이 보드에서 빼기</button>` : ''}
           </div></div>`;
@@ -4655,7 +4662,7 @@
       else if (opt.mode === 'clue') c = mbById('clue', id);
       else c = mbById('store', id);
       if (!c) return;
-      itemEd = { mode: opt.mode, id, dest: opt.dest, pt: opt.pt, data: opt.data, ratio: opt.ratio, qid: opt.qid, pc: c.pc || '', kind: c.kind === 'img' ? 'img' : 'item' };
+      itemEd = { mode: opt.mode, id, dest: opt.dest, pt: opt.pt, data: opt.data, ratio: opt.ratio, qid: opt.qid, pc: c.pc || '', kind: opt.kind === 'npc' || opt.kind === 'img' || opt.kind === 'item' ? opt.kind : (c.kind === 'img' ? 'img' : 'item') };
       document.getElementById('itm-img').src = c.img; document.getElementById('itm-label').value = c.label || ''; document.getElementById('itm-detail').value = c.detail || '';
       const sel = document.getElementById('itm-q'); sel.innerHTML = `<option value="">얻은 퀘스트 (선택)</option>` + state.quests.map(q => `<option value="${q.id}"${c.qid === q.id ? ' selected' : ''}>${escapeHtml(q.title || '')}</option>`).join('');
       sel.style.display = opt.mode === 'new' ? 'none' : '';
