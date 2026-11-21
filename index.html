@@ -207,6 +207,7 @@
     .tl-quest .tl-btn { top: -9px; width: 20px; height: 20px; }
     .tl-quest .tl-btn.del { right: -9px; } .tl-quest .tl-btn.pat { right: 15px; }
     .tl-resize-b { z-index: 4; }
+    .tl-swb { border: 2px solid #cbd5e1; border-radius: 6px; padding: 2px; background: #fff; cursor: pointer; } .tl-swb.on { border-color: #ca8a04; box-shadow: 0 0 0 2px #fde68a; } .tl-swc { display: block; width: 38px; height: 38px; border-radius: 3px; background: var(--pat) 0 0 / 76px 76px; }
     .tl-zone-head { background: transparent; transition: background .15s; }
     .tl-zone-head:hover, .tl-zone-head:focus-within { background: color-mix(in srgb, var(--zc, #6366f1) 18%, transparent); }
     .tl-zone-head .tl-zbtn { opacity: 0; transition: opacity .15s; }
@@ -527,7 +528,8 @@
     .ts-c { flex: none; width: 74px; margin-left: -24px; cursor: pointer; transform-origin: 50% 160%; transform: translateY(var(--y)) rotate(var(--r)); transition: transform .08s linear, filter .18s; filter: drop-shadow(0 4px 6px rgba(0,0,0,.5)); }
     .ts-c:first-child { margin-left: 0; } .ts-c:hover { transform: translateY(calc(var(--y) - 14px)) rotate(var(--r)); z-index: 5; }
     .ts-c.used { filter: grayscale(.7) brightness(.6); } .ts-c.cur { transform: translateY(calc(var(--y) - 12px)) rotate(var(--r)); filter: drop-shadow(0 0 8px #f6d58a); z-index: 4; }
-    #tcg-ov.has-strip .tcg-bar { display: none; } #tcg-strip { height: 168px; } #tcg-ov.has-strip { padding-bottom: 176px; }
+    #tcg-ov.has-strip .tcg-bar, #tcg-ov .tcg-wrap:not(.wide) .tcg-bar { display: none; }
+    .tcg-ctxp { position: fixed; z-index: 9800; display: flex; gap: 8px; padding: 8px 10px; background: rgba(20,16,10,.92); border: 1.5px solid #ca8a04; border-radius: 999px; box-shadow: 0 8px 22px rgba(0,0,0,.6); animation: tmIn .18s both; } .tcg-ctxp .tcg-ib { border: 1.5px solid #ca8a04; background: rgba(40,30,15,.9); border-radius: 999px; padding: 3px 10px; display: inline-flex; align-items: center; cursor: pointer; } .tcg-ctxp .tcg-ib img { height: 30px; width: auto; max-width: 40px; object-fit: contain; } #tcg-strip { height: 168px; } #tcg-ov.has-strip { padding-bottom: 176px; }
     .ts-arr { position: fixed; bottom: 70px; z-index: 5; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid #ca8a04; background: rgba(20,16,10,.8); color: #f6d58a; font-size: 1.4rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0 0 3px; } .ts-arr.l { left: 6px; } .ts-arr.r { right: 6px; }
     .ts-c { transform-origin: 50% 50%; width: 80px; margin-left: -34px; transform: translate(var(--x, 0px), var(--y, 0px)) rotate(var(--r, 0deg)) scale(var(--s, 1)); }
     #tcg-strip .ts-in { padding-top: 120px; } #tcg-strip { height: 250px; } #tcg-ov.has-strip { padding-bottom: 225px; } .ts-arr { bottom: 100px; }
@@ -1512,6 +1514,9 @@
     .ctx-menu .cx-papers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
     .ctx-menu .cx-p { height: 34px; border: 2px solid #cbd5e1; border-radius: 5px; background-size: contain; background-repeat: no-repeat; background-position: center; background-color: #b9b19d; cursor: pointer; }
     .ctx-menu .cx-p.sel { border-color: #ca8a04; }
+    #note-modal .modal-box { width: min(980px, 96vw); max-width: min(980px, 96vw); display: grid; grid-template-columns: minmax(240px, .8fr) minmax(0, 1.4fr); gap: 12px 20px; align-items: start; max-height: 92vh; overflow: auto; }
+    #note-modal .modal-box > .modal-title, #note-modal .modal-box > div:last-child { grid-column: 1 / -1; } #note-modal .modal-box > div:not(.modal-title):not(:last-child) { grid-column: 1; } #note-modal .nm-fold { grid-column: 2; grid-row: 2 / span 4; } #note-modal .nm-fold > summary { pointer-events: none; list-style: none; } #note-modal .nm-fold > summary::-webkit-details-marker { display: none; }
+    @media (max-width: 760px) { #note-modal .modal-box { grid-template-columns: 1fr; } #note-modal .nm-fold, #note-modal .modal-box > div:not(.modal-title):not(:last-child) { grid-column: 1; grid-row: auto; } }
     .nm-fold { border: 1px solid var(--border-subtle); border-radius: 8px; padding: 6px 10px; }
     .nm-fold > summary { cursor: pointer; font-weight: 800; color: var(--text-muted); font-size: .85rem; padding: 4px 0; }
     .nm-fold[open] > summary { margin-bottom: 10px; }
@@ -1795,7 +1800,7 @@
       <div><input type="text" id="nm-title" placeholder="제목" oninput="noteText('title', this.value)" /></div>
       <div><textarea id="nm-desc" rows="3" placeholder="설명" oninput="noteText('description', this.value)"></textarea></div>
       <div><textarea id="nm-out" rows="3" placeholder="결과" oninput="noteText('outcome', this.value)"></textarea></div>
-      <details class="nm-fold"><summary>꾸미기</summary>
+      <details class="nm-fold" open><summary>꾸미기</summary>
       <div><div class="nm-label">텍스처</div><div class="tex-grid" id="nm-tex"></div></div>
       <div><div class="nm-label">종이 모양 (테두리)</div><div class="shape-grid" id="nm-shape"></div></div>
       <div>
@@ -4730,6 +4735,17 @@
       tcgStrip(ov);
     }
     let _tcgAskT = 0;
+    function tcgCtxClose() { const o = document.querySelector('.tcg-ctxp'); if (o) o.remove(); }
+    function tcgCtxOpen(x, y, flipEl) {
+      tcgCtxClose(); const ov = document.getElementById('tcg-ov'); if (!ov || !tcgSpec || tcgPanel) return;
+      const multi = tcgMulti.length > 1, mi = multi && flipEl && flipEl.dataset.mi != null ? Number(flipEl.dataset.mi) : null, sp = multi ? tcgMulti[mi != null ? mi : tcgMulti.length - 1] : tcgSpec, ei = multi ? (mi != null ? mi : tcgMulti.length - 1) : '';
+      const eic = sp.editLabel === '내용 수정' ? `<img src="${IC_FEATHER}" alt="">` : `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#f6d58a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M8 9h7M8 13h5"/></svg>`;
+      const d = document.createElement('div'); d.className = 'tcg-ctxp';
+      d.innerHTML = (multi ? '' : `<button class="tcg-ib" title="꾸미기" aria-label="꾸미기" data-a="deco"><img src="${IC_BRUSH}" alt=""></button>`) + (sp.edit ? `<button class="tcg-ib" title="${sp.editLabel || '수정'}" aria-label="${sp.editLabel || '수정'}" data-a="edit">${eic}</button>` : '');
+      d.onclick = e => { const b = e.target.closest('button'); if (!b) return; e.stopPropagation(); tcgCtxClose(); if (b.dataset.a === 'deco') tcgPanelToggle(); else tcgEdit(multi ? ei : undefined); };
+      ov.appendChild(d); const r = d.getBoundingClientRect(); d.style.left = Math.max(8, Math.min(x - r.width / 2, innerWidth - r.width - 8)) + 'px'; d.style.top = Math.max(8, Math.min(y + 8, innerHeight - r.height - 8)) + 'px';
+      setTimeout(() => document.addEventListener('pointerdown', function f(ev) { if (ev.target.closest('.tcg-ctxp')) return; document.removeEventListener('pointerdown', f, true); tcgCtxClose(); }, true), 0);
+    }
     function tcgAskDeco() {
       const ov = document.getElementById('tcg-ov'); if (!ov || tcgMulti.length > 1 || !tcgSpec || tcgPanel) return; const o = ov.querySelector('.tcg-ask'); if (o) o.remove();
       const a = document.createElement('div'); a.className = 'tcg-ask'; a.innerHTML = '카드를 꾸밀까요?<div><button data-y="1">꾸미기</button><button>취소</button></div>';
@@ -4741,6 +4757,7 @@
       if (window.__tcgAdd && document.getElementById('tcg-ov') && tcgMulti.length) { window.__tcgAdd = 0; sp.fl = false; sp.fresh = 0; tcgMulti.push(sp); tcgSpec = sp; tcgPanel = false; tcgRenderMulti(); return; }
       tcgMulti = []; tcgSpec = sp; tcgPanel = false; tcgFlipped = false; let ov = document.getElementById('tcg-ov');
       if (!ov) { ov = document.createElement('div'); ov.id = 'tcg-ov'; ov.onclick = e => { if (ov._lp) { ov._lp = 0; return; } if (tcgPanel || e.target.closest('.tcg-flip,.tcg-bar,.tcg-r,.tcg-panel,#tcg-strip,.tcg-ask')) return; tcgClose(); };
+        ov.addEventListener('contextmenu', e => { e.preventDefault(); clearTimeout(_tcgAskT); tcgCtxOpen(e.clientX, e.clientY, e.target.closest('.tcg-flip')); });
         ov.addEventListener('pointerdown', e => { if (tcgPanel || tcgMulti.length > 1 || e.target.closest('.tcg-flip,.tcg-bar,.tcg-r,.tcg-panel,#tcg-strip,.tcg-ask')) return; const x = e.clientX, y = e.clientY; clearTimeout(_tcgAskT); _tcgAskT = setTimeout(() => { ov._lp = 1; tcgAskDeco(); }, 600); const mv = ev => { if (Math.hypot(ev.clientX - x, ev.clientY - y) > 10) { clearTimeout(_tcgAskT); } }, up = () => { clearTimeout(_tcgAskT); ov.removeEventListener('pointermove', mv); ov.removeEventListener('pointerup', up); ov.removeEventListener('pointercancel', up); }; ov.addEventListener('pointermove', mv); ov.addEventListener('pointerup', up); ov.addEventListener('pointercancel', up); }); document.body.appendChild(ov); }
       tcgRender(true);
     }
@@ -6960,9 +6977,10 @@
         const menu = document.createElement('div'); menu.id = 'ctx-menu'; menu.className = 'ctx-menu';
         menu.addEventListener('contextmenu', ev => ev.preventDefault());
         const edit = n.kind === 'note' ? `editTimelineNote('${id}')` : `openTlNodeEdit('${id}')`;
-        menu.innerHTML = `<div class="cx-sec"><button class="cx-b" onclick="closeCtx();${edit}">내용 수정</button></div>`
-          + (n.kind !== 'note' && (n.title != null || n.desc != null) ? `<div class="cx-sec"><button class="cx-b" onclick="tlNodeReset('${id}')">퀘스트 원본 내용으로 되돌리기</button></div>` : '')
-          + `<div class="cx-sec"><button class="cx-b red" data-label="타임라인에서 빼기" onclick="armDel(this,()=>{closeCtx();tlRemoveNode('${id}')})">타임라인에서 빼기</button></div>`;
+        const quest = n.kind !== 'note', ib = (src, t, fn) => `<button class="cx-i" title="${t}" aria-label="${t}" onclick="${fn}"><img src="${src}" alt=""></button>`;
+        menu.innerHTML = `<div class="cx-sec"><div class="cx-row cx-ico" style="justify-content:flex-start;gap:8px;">${quest ? ib(IC_BRUSH, '꾸미기', 'tlDecorToggle()') : ''}${ib(IC_FEATHER, '내용 수정', `closeCtx();${edit}`)}${ib(IC_RUNE, n.kind === 'note' ? '말풍선 삭제' : '타임라인에서 빼기', `closeCtx();tlRemoveNode('${id}')`)}</div></div>`
+          + (quest ? `<div class="cx-sec" id="tl-decor" data-id="${escapeHtml(id)}" hidden><div class="cx-t">문양</div><div class="cx-row" style="flex-wrap:wrap;gap:6px;">${Array.from({ length: TL_PAT_N }, (_, k) => `<button class="tl-swb${tlPatOf(id, n) === k ? ' on' : ''}" aria-label="문양 ${k + 1}" onclick="tlSetPat('${id}',${k})"><span class="tl-p${k} tl-swc"></span></button>`).join('')}</div><div class="cx-row" style="margin-top:8px;"><span>안쪽 색</span><input type="color" id="tl-fillin" value="${n.fill || '#f4e6bd'}" oninput="tlFillLive('${id}',this.value)" onchange="persistState()"><button class="cx-b" onclick="tlFillReset('${id}');document.getElementById('tl-fillin').value='#f4e6bd'">원래대로</button></div></div>` : '')
+          + (quest && (n.title != null || n.desc != null) ? `<div class="cx-sec"><button class="cx-b" onclick="tlNodeReset('${id}')">퀘스트 원본 내용으로 되돌리기</button></div>` : '');
         document.body.appendChild(menu);
         const w = menu.offsetWidth, hh = menu.offsetHeight;
         menu.style.left = Math.max(8, Math.min(e.clientX, innerWidth - w - 8)) + 'px'; menu.style.top = Math.max(8, Math.min(e.clientY, innerHeight - hh - 8)) + 'px';
@@ -7136,6 +7154,8 @@
     function tlFillCss(c) { return c ? `background:linear-gradient(color-mix(in srgb, ${c} 70%, #fff), ${c});` : ''; }
     function tlFillLive(id, c) { const n = state.timeline.nodes[id]; if (!n) return; n.fill = c; const el = document.querySelector('.tl-node[data-node-id="' + id + '"] .tl-in'); if (el) el.style.cssText += tlFillCss(c); }
     function tlFillReset(id) { const n = state.timeline.nodes[id]; if (!n) return; delete n.fill; persistState(); renderTimeline(); }
+    function tlSetPat(id, k) { const n = state.timeline.nodes[id]; if (!n) return; n.pat = k; persistState(); renderTimeline(); document.querySelectorAll('#tl-decor .tl-swb').forEach((b, i) => b.classList.toggle('on', i === k)); }
+    function tlDecorToggle() { const d = document.getElementById('tl-decor'), m = document.getElementById('ctx-menu'); if (!d || !m) return; d.hidden = !d.hidden; const r = m.getBoundingClientRect(); if (r.bottom > innerHeight - 8) m.style.top = Math.max(8, innerHeight - r.height - 8) + 'px'; }
     function tlCyclePat(id) { const n = state.timeline.nodes[id]; if (!n) return; n.pat = (tlPatOf(id, n) + 1) % TL_PAT_N; persistState(); renderTimeline(); }
     function tlDeco(n) {
       if (!n || (!n.paper && !n.shape)) return { cls: '', style: '', bg: '' };
@@ -7169,7 +7189,6 @@
         return `
           <div class="tl-node tl-note${dc.cls} ${tlConnectFrom === id ? 'picked' : ''}" data-node-id="${escapeHtml(id)}" style="${style}">
             <div class="tl-resize" title="끌어서 가로 크기 조절"></div><div class="tl-resize tl-resize-b" title="끌어서 세로 길이 조절 (여러 날에 걸친 퀘스트)"></div>
-            <button class="tl-btn del" title="삭제" onclick="tlRemoveNode('${id}')">×</button>
             ${escapeHtml(n.text || '(빈 말풍선)')}
           </div>`;
       }
@@ -7178,9 +7197,6 @@
       return `
         <div class="tl-node tl-quest${dc.cls} tl-p${tlPatOf(id, n)} ${q.status === 'completed' ? 'completed' : ''} ${tlConnectFrom === id ? 'picked' : ''}" data-node-id="${escapeHtml(id)}" style="${style}">
           <div class="tl-resize" title="끌어서 가로 크기 조절"></div><div class="tl-resize tl-resize-b" title="끌어서 세로 길이 조절 (여러 날에 걸친 퀘스트)"></div>
-          <button class="tl-btn del" title="타임라인에서 빼기" onclick="tlRemoveNode('${id}')">×</button>
-          <button class="tl-btn pat" title="문양 바꾸기" aria-label="문양 바꾸기" onclick="tlCyclePat('${id}')">◈</button>
-          <label class="tl-btn col" title="안쪽 색 바꾸기" aria-label="안쪽 색 바꾸기"><input type="color" value="${n.fill || '#f4e6bd'}" oninput="tlFillLive('${id}',this.value)" onchange="persistState()"></label>${n.fill ? `<button class="tl-btn colr" title="안쪽 색 원래대로" aria-label="안쪽 색 원래대로" onclick="tlFillReset('${id}')">↺</button>` : ''}
           <div class="tl-in" style="${tlFillCss(n.fill)}">
             <div class="tl-title">${escapeHtml(n.title != null ? n.title : (q.title || '제목 없음'))}</div>
             <div class="tl-desc">${escapeHtml(n.desc != null ? n.desc : (q.description || ''))}</div>
