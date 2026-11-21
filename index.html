@@ -1831,7 +1831,7 @@
   </div></div>
 
   <div class="modal-backdrop" id="item-modal"><div class="modal-box itm-card">
-    <div class="itm-seg" id="itm-kindrow"><button type="button" data-k="item" onclick="itemKindSet('item')">아이템</button><button type="button" data-k="img" onclick="itemKindSet('img')">이미지</button></div>
+    <div class="itm-seg" id="itm-kindrow"><button type="button" data-k="item" onclick="itemKindSet('item')">아이템</button><button type="button" data-k="img" onclick="itemKindSet('img')">이미지</button><button type="button" data-k="npc" id="itm-knpc" onclick="itemKindSet('npc')">인물</button></div>
     <div class="itm-imgwrap"><img id="itm-img" alt=""></div>
     <input type="text" id="itm-label" class="itm-name" aria-label="이름">
     <div id="itm-own" style="display:flex;flex-direction:column;gap:10px;">
@@ -2027,7 +2027,6 @@
     </div>
   </div>
 
-  <script>/* 같은 GitHub 계정의 다른 사이트와 브라우저 저장소가 섞이지 않게 키에 접두어를 붙임 */(function(){var P='weekday:',g=Storage.prototype.getItem,st=Storage.prototype.setItem,r=Storage.prototype.removeItem;Storage.prototype.getItem=function(k){return g.call(this,P+k)};Storage.prototype.setItem=function(k,v){return st.call(this,P+k,v)};Storage.prototype.removeItem=function(k){return r.call(this,P+k)};})();</script>
   <script>
     (function () {
       function show(msg) {
@@ -2115,7 +2114,7 @@
 
 
     // ===== 서버 연결: google.script.run 이 응답 없으면 같은 주소로 직접 요청(fetch)으로 자동 전환 =====
-    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxjxFvq0tnmU14rf-Gq_KI2QBc5zvjtnPIhmidRggdK71Rwqa8bw-3mrLsIfY5a28Se/exec';
+    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycby-mblLRUngMtFFYv6hH9uJdUtUpttMCU7gyhHNqyi21Gc5NA6pLlPvz1kiMt8BnDpZ/exec';
     function execUrl() { try { return localStorage.getItem('adventure_exec_url') || EXEC_URL_DEFAULT; } catch (e) { return EXEC_URL_DEFAULT; } }
     function diagShow(msg) { try { console.info('[sync]', msg); } catch (e) {} }
     function fetchT(url, opt, ms) {
@@ -3829,6 +3828,14 @@
       const nl = box.querySelector('.cx-nl'); if (nl) nl.style.display = v ? '' : 'none';
     }
     function ctxNpc(npcId) { const qid = ctxId; closeCtx(); addNpcCard(npcId, qid); }
+    function addQuestAt(at) {
+      addQuest(); const q = state.quests[0];
+      if (state.boardStatus === 'completed') state.boardStatus = 'active';
+      if (Array.isArray(state.boardTex.members)) state.boardTex.members.push(q.id);
+      if (at && typeof at.x === 'number') q.board = { x: Math.max(0, Math.round(at.x)), y: Math.max(0, Math.round(at.y)), w: NOTE_W, h: NOTE_H, z: ++boardTopZ };
+      persistState(); renderBoard(); openNoteModal(q.id);
+    }
+    function ctxQuestAdd() { const at = ctxAt; closeCtx(); addQuestAt(at); }
     function ctxMemo(pcId) {
       const qid = ctxKind === 'quest' ? ctxId : null, at = ctxAt;
       closeCtx(); createMemo(pcId, qid, at);
@@ -3880,7 +3887,7 @@
             ${Array.isArray(state.boardTex.members) ? `<button class="cx-b" onclick="boardUnpick('${id}')">이 보드에서 빼기</button>` : ''}
           </div></div>`;
         h = memoPickHtml(id, true) + npcPickHtml(id) + toolRow + iconRow + layerHtml(id);
-      } else { h = memoPickHtml(null); }
+      } else { h = (state.viewMode === 'board' ? `<div class="cx-sec"><button class="cx-b" onclick="ctxQuestAdd()">＋ 퀘스트 추가</button></div>` : '') + memoPickHtml(null); }
       menu.innerHTML = h;
     }
     function ctxJump(id) { const q = state.quests.find(x => x.id === id); if (q) { closeBoardPopup(true); jumpToQuest(id); } }
@@ -4212,7 +4219,8 @@
         const pcs = state.boardTex.pcs || [], cur = state.jStorePc || '';
         const pcMap = {}; pcs.forEach(p => { pcMap[p.id] = p; });
         const btns = jStoreOrder().map(id => id === '-' ? `<button class="j-pc${cur === '-' ? ' on' : ''}" ${jdr('-')} title="소유주 없음 (공용 가방)" onclick="jSet('jStorePc','-')"><img src="${IC_BAG}" alt="공용" style="object-fit:contain;border-radius:0;"></button>` : (pcMap[id] ? `<button class="j-pc${id === cur ? ' on' : ''}" ${jdr(id)} title="${escapeHtml(pcMap[id].name || '')}" onclick="jSet('jStorePc','${id}')"><img src="${escapeHtml(pcMap[id].img || IC_NPC)}" alt=""></button>` : '')).join('');
-        h += `<div class="j-pcs"><button class="j-pc${cur === '' ? ' on' : ''}" onclick="jSet('jStorePc','')"><span style="font-weight:800;">전체</span></button>${btns}</div>`;
+        const fOn = state.jStoreFilterOpen || state.jStoreCat || state.jStoreRar;
+        h += `<div class="j-pcs"><button class="j-pc${cur === '' ? ' on' : ''}" onclick="jSet('jStorePc','')"><span style="font-weight:800;">전체</span></button>${btns}<button class="j-pc${fOn ? ' on' : ''}" onclick="jSet('jStoreFilterOpen',!state.jStoreFilterOpen)" title="종류 · 등급별로 걸러 보기" aria-label="필터"><img src="${IC_BOOKMARK}" alt="" style="object-fit:contain;border-radius:0;"></button></div>${state.jStoreFilterOpen ? jStoreFilters() : ''}`;
       }
       return h;
     }
@@ -4330,6 +4338,17 @@
         if (c.detail === undefined && c.pc === undefined && (i.detail || i.pc)) { c.detail = i.detail || ''; c.pc = i.pc || ''; }
         i.label = c.label || ''; i.detail = c.detail || ''; i.pc = c.pc || ''; i.qid = c.qid || ''; i.img = c.img; i.cat = c.cat || ''; i.rar = c.rar || '';
       });
+      (state.boardTex.pcs || []).forEach(p => {
+        const its = (((p.sheet || {}).detail || {}).items) || [], mine = st.items.filter(x => x.shPc === p.id), used = new Set();
+        its.forEach(it => {
+          if (!it || it.src || !String(it.name || '').trim()) return;
+          let sI = (it.hid && mine.find(x => !used.has(x) && x.shUid === it.hid)) || mine.find(x => !used.has(x) && x.label === String(it.name).trim());
+          if (!it.hid) it.hid = (sI && sI.shUid) || ('h' + Date.now().toString(36) + Math.floor(Math.random() * 1e5).toString(36));
+          if (!sI) { const i = st.items.length; sI = { id: 's_' + Date.now().toString(36) + Math.floor(Math.random() * 1e5).toString(36), src: '', shPc: p.id, img: '', x: 30 + (i % 8) * 190, y: 30 + Math.floor(i / 8) * 240, w: 150, h: 190, z: ++mbTopZ, rot: ((i % 5) - 2) * 1.2, qid: '' }; st.items.push(sI); }
+          used.add(sI); sI.shUid = it.hid; sI.label = String(it.name).trim(); sI.detail = it.note || ''; sI.pc = p.id; sI.cat = it.cat || ''; sI.rar = it.rar || ''; if (it.img) sI.img = it.img;
+        });
+        mine.forEach(x => { if (!used.has(x)) st.items = st.items.filter(y => y !== x); });
+      });
       const have = new Set(st.items.map(i => i.src).filter(Boolean));
       cards.forEach(n => {
         if (n.kind === 'img' || have.has(n.id)) return;
@@ -4361,7 +4380,7 @@
       const base = `left:${c.x}px;top:${c.y}px;width:${c.w}px;height:${c.h}px;z-index:${c.z || 1};`;
       if (kind === 'store') {
         const ct = catOf(c.cat), rr = rarOf(c.rar);
-        return `<div class="mb-card mb-item" data-kind="store" data-id="${c.id}" style="${base}transform:rotate(${c.rot || 0}deg);${rr ? `border-color:${rr[2]};` : ''}"><img src="${escapeHtml(c.img)}" alt="" draggable="false"><div class="mb-il">${escapeHtml(c.label || '')}</div>${rr ? `<div class="mb-rar" style="color:${rr[2]}">${rr[1]}</div>` : ''}${mbOwnHtml(c)}${c.detail ? `<div class="mb-id">${escapeHtml(c.detail)}</div>` : ''}<span class="mb-rs"></span></div>`;
+        return `<div class="mb-card mb-item" data-kind="store" data-id="${c.id}" style="${base}transform:rotate(${c.rot || 0}deg);${rr ? `border-color:${rr[2]};` : ''}"><img src="${escapeHtml(c.img || IC_BAG)}" alt="" draggable="false"><div class="mb-il">${escapeHtml(c.label || '')}</div>${rr ? `<div class="mb-rar" style="color:${rr[2]}">${rr[1]}</div>` : ''}${mbOwnHtml(c)}${c.detail ? `<div class="mb-id">${escapeHtml(c.detail)}</div>` : ''}<span class="mb-rs"></span></div>`;
       }
       if (c.type === 'npc' || c.type === 'img') {
         const n = c.type === 'npc' ? npcLike(c.npcId) : null, src = c.type === 'npc' ? (n && n.image) : c.img, nm = c.label != null && c.label !== '' ? c.label : (c.type === 'npc' ? (n ? (n.name || 'NPC') : '(삭제된 인물)') : '');
@@ -4465,7 +4484,7 @@
       listEl.innerHTML = jHeaderHtml() + `
         <div class="board-tools">${acts}<span style="flex:1"></span>${srchHtml(kind)}
           <button class="btn btn-secondary board-fold" onclick="state.mbToolsOpen=!state.mbToolsOpen;renderMini('${kind}')" title="설정 펼치기/접기" aria-label="설정"><img class="ico-img gear-img" src="${IC_GEAR}" alt=""></button></div>
-        ${state.mbToolsOpen ? `<div class="board-drawer">${zoomBar}${kind === 'store' ? patSel('storeBg', state.boardTex.storeBg || '', 'setStoreBg(this.value)', true) + jStoreFilters() : ''}${kind === 'clue' ? `<label style="display:flex;gap:6px;align-items:center;font-size:.85rem;white-space:nowrap;">배경 <select onchange="mbSetBg(this.value)">${CLUE_BGS.map(x => `<option value="${x[0]}"${(state.boardTex.clueBg || 'p1') === x[0] ? ' selected' : ''}>${x[1]}</option>`).join('')}</select></label>` : ''}</div>` : ''}
+        ${state.mbToolsOpen ? `<div class="board-drawer">${zoomBar}${kind === 'store' ? patSel('storeBg', state.boardTex.storeBg || '', 'setStoreBg(this.value)', true) : ''}${kind === 'clue' ? `<label style="display:flex;gap:6px;align-items:center;font-size:.85rem;white-space:nowrap;">배경 <select onchange="mbSetBg(this.value)">${CLUE_BGS.map(x => `<option value="${x[0]}"${(state.boardTex.clueBg || 'p1') === x[0] ? ' selected' : ''}>${x[1]}</option>`).join('')}</select></label>` : ''}</div>` : ''}
         <div class="mb" id="mb-view" data-kind="${kind}"><div id="mb-sizer" style="width:${W * z}px;height:${H * z}px;"><div class="mb-inner ${mbBg(kind).cls}" id="mb-inner" style="width:${W}px;height:${H}px;transform:scale(${z});${mbBg(kind).st}">
           ${kind === 'store' && state.jStorePc === '-' ? mbFundHtml() : ''}${lanes}<svg class="mb-svg" id="mb-svg" width="${W}" height="${H}"></svg>${mbCards(kind, d).filter(c => kind !== 'store' || ((!state.jStorePc || (state.jStorePc === '-' ? !c.pc : c.pc === state.jStorePc)) && (!state.jStoreCat || c.cat === state.jStoreCat) && (!state.jStoreRar || c.rar === state.jStoreRar))).map(c => mbCardHtml(kind, c)).join('')}
           ${!mbCards(kind, d).length ? `<div class="qn-empty">${kind === 'store' ? '보드판에 붙인 이미지가 있으면 자동으로 들어와요.' : '빈 곳을 우클릭해서 추가 단서·추가 회차를 만들어 보세요.'}</div>` : ''}
@@ -4548,7 +4567,7 @@
       persistState(); renderMini('clue');
     }
     function mbDel(kind, id) {
-      const d = mbData(kind); if (kind === 'store') d.items = d.items.filter(c => c.id !== id); else { d.cards = d.cards.filter(c => c.id !== id); d.conns = d.conns.filter(c => c.a !== id && c.b !== id); }
+      const d = mbData(kind); if (kind === 'store') { const g = d.items.find(c => c.id === id); if (g && g.shPc) { const pp = (state.boardTex.pcs || []).find(x => x.id === g.shPc), a = pp && pp.sheet && pp.sheet.detail && pp.sheet.detail.items; if (a) { const k = a.findIndex(x => x && !x.src && (x.hid === g.shUid || x.name === g.label)); if (k >= 0) a.splice(k, 1); } } d.items = d.items.filter(c => c.id !== id); } else { d.cards = d.cards.filter(c => c.id !== id); d.conns = d.conns.filter(c => c.a !== id && c.b !== id); }
       persistState(); renderMini(kind);
     }
     function mbSetPaper(id, k) { const c = mbById('clue', id); if (!c) return; c.paper = k; persistState(); renderMini('clue'); closeCtx(); }
@@ -4603,10 +4622,10 @@
     let itemEd = null;
     function itemKindSet(k) {
       if (itemEd) itemEd.kind = k;
-      const item = k !== 'img';
+      const item = k === 'item', npc = k === 'npc';
       document.getElementById('itm-own').style.display = item ? 'flex' : 'none';
-      document.getElementById('itm-detail').style.display = item ? '' : 'none';
-      document.getElementById('itm-label').placeholder = item ? '아이템 이름' : '제목';
+      document.getElementById('itm-detail').style.display = item || npc ? '' : 'none'; document.getElementById('itm-detail').placeholder = npc ? '메모 (인물 도감에 같이 저장돼요)' : '상세 정보 (효과, 설명 등)';
+      document.getElementById('itm-label').placeholder = item ? '아이템 이름' : npc ? '인물 이름' : '제목';
       document.querySelectorAll('#itm-kindrow button').forEach(b => b.classList.toggle('on', b.dataset.k === k));
     }
     function itemPcRender() {
@@ -4632,6 +4651,7 @@
       document.getElementById('itm-cat').innerHTML = `<option value="">종류</option>` + ITEM_CATS.map(x => `<option value="${x[0]}"${c.cat === x[0] ? ' selected' : ''}>${x[1]}</option>`).join('');
       document.getElementById('itm-rar').innerHTML = `<option value="">등급</option>` + ITEM_RAR.map(x => `<option value="${x[0]}"${c.rar === x[0] ? ' selected' : ''}>${x[1]}</option>`).join('');
       document.getElementById('itm-kindrow').style.display = opt.mode === 'store' ? 'none' : 'flex';
+      { const nb = document.getElementById('itm-knpc'); if (nb) nb.style.display = opt.mode === 'new' && !opt.dest ? '' : 'none'; }
       itemKindSet(itemEd.kind); itemPcRender();
       const b = document.getElementById('itm-del'); b.textContent = '떼기'; delete b.dataset.armed; b.style.visibility = opt.mode === 'new' ? 'hidden' : 'visible';
       document.getElementById('item-modal').classList.add('open');
@@ -4858,6 +4878,12 @@
     function itemRefresh() { if (state.viewMode === 'board') renderBoard(); else if (state.viewMode === 'journal') renderJournal(); }
     function saveItemModal() {
       const e = itemEd; if (!e) return;
+      if (e.kind === 'npc' && e.mode === 'new' && !e.dest) {
+        const id = 'gnpc_' + Date.now(), name = (document.getElementById('itm-label').value || '').trim() || '새 인물';
+        state.globalNpcs.unshift({ id, name, image: e.data || '', memo: document.getElementById('itm-detail').value || '' });
+        const q = state.quests.find(x => x.id === e.qid); if (q) { q.npcIds = q.npcIds || []; if (!q.npcIds.includes(id)) q.npcIds.push(id); }
+        closeItemModal(); persistState(); addNpcCard(id, e.qid); showToast('인물 도감에도 추가했어요'); return;
+      }
       const kind = e.kind === 'img' ? 'img' : 'item';
       const v = { kind: e.mode === 'store' ? 'item' : kind, label: document.getElementById('itm-label').value, detail: kind === 'img' ? '' : document.getElementById('itm-detail').value, pc: kind === 'img' ? '' : (e.pc || ''), qid: document.getElementById('itm-q').value, cat: kind === 'img' ? '' : document.getElementById('itm-cat').value, rar: kind === 'img' ? '' : document.getElementById('itm-rar').value };
       if (e.mode === 'new' && e.dest === 'clue') { closeItemModal(); mbAddRef({ type: 'img', img: e.data, label: v.label, kind: v.kind, detail: v.detail, pc: v.pc, cat: v.cat, rar: v.rar, w: 120, h: Math.round(Math.max(90, Math.min(200, 110 / (e.ratio || 1))) + 30) }, e.pt); return; }
@@ -4964,7 +4990,7 @@
     function bsIconOf(x) { return x.icon || (x.id === 'main' ? BOOK_IMG : SCROLL_OPEN); }
     function boardIconBar() {
       const bt = bsEnsure();
-      return bt.sets.map(x => `<button class="btn btn-tab bs-ic ${x.id === bt.active ? 'active' : ''}" data-bid="${escapeHtml(x.id)}" title="${escapeHtml(x.name || '보드')}${x.id === bt.active ? ' — 눌러서 진행 중 · 완료 · 전체 선택' : ''}" aria-label="${escapeHtml(x.name || '보드')}" onclick="boardIconClick(this)"><img src="${escapeHtml(bsIconOf(x))}" alt="" draggable="false"></button>`).join('') + `<button class="btn btn-tab bs-ic${state.boardFilterOpen ? ' active' : ''}" onclick="state.boardFilterOpen=!state.boardFilterOpen;renderBoard()" title="폴더 · 태그별로 분류해서 보기" aria-label="폴더 태그 필터"><img src="${IC_BOOKMARK}" alt="" draggable="false"></button><button class="btn btn-tab bs-ic" onclick="openBsModal('new')" title="새 보드판 만들기" aria-label="새 보드판 만들기"><img src="${IC_FEATHER}" alt="" draggable="false"></button>`;
+      return bt.sets.map(x => `<button class="btn btn-tab bs-ic ${x.id === bt.active ? 'active' : ''}" data-bid="${escapeHtml(x.id)}" title="${escapeHtml(x.name || '보드')}${x.id === bt.active ? ' — 눌러서 진행 중 · 완료 · 전체 선택' : ''}" aria-label="${escapeHtml(x.name || '보드')}" onclick="boardIconClick(this)"><img src="${escapeHtml(bsIconOf(x))}" alt="" draggable="false"></button>`).join('') + `<button class="btn btn-tab bs-ic${state.boardFilterOpen ? ' active' : ''}" onclick="state.boardFilterOpen=!state.boardFilterOpen;renderBoard()" title="폴더 · 태그별로 분류해서 보기" aria-label="폴더 태그 필터"><img src="${IC_BOOKMARK}" alt="" draggable="false"></button><button class="btn btn-tab bs-ic" onclick="openBsModal('new')" title="새 보드판 만들기" aria-label="새 보드판 만들기"><img src="${IC_FEATHER}" alt="" draggable="false"></button><button class="btn btn-tab bs-ic" onclick="addQuestAt()" title="퀘스트 추가" aria-label="퀘스트 추가"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>`;
     }
     function closeBsPop() { const p = document.getElementById('bs-pop'); if (p) p.remove(); }
     function boardIconClick(btn) {
