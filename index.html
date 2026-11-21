@@ -3011,7 +3011,7 @@
       document.getElementById('tab-board').classList.toggle('active', state.viewMode === 'board');
       document.querySelector('.container').classList.toggle('wide-full', state.viewMode === 'board');
       document.body.classList.toggle('fl-mode', ['board', 'journal', 'timeline'].includes(state.viewMode) && !state.boardPopup);
-      document.querySelectorAll('.tab-ico, .top-ico, .gear-img').forEach(im => { im.src = ({ scrolls: IC_SCROLLS, open: SCROLL_OPEN, closed: SCROLL_CLOSED, human: IC_HUMAN, bonfire: IC_BONFIRE, timeline: IC_TIMELINE, gear: IC_GEAR, feather: IC_FEATHER, needle: IC_NEEDLE, journal: IC_JOURNAL, map: IC_MAP, search: (() => { try { return (SRCH_SVG.match(/src="([^"]+)"/) || [])[1]; } catch (e) { return ''; } })() })[im.dataset.ico]; });
+      document.querySelectorAll('.tab-ico, .top-ico, .gear-img').forEach(im => { if (!im.dataset.ico) return; const u = ({ scrolls: IC_SCROLLS, open: SCROLL_OPEN, closed: SCROLL_CLOSED, human: IC_HUMAN, bonfire: IC_BONFIRE, timeline: IC_TIMELINE, gear: IC_GEAR, feather: IC_FEATHER, needle: IC_NEEDLE, journal: IC_JOURNAL, map: IC_MAP, search: (() => { try { return (SRCH_SVG.match(/src="([^"]+)"/) || [])[1]; } catch (e) { return ''; } })() })[im.dataset.ico]; if (u) im.src = u; });
       document.getElementById('tab-timeline').classList.toggle('active', state.viewMode === 'timeline');
       document.getElementById('tab-journal').classList.toggle('active', state.viewMode === 'journal');
       topAddBtn.style.display = (state.viewMode === 'journal' || state.viewMode === 'map') ? 'none' : '';
