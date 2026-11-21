@@ -1008,6 +1008,37 @@
     .quest-footer-actions { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid var(--border-subtle); }
 
     /* 설정 모달 */
+
+    .modal-box.lg-box { width: min(1100px, 96vw) !important; height: min(86vh, 900px) !important; max-width: none !important; max-height: none !important; padding: 0 !important; display: flex; flex-direction: column; overflow: hidden; font-family: 'Gowun Batang', 'Nanum Myeongjo', serif; }
+    .lg-top { display: flex; gap: 10px; align-items: center; padding: 10px 14px; border-bottom: 1px solid #d8cdb4; background: #f4ecd8; }
+    .lg-top b { font-size: 16px; white-space: nowrap; color: #3b2a14; }
+    .lg-top input { flex: 1; min-width: 0; padding: 7px 10px; border: 1px solid #c9bb98; border-radius: 8px; background: #fffaf0; font: inherit; font-size: 14px; }
+    .lg-x { border: 0; background: none; font-size: 18px; cursor: pointer; color: #5a4a2c; }
+    .lg-body { flex: 1; display: flex; min-height: 0; overflow: hidden; }
+    .lg-list { width: 250px; flex: none; overflow-y: auto; border-right: 1px solid #d8cdb4; background: #f8f1e0; }
+    .lg-list button { display: block; width: 100%; text-align: left; padding: 9px 12px; border: 0; border-bottom: 1px solid #e6dcc3; background: none; cursor: pointer; font: inherit; color: #3b2a14; }
+    .lg-list button:hover { background: #efe4c9; } .lg-list button.on { background: #e4d3a8; }
+    .lg-list .lg-l1 { font-weight: 700; font-size: 14px; } .lg-list .lg-l2 { font-size: 12px; opacity: .75; margin-top: 2px; line-height: 1.35; } .lg-list .lg-l3 { font-size: 11px; opacity: .55; margin-top: 2px; }
+    .lg-main { flex: 1; overflow-y: auto; padding: 14px 18px 40px; background: #fffaf0; color: #2d2410; scroll-behavior: auto; }
+    .lg-h { font-size: 18px; font-weight: 700; margin: 0 0 12px; }
+    .lg-m { display: flex; gap: 10px; padding: 2px 0; line-height: 1.55; font-size: 14px; }
+    .lg-m.first { margin-top: 10px; }
+    .lg-by { flex: none; width: 118px; text-align: right; font-weight: 700; font-size: 13px; padding-top: 1px; overflow-wrap: anywhere; }
+    .lg-t { flex: 1; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .lg-m.gm .lg-t { background: #f3e9cf; border-radius: 6px; padding: 2px 8px; }
+    .lg-m.roll .lg-t { color: #7a4a12; } .lg-m.desc { justify-content: center; opacity: .7; font-size: 12.5px; }
+    .lg-m.desc img { max-width: 260px; max-height: 160px; border-radius: 6px; }
+    .lg-m.flash .lg-t { animation: lgf 1.8s ease-out; } @keyframes lgf { 0%, 40% { background: #ffe27a; } 100% { background: transparent; } }
+    .lg-m a { color: #2a5fa8; } .lg-main mark { background: #ffe27a; color: inherit; padding: 0 1px; border-radius: 2px; }
+    .lg-r { display: block; width: 100%; text-align: left; padding: 8px 10px; margin-bottom: 6px; border: 1px solid #e0d4b6; border-radius: 8px; background: #fffdf6; cursor: pointer; font: inherit; font-size: 13.5px; color: #2d2410; }
+    .lg-r:hover { background: #f6ecd2; } .lg-r small { display: block; opacity: .6; font-size: 11.5px; margin-bottom: 2px; }
+    .lg-empty { opacity: .6; padding: 30px 0; text-align: center; }
+    @media (max-width: 700px) {
+      .modal-box.lg-box { width: 100vw !important; height: 94vh !important; border-radius: 10px; }
+      .lg-body { flex-direction: column; } .lg-list { width: 100%; height: 96px; display: flex; overflow-x: auto; overflow-y: hidden; border-right: 0; border-bottom: 1px solid #d8cdb4; }
+      .lg-list button { width: 150px; flex: none; border-bottom: 0; border-right: 1px solid #e6dcc3; } .lg-list .lg-l2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      .lg-m { flex-direction: column; gap: 0; } .lg-by { width: auto; text-align: left; font-size: 12px; }
+    }
     .modal-backdrop {
       position: fixed; inset: 0; background: rgba(0,0,0,0.5);
       display: none; align-items: center; justify-content: center; padding: 16px; z-index: 100;
@@ -1777,6 +1808,7 @@
           <img class="ico-img tab-ico" src="" data-ico="map" alt="">
         </button>
         <button class="btn btn-tab cal-chip" id="cal-chip" onclick="calOpen()" title="세션 일정 (구글 캘린더) — 눌러서 월 달력 펼치기" aria-label="세션 일정"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span id="cal-chip-t">일정</span></button>
+        <button class="btn btn-tab" id="lg-chip" onclick="lgOpen()" style="display:none" title="세션 로그 (회차별 열람 · 검색)" aria-label="세션 로그"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M9 8h6M9 12h6"/></svg><span style="margin-left:4px;font-size:12px;font-weight:700;">로그</span></button>
       </div>
 
       <div class="action-group">
@@ -1921,6 +1953,10 @@
       <button class="btn btn-primary" onclick="calAdd()">캘린더에 일정 등록</button>
     </div>
     <div id="cal-list"></div>
+  </div></div>
+  <div class="modal-backdrop" id="lg-modal" onclick="if(event.target===this)lgClose()"><div class="modal-box lg-box">
+    <div class="lg-top"><b>세션 로그</b><input id="lg-q" type="search" placeholder="전체 회차 검색 (대사 · 판정 · 이름)" oninput="lgSearchDeb()" autocomplete="off"><button class="lg-x" onclick="lgClose()" aria-label="닫기">✕</button></div>
+    <div class="lg-body"><div class="lg-list" id="lg-list"></div><div class="lg-main" id="lg-main"></div></div>
   </div></div>
   <div class="modal-backdrop" id="pc-cfg-modal"><div class="modal-box pc-cfgm" id="pcc-box"></div></div>
   <div class="modal-backdrop" id="quest-view"><div class="modal-box qv-card" id="qv-box"></div></div>
@@ -2184,7 +2220,7 @@
 
 
     // ===== 서버 연결: google.script.run 이 응답 없으면 같은 주소로 직접 요청(fetch)으로 자동 전환 =====
-    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxjxFvq0tnmU14rf-Gq_KI2QBc5zvjtnPIhmidRggdK71Rwqa8bw-3mrLsIfY5a28Se/exec';
+    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbzLAMP4n1Gx6CTlABSjsUMx_NyptY0NteAweThvwJBzv02KZkSlSR4i9v0VDokOV2yF/exec';
     function execUrl() { try { return localStorage.getItem('adventure_exec_url') || EXEC_URL_DEFAULT; } catch (e) { return EXEC_URL_DEFAULT; } }
     function diagShow(msg) { try { console.info('[sync]', msg); } catch (e) {} }
     function fetchT(url, opt, ms) {
@@ -2292,6 +2328,48 @@
     // ---- 구글 캘린더 연동 (앱스크립트 서버의 calList / __cal 사용) ----
     const CAL = { m: new Date(new Date().getFullYear(), new Date().getMonth(), 1), ev: [], sel: null };
     const calP2 = n => String(n).padStart(2, '0'), calYmd = d => d.getFullYear() + '-' + calP2(d.getMonth() + 1) + '-' + calP2(d.getDate());
+    // ---- 세션 로그 (logs/ 폴더가 있을 때만 버튼 표시) ----
+    const LG = { idx: null, data: {}, cur: 0, tm: null };
+    function lgProbe() { fetch('logs/index.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(j => { if (j && j.length) { LG.idx = j; const b = document.getElementById('lg-chip'); if (b) b.style.display = ''; } }).catch(() => {}); }
+    window.addEventListener('load', lgProbe);
+    function lgOpen() { document.getElementById('lg-modal').classList.add('open'); lgList(); if (!LG.cur) lgShow(LG.idx[LG.idx.length - 1].id); else if (!document.getElementById('lg-q').value) lgShow(LG.cur); }
+    function lgClose() { document.getElementById('lg-modal').classList.remove('open'); }
+    function lgList() { document.getElementById('lg-list').innerHTML = LG.idx.map(x => `<button data-id="${x.id}" class="${x.id === LG.cur ? 'on' : ''}" onclick="document.getElementById('lg-q').value='';lgShow(${x.id})"><div class="lg-l1">${escapeHtml(x.label)}</div><div class="lg-l2">${escapeHtml(x.title || '')}</div><div class="lg-l3">${escapeHtml(x.date || '')} · ${x.n}줄</div></button>`).join(''); }
+    function lgLoad(id) { if (LG.data[id]) return Promise.resolve(LG.data[id]); const x = LG.idx.find(a => a.id === id); return fetch(x.file).then(r => r.json()).then(j => (LG.data[id] = j.msgs)); }
+    function lgColor(n) { let h = 0; for (const c of String(n)) h = (h * 31 + c.charCodeAt(0)) % 360; return `hsl(${h},45%,32%)`; }
+    function lgLink(t, q) { let e = escapeHtml(t); if (q) { const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/&/g, '&amp;'), 'gi'); e = e.replace(re, m => '<mark>' + m + '</mark>'); } return e.replace(/(https?:\/\/[^\s<"]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>'); }
+    function lgShow(id, hit) {
+      LG.cur = id; lgList(); const main = document.getElementById('lg-main'), x = LG.idx.find(a => a.id === id); main.innerHTML = '<div class="lg-empty">불러오는 중…</div>';
+      lgLoad(id).then(ms => {
+        let prev = null, h = `<div class="lg-h">${escapeHtml(x.label)} — ${escapeHtml(x.title || '')} <small style="font-weight:400;opacity:.6">${escapeHtml(x.date || '')}</small></div>`;
+        ms.forEach((m, i) => {
+          if (m[0] === 'd') { h += `<div class="lg-m desc" data-i="${i}">${m[3] ? `<img loading="lazy" src="${escapeHtml(m[3])}" alt="">` : ''}${m[2] ? `<span>${escapeHtml(m[2])}</span>` : ''}</div>`; prev = null; return; }
+          const first = m[1] !== prev; prev = m[1];
+          if (m[0] === 'r') h += `<div class="lg-m roll${first ? ' first' : ''}" data-i="${i}"><div class="lg-by" style="color:${lgColor(m[1])}">${first ? escapeHtml(m[1]) : ''}</div><div class="lg-t">🎲 ${escapeHtml(m[2])} → <b>${escapeHtml(m[3])}</b></div></div>`;
+          else h += `<div class="lg-m${m[3] ? ' gm' : ''}${first ? ' first' : ''}" data-i="${i}"><div class="lg-by" style="color:${lgColor(m[1])}">${first ? escapeHtml(m[1]) : ''}</div><div class="lg-t">${lgLink(m[2], '')}</div></div>`;
+        });
+        main.innerHTML = h;
+        if (hit != null) { const el = main.querySelector(`[data-i="${hit}"]`); if (el) { el.scrollIntoView({ block: 'center' }); el.classList.add('flash'); } } else main.scrollTop = 0;
+      }).catch(() => { main.innerHTML = '<div class="lg-empty">로그 파일을 불러오지 못했어요. (logs 폴더 확인)</div>'; });
+    }
+    function lgSearchDeb() { clearTimeout(LG.tm); LG.tm = setTimeout(lgSearch, 250); }
+    function lgSearch() {
+      const q = document.getElementById('lg-q').value.trim(), main = document.getElementById('lg-main');
+      if (!q) { lgShow(LG.cur || LG.idx[LG.idx.length - 1].id); return; }
+      main.innerHTML = '<div class="lg-empty">검색 중…</div>';
+      Promise.all(LG.idx.map(x => lgLoad(x.id))).then(() => {
+        if (document.getElementById('lg-q').value.trim() !== q) return;
+        const ql = q.toLowerCase(); let total = 0, h = '', shown = 0;
+        LG.idx.forEach(x => {
+          const hits = []; LG.data[x.id].forEach((m, i) => { if ((m[2] + ' ' + (m[0] === 'r' ? m[3] : '') + ' ' + m[1]).toLowerCase().includes(ql)) hits.push(i); });
+          total += hits.length; if (!hits.length) return;
+          h += `<div class="lg-h" style="font-size:15px;margin-top:14px">${escapeHtml(x.label)} · ${escapeHtml(x.title || '')} <small style="opacity:.6">(${hits.length}건)</small></div>`;
+          hits.slice(0, 60).forEach(i => { if (shown >= 600) return; shown++; const m = LG.data[x.id][i], t = (m[0] === 'r' ? m[2] + ' → ' + m[3] : m[2]).replace(/\n+/g, ' '), p = Math.max(0, t.toLowerCase().indexOf(ql) - 40); h += `<button class="lg-r" onclick="lgShow(${x.id},${i})"><small>${escapeHtml(m[1] || '')}</small>${p ? '…' : ''}${lgLink(t.slice(p, p + 140), q)}</button>`; });
+          if (hits.length > 60) h += `<div class="lg-empty" style="padding:4px">… 그 외 ${hits.length - 60}건 (검색어를 더 좁혀보세요)</div>`;
+        });
+        main.innerHTML = `<div class="lg-h">“${escapeHtml(q)}” 검색 결과 ${total}건</div>` + (h || '<div class="lg-empty">결과가 없어요.</div>'); main.scrollTop = 0;
+      }).catch(() => { main.innerHTML = '<div class="lg-empty">로그 파일을 불러오지 못했어요.</div>'; });
+    }
     function calOpen() { document.getElementById('cal-modal').classList.add('open'); if (!document.getElementById('cal-d').value) document.getElementById('cal-d').value = calYmd(new Date()); calLoad(); }
     function calClose() { document.getElementById('cal-modal').classList.remove('open'); calNext(); }
     function calMonth(n) { CAL.m = new Date(CAL.m.getFullYear(), CAL.m.getMonth() + n, 1); calLoad(); }
@@ -2691,6 +2769,34 @@
       if (k === 'z' || k === 'y') { e.preventDefault(); if (state.viewMode === 'map') mapUndo(k === 'y' || e.shiftKey); else gUndoAction(k === 'y' || e.shiftKey); }
       else if (k === 'k') { e.preventDefault(); gsOpen(); }
     });
+    // ---- 큰 이미지는 드라이브에 올리고 데이터에는 주소만 저장 (저널 데이터가 커지는 것 방지) ----
+    const IMG = { off: false, busy: false, map: (() => { try { return JSON.parse(localStorage.getItem('adv_img_map') || '{}'); } catch (e) { return {}; } })() };
+    const IMG_MIN = 40000; // 이 글자 수보다 큰 base64 이미지만 옮김
+    function imgHash(s) { let a = 2166136261, b = 5381; for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); a = Math.imul(a ^ c, 16777619); b = (b * 33 + c) | 0; } return (a >>> 0).toString(36) + (b >>> 0).toString(36) + s.length.toString(36); }
+    function imgBig() {
+      const out = [], seen = new Set();
+      const walk = o => { if (!o || typeof o !== 'object' || seen.has(o)) return; seen.add(o); for (const k in o) { const v = o[k]; if (typeof v === 'string') { if (v.length > IMG_MIN && v.startsWith('data:image/')) out.push([o, k]); } else if (v && typeof v === 'object') walk(v); } };
+      [state.folders, state.quests, state.globalNpcs, state.timeline, state.boardTex].forEach(walk);
+      return out;
+    }
+    async function imgExt() {
+      if (IMG.busy || IMG.off) return; IMG.busy = true;
+      try {
+        const items = imgBig(), seenH = {}; let up = 0;
+        for (const it of items) { const v = it[0][it[1]], h = imgHash(v); it.h = h; if (!seenH[h]) seenH[h] = v; }
+        for (const h in seenH) {
+          if (IMG.map[h]) continue;
+          const m = /^data:(image\/[a-z0-9.+-]+);base64,([\s\S]*)$/i.exec(seenH[h]); if (!m) { IMG.off = true; break; }
+          const ext = (m[1].split('/')[1] || 'png').replace('jpeg', 'jpg').replace(/[^a-z0-9]/gi, '');
+          let res = null;
+          try { res = await fetchT(execUrl(), { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ __img: 1, data: m[2], name: 'img_' + h + '.' + ext, type: m[1] }) }, 90000); } catch (e) { res = null; }
+          if (res && res.status === 'OK' && res.id) { IMG.map[h] = 'https://lh3.googleusercontent.com/d/' + res.id; up++; try { localStorage.setItem('adv_img_map', JSON.stringify(IMG.map)); } catch (e) {} }
+          else { IMG.off = true; diagShow('이미지 업로드 미지원/실패 — 서버 스크립트에 업로드 기능을 추가해야 해요'); break; }
+        }
+        let n = 0; items.forEach(it => { if (IMG.map[it.h]) { it[0][it[1]] = IMG.map[it.h]; n++; } });
+        if (n) { try { showToast('큰 이미지 ' + n + '개를 드라이브로 옮겼어요'); } catch (e) {} if (typeof renderAll === 'function') try { renderAll(); } catch (e) {} }
+      } finally { IMG.busy = false; }
+    }
     function persistState(forceOverwrite = false) {
       gSnapshot();
       tlSnapshot();
@@ -2700,6 +2806,7 @@
       clearTimeout(saveTimer);
       saveTimer = setTimeout(() => {
         if (saveInFlight && Date.now() - saveInFlight < 45000) { saveAgain = true; return; }
+        if (!IMG.off && !IMG.busy && imgBig().length) { imgExt().then(() => persistState(forceOverwrite), () => persistState(forceOverwrite)); return; }
         saveInFlight = Date.now();
         const done = () => { saveInFlight = 0; if (saveAgain) { saveAgain = false; persistState(); } };
         srvSave({
