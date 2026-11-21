@@ -3907,6 +3907,14 @@
         h = `<div class="cx-sec"><div class="cx-t">화살표</div><div class="cx-row">${ab('none', '선만')}${ab('one', '한쪽 →')}${ab('both', '양쪽 ↔')}</div></div>
           <div class="cx-sec"><div class="cx-row"><span>색</span><input type="color" value="${c.color || '#b3262a'}" oninput="connSet('${id}','color',this.value)"><span>굵기</span><input type="range" min="2" max="14" value="${c.w || 5}" oninput="connSet('${id}','w',Number(this.value))"></div></div>
           <div class="cx-sec"><button class="cx-b red" onclick="closeCtx();connDel('${id}')">선 지우기</button></div>` + layerHtml(id);
+      } else if (ctxKind === 'qtile') {
+        const q = state.quests.find(x => x.id === id); if (!q) { closeCtx(); return; }
+        const done = q.status === 'completed';
+        h = `<div class="cx-sec"><div class="cx-row cx-ico" style="justify-content:flex-start;gap:8px;">
+            <button class="cx-i" title="퀘스트 상세 수정" aria-label="퀘스트 상세 수정" onclick="closeCtx();openQuestDetail('${id}')"><img src="${IC_FEATHER}" alt=""></button>
+            <button class="cx-i" title="카드 꾸미기" aria-label="카드 꾸미기" onclick="closeCtx();openNoteModal('${id}')"><img src="${IC_BRUSH}" alt=""></button>
+            ${done ? `<button class="cx-i" title="진행 중" aria-label="진행 중" onclick="ctxStatus('${id}','active')"><img src="${SCROLL_OPEN}" alt=""></button>` : `<button class="cx-i" title="완료" aria-label="완료" onclick="ctxStatus('${id}','completed')"><img src="${SCROLL_CLOSED}" alt=""></button>`}
+          </div></div>`;
       } else if (ctxKind === 'quest') {
         const q = state.quests.find(x => x.id === id); if (!q) { closeCtx(); return; }
         const iconRow = `<div class="cx-sec"><div class="cx-row cx-ico">
@@ -5420,6 +5428,7 @@
       document.getElementById('note-modal').classList.remove('open');
       noteEditId = null;
       persistState();
+      try { if (state.viewMode === 'quests') renderQuests(); } catch (e) {}
       renderAll();
     }
 
@@ -6476,6 +6485,11 @@
       }, () => showToast('이미지를 불러오지 못했어요.'));
     }
     function qtileMenu(e, id) {
+      e.preventDefault(); e.stopPropagation(); qtMenuClose();
+      if (!state.quests.find(x => x.id === id)) return;
+      showCtx('qtile', id, e.clientX, e.clientY);
+    }
+    function qtileMenuOld(e, id) {
       e.preventDefault(); e.stopPropagation(); qtMenuClose(); paperDimsKick();
       const q = state.quests.find(x => x.id === id); if (!q) return;
       const cur = qPaperOf(q).key, sw = Math.max(0.6, Math.min(1.9, Number(q.tw) || Number(q.tscale) || 1)), sh_ = Math.max(0.6, Math.min(1.9, Number(q.th) || Number(q.tscale) || 1));
