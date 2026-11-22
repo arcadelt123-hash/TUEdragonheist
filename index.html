@@ -1968,6 +1968,55 @@
       text-align: center !important;
       margin-top: 2px !important;
     }
+
+    /* 기본 NPC 카드: 토큰 배경 및 텍스트 배경 완전 투명화 */
+    :is(.codex-grid.fx .pc-slot[data-dnd="npc"], .fan-row[data-r="npc"] .fan-c) .pc-card.pcl-classic:not([style*="--pcbg"]):not([style*="--pcb"]):not([style*="--pct"]) {
+      background: transparent !important;
+      background-image: none !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      outline: 0 !important;
+      padding: 6px 4px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 6px !important;
+      overflow: visible !important;
+    }
+    :is(.codex-grid.fx .pc-slot[data-dnd="npc"], .fan-row[data-r="npc"] .fan-c) .pc-card.pcl-classic:not([style*="--pcbg"]):not([style*="--pcb"]):not([style*="--pct"]) .pc-img {
+      width: 100% !important;
+      max-width: 120px !important;
+      aspect-ratio: 1 / 1 !important;
+      height: auto !important;
+      border-radius: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+      background-image: none !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+    }
+    :is(.codex-grid.fx .pc-slot[data-dnd="npc"], .fan-row[data-r="npc"] .fan-c) .pc-card.pcl-classic:not([style*="--pcbg"]):not([style*="--pcb"]):not([style*="--pct"]) .pc-img img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      border-radius: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      filter: none !important;
+    }
+    :is(.codex-grid.fx .pc-slot[data-dnd="npc"], .fan-row[data-r="npc"] .fan-c) .pc-card.pcl-classic:not([style*="--pcbg"]):not([style*="--pcb"]):not([style*="--pct"]) :is(.pc-name, .pc-sub, .pc-ex) {
+      background: transparent !important;
+      background-color: transparent !important;
+      background-image: none !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      text-shadow: none !important;
+      color: var(--text-main, #1e293b) !important;
+      text-align: center !important;
+      padding: 0 2px !important;
+      margin: 0 !important;
+    }
 </style>
 <link rel="preconnect" href="https://cdn.tailwindcss.com">
 <script>/* 캐릭터 시트가 쓸 라이브러리를 한가할 때 미리 받아 둠 */(function(){function pf(){['https://cdn.tailwindcss.com'].forEach(function(u){var l=document.createElement('link');l.rel='prefetch';l.as='script';l.href=u;document.head.appendChild(l);});}if('requestIdleCallback' in window)window.addEventListener('load',function(){requestIdleCallback(pf,{timeout:4000});});else window.addEventListener('load',function(){setTimeout(pf,2500);});})();</script>
