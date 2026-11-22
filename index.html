@@ -1838,6 +1838,12 @@
       .pcc-cols:has(> .pcc-c1b) > .pcc-c3 { grid-column: 4; grid-row: 1 / span 2; }
       .pcc-cols:has(> .pcc-c1b) > .pcc-c4 { grid-column: 2 / span 2; grid-row: 2; padding-left: 0; border-left: 0; border-top: 1px dashed var(--border-subtle); padding-top: 8px; }
     }
+    .pcc-cols > .pcc-c > .pcc-h { cursor: pointer; user-select: none; } .pcc-cols > .pcc-c > .pcc-h::after { content: ' ▾'; opacity: .55; font-size: .8em; } .pcc-cols > .pcc-c.pcc-fold > .pcc-h::after { content: ' ▸'; }
+    .pcc-cols > .pcc-c.pcc-fold > :not(.pcc-h) { display: none !important; }
+    @media (min-width: 1100px) {
+      .pcc-cols.pcc-wide:has(> .pcc-c1b) { grid-template-columns: 210px 230px 190px minmax(0, 1fr) minmax(0, 1fr); }
+      .pcc-cols.pcc-wide:has(> .pcc-c1b) > .pcc-c4 { grid-column: 5; grid-row: 1 / span 2; padding-left: 12px; border-left: 1px dashed var(--border-subtle); border-top: 0; padding-top: 0; }
+    }
     .pcc-c1b { width: 230px; flex: none; } .pcc-c2 { width: 190px; flex: none; } .pcc-c3 { flex: 1 1 200px; } .pcc-c4 { flex: 1.4 1 260px; }
     .pcc-h { font-size: .85rem; } .pcc-none { font-size: .76rem; color: var(--text-muted); }
     .pcc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 6px; max-height: 520px; overflow-y: auto; padding: 2px; align-content: start; }
@@ -6940,6 +6946,11 @@
       const up = () => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', up); if (el._p) { const [x, y] = el._p; pcTbSave(pcTbList().map(b => b.id === id ? Object.assign({}, b, { x: +x.toFixed(1), y: +y.toFixed(1) }) : b)); } };
       document.addEventListener('pointermove', mv); document.addEventListener('pointerup', up);
     });
+    function pccFoldGet() { try { return JSON.parse(localStorage.getItem('adv_pccfold') || '[]'); } catch (e) { return []; } }
+    function pccWide() { const c = document.querySelector('.pcc-cols'); if (!c) return; c.classList.remove('pcc-wide'); const w = c.parentElement ? c.parentElement.clientWidth : 0; c.classList.toggle('pcc-wide', w >= 1380); }
+    window.addEventListener('resize', pccWide);
+    function pccFoldApply() { const F = pccFoldGet(); document.querySelectorAll('.pcc-cols > .pcc-c').forEach(c => { const h = c.querySelector(':scope > .pcc-h'); if (h) c.classList.toggle('pcc-fold', F.includes(h.textContent.trim())); }); }
+    document.addEventListener('click', e => { const h = e.target.closest && e.target.closest('.pcc-cols > .pcc-c > .pcc-h'); if (!h) return; const k = h.textContent.trim(), F = pccFoldGet(), i = F.indexOf(k); if (i >= 0) F.splice(i, 1); else F.push(k); try { localStorage.setItem('adv_pccfold', JSON.stringify(F)); } catch (e2) {} pccFoldApply(); });
     function pcCfgSet(k, v, full) { const i = pcIdx(pccId); if (i < 0) return; pcSet(i, k, v); if (full) pcCfgRender(); else pcCfgPrev(); }
     function pcCfgRender() {
       if (pccVirt && pccId === 'tcgx') { tcgSave(); tcgRender(false); return; }
@@ -6968,6 +6979,7 @@
             <div class="pcc-colors"><label>테두리 <input type="color" value="${p.cBorder || '#b8893a'}" oninput="pcCfgSet('cBorder',this.value)"></label><label>글자 <input type="color" value="${p.cText || '#3b2410'}" oninput="pcCfgSet('cText',this.value)"></label><label>배경 <input type="color" value="${p.cBg || '#fbf1d9'}" oninput="pcCfgSet('cBg',this.value)"></label><button class="btn btn-secondary" style="padding:2px 8px;font-size:.72rem;" onclick="['cBorder','cText','cBg'].forEach(k=>pcCfgSet(k,'',false));pcCfgRender()">색 초기화</button></div>
           </div>
           <div class="pcc-c pcc-c1b">
+            <b class="pcc-h">글씨 · 텍스트 박스 · 메모</b>
             <div class="pcc-colors"><label>글씨체 <select onchange="pcCfgSet('cFont',this.value,true)" style="font-size:.78rem"><option value="">기본</option>${MEMO_FONTS.map(f => `<option value="${f.k}"${p.cFont === f.k ? ' selected' : ''}>${f.n}</option>`).join('')}</select></label><label>글씨 크기 <input type="range" min="60" max="220" step="5" value="${Number(p.cTs) || 100}" oninput="pcCfgSet('cTs',Number(this.value));this.nextElementSibling.textContent=this.value+'%'"><span style="font-size:.72rem;min-width:34px">${Number(p.cTs) || 100}%</span></label><button class="btn btn-secondary" style="padding:2px 8px;font-size:.72rem;" onclick="pcCfgSet('cFont','');pcCfgSet('cTs','',true)">글씨 초기화</button></div>
             ${pcTbHtml()}
             ${memo}${tokBox}</div>
@@ -6975,7 +6987,7 @@
           <div class="pcc-c pcc-c3"><b class="pcc-h">틀</b>${frameGrid}</div>
           <div class="pcc-c pcc-c4"><b class="pcc-h">배경</b>${bgGrid}</div>
         </div>`;
-      pcCfgPrev();
+      pcCfgPrev(); pccFoldApply(); pccWide();
     }
     const PC_FRAMES = [{"k": "b_arab", "n": "아라베스크", "r": 0.7, "x": 15.2, "y": 4.3, "w": 69.5, "h": 91.3}, {"k": "b_frame", "n": "금박 액자", "r": 0.7, "x": 17.6, "y": 12.2, "w": 64.8, "h": 75.6}, {"k": "frame1_floral", "n": "꽃무늬 아치", "r": 0.6091, "x": 3.9, "y": 2.4, "w": 92.2, "h": 95.3}, {"k": "frame2_lattice", "n": "격자 네이비", "r": 0.6772, "x": 14.4, "y": 9.9, "w": 71.1, "h": 79.8}, {"k": "frame3_cream", "n": "청록 패턴", "r": 0.7034, "x": 12.7, "y": 6.7, "w": 74.7, "h": 86.6}, {"k": "frame5_navy", "n": "네이비 문양", "r": 0.701, "x": 12.0, "y": 7.3, "w": 75.6, "h": 87.2}, {"k": "frame6_teal_arch", "n": "청록 아치", "r": 0.6667, "x": 17.0, "y": 29.1, "w": 66.0, "h": 58.4, "bg": 1}, {"k": "frame7_floral_arch", "n": "꽃 아치", "r": 0.7152, "x": 11.9, "y": 12.7, "w": 84.7, "h": 77.0, "bg": 1}, {"k": "frame8_lantern", "n": "랜턴", "r": 0.5632, "x": 8.1, "y": 8.8, "w": 83.9, "h": 83.1, "bg": 1}, {"k": "frame9_blue_mandala", "n": "블루 만다라", "r": 0.7144, "x": 19.3, "y": 0, "w": 61.5, "h": 74}, {"k": "frame10_swirl", "n": "물감 소용돌이", "r": 0.7, "x": 14, "y": 11, "w": 72, "h": 78}, {"k": "n_star", "n": "별과 달 (남색)", "r": 0.6667, "x": 21.4, "y": 22.3, "w": 55.8, "h": 57.1, "flat": 1}, {"k": "n_herald", "n": "문장 양피지", "r": 0.6656, "x": 15.9, "y": 12.0, "w": 68.4, "h": 75.7, "flat": 1}, {"k": "n_floral", "n": "분홍 꽃 틀", "r": 1.0, "x": 14.4, "y": 12.8, "w": 70.0, "h": 71.1, "flat": 1}, {"k": "n_knot", "n": "붉은 매듭 틀", "r": 1.0, "x": 16.8, "y": 16.8, "w": 66.8, "h": 67.0, "flat": 1}, {"k": "n_band", "n": "붉은 청색 덩굴", "r": 1.75, "x": 14.5, "y": 23.4, "w": 70.2, "h": 51.7, "bg": 1, "flat": 1}, {"k": "n_flourish", "n": "노란 화환", "r": 1.0, "x": 20, "y": 15, "w": 60, "h": 70, "flat": 1}, {"k": "n_botanic", "n": "새와 꽃 액자", "r": 0.6322, "x": 13.7, "y": 7.9, "w": 73.1, "h": 72.3, "bg": 1, "flat": 1}, {"k": "n_nouveau", "n": "주황 아르누보", "r": 1.0, "x": 8.5, "y": 9.5, "w": 79, "h": 82, "flat": 1}];
     const FR_OLD = {"n_star": [25.8, 28.2, 48.1, 44.9], "n_herald": [15.0, 22.8, 70.1, 56.0], "n_floral": [21.9, 31.4, 55.6, 34.2], "n_knot": [27.7, 22.6, 53.3, 58.4], "n_band": [14.5, 23.4, 70.2, 51.7], "n_flourish": [25.6, 20.6, 48.7, 58.8], "n_nouveau": [17.0, 13.5, 68.0, 72.8]};
