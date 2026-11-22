@@ -3409,7 +3409,7 @@
 
     // ---- JSON 백업 / 복원 ----
     function exportBackup() {
-      const blob = new Blob([JSON.stringify({ folders: state.folders, quests: state.quests, globalNpcs: state.globalNpcs, timeline: state.timeline }, null, 1)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify({ folders: state.folders, quests: state.quests, globalNpcs: state.globalNpcs, timeline: state.timeline, pcs: ((state.boardTex && state.boardTex.pcs) || []).map(p => ({ id: p.id, name: p.name || '', off: !!p.off, st: p.st || '' })), map: (function () { try { const d = mapData || mapLocal(); return d ? { maps: d.maps || [], pins: (d.pins || []).map(p => ({ id: p.id, mapId: p.mapId, x: p.x, y: p.y, title: p.title || '', category: p.category || '', desc: p.desc || '', sessions: p.sessions || [], quests: p.quests || [] })), categories: d.categories || [] } : null; } catch (e) { return null; } })(), items: (((state.boardTex || {}).store || {}).items || []).map(i => ({ id: i.id, label: i.label || '', detail: i.detail || '', img: i.img || '', pc: i.pc || '', cat: i.cat || '', qid: i.qid || '' })), clueBoard: (function () { const c = (state.boardTex || {}).clueBoard; return c ? { lanes: (c.lanes || []).map(l => ({ id: l.id, label: l.label || '', session: l.session })), cards: (c.cards || []).map(k => ({ id: k.id, text: k.text || '', done: !!k.done, lid: k.lid || '', qids: k.qids || [] })) } : null; })() }, null, 1)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = 'adventure-backup-' + new Date().toISOString().slice(0, 10) + '.json';
