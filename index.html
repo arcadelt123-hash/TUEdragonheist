@@ -2191,6 +2191,7 @@
           <button class="btn btn-primary" onclick="addNewFolderFromModal()">+ 폴더 추가</button>
         </div>
       </details>
+      <details class="land-box" id="gb-box" style="display:none"><summary>GM 보드에서 가져오기 (GM 전용)</summary><div class="manual"><p style="font-size:.85rem">GM 세션 보드의 단서 · 퀘스트 · 인물 · 지도를 이 저널로 옮겨요. 서버 주소와 비밀번호는 처음 한 번만 넣으면 돼요.</p><button class="btn btn-primary" onclick="closeFolderModal();gbOpen()">가져오기 창 열기</button></div></details>
       <details class="land-box" id="dev-box" ontoggle="if(this.open)devRender()"><summary>기기 관리 · 보안 (로그인)</summary><div id="dev-body" class="manual"></div></details>
       <details class="land-box" id="manual-box"><summary>사용설명서</summary>
         <div class="manual">
@@ -2228,7 +2229,7 @@
 
           <h4>GM 보드에서 가져오기 (GM 전용)</h4>
           <ul>
-            <li>GM 권한이 있는 기기의 단서 보드 위쪽에 「GM 보드에서 가져오기」 버튼이 보여요. GM 보드 서버 주소와 비밀번호를 한 번 넣으면 이 기기에 저장돼요.</li>
+            <li>GM 권한이 있는 기기에서 환경설정(톱니바퀴) 안의 「GM 보드에서 가져오기」 항목을 열고 「가져오기 창 열기」를 누르면 창이 떠요. 이 항목은 GM에게만 보여요. 처음 한 번은 GM 보드 서버 주소와 비밀번호를 한 번 넣으면 이 기기에 저장돼요.</li>
             <li>서버에서 바로 가져오거나, GM 보드에서 「내보내기」로 받은 파일을 「파일에서 불러오기」로 열어요.</li>
             <li>가져올 항목을 고를 수 있어요: 단서 · 떡밥 메모(종류와 공개 상태로 거름, 기본은 공개한 것만), 퀘스트(고른 보드의 글 박스), 인물(인물 도감에 만들기), 지도(지도 카드와 핀, 퀘스트와 연결된 핀은 같이 연결).</li>
             <li>한 번 가져온 항목은 다시 가져와도 중복되지 않고 내용만 갱신돼요. 이 저널은 플레이어도 보니까, 미공개 단서는 직접 체크했을 때만 가져와요.</li>
@@ -2775,7 +2776,7 @@
       <label>팀 <select id="gb-t" onchange="gbPick()" style="padding:5px 8px;border-radius:8px;border:1px solid #c9bb98">${ts.map(t => `<option value="${t.id}"${t.id === tid ? ' selected' : ''}>${escapeHtml(t.name)}</option>`).join('')}</select></label>
       <div style="${sec}"><label><input type="checkbox" id="gb-c-clue" checked> <b>단서 · 떡밥 메모</b></label><br>${kinds.map(k => `<label style="${lb}"><input type="checkbox" class="gb-k" value="${escapeHtml(k)}" checked> ${escapeHtml(k)} (${cnt(k)})</label>`).join('') || '<span style="color:#7a6a48">메모가 없어요</span>'}<br>${ST.map((s, i) => `<label style="${lb}"><input type="checkbox" class="gb-s" value="${i}"${i === 1 ? ' checked' : ''}> ${s} (${ms.filter(m => (m.x.st || 0) === i).length})</label>`).join('')}</div>
       <div style="${sec}"><label><input type="checkbox" id="gb-c-quest"> <b>퀘스트</b></label> <span style="font-size:.78rem;color:#7a6a48">고른 보드의 글 박스를 새 퀘스트로 만들어요 (제목 = 박스 제목, 내용 = 박스 글)</span><br>${bds.map(b => `<label style="${lb}"><input type="checkbox" class="gb-qb" value="${b.id}"> ${escapeHtml(b.name)} (${(b.boxes || []).filter(x => x.t === 'text' && !x.jk).length})</label>`).join('')}</div>
-      <div style="${sec}"><label><input type="checkbox" id="gb-c-npc"> <b>인물</b></label> <span style="font-size:.78rem;color:#7a6a48">등록한 등장인물 ${(T.chars || []).length}명을 인물 도감에 만들어요 (같은 이름은 건너뜀)</span><br><label style="${lb}"><input type="checkbox" id="gb-npcmemo"> 인물에 붙은 공개한 메모 내용을 인물 메모에 적기</label></div>
+      <div style="${sec}"><label><input type="checkbox" id="gb-c-npc"> <b>인물</b></label> <span style="font-size:.78rem;color:#7a6a48">등록한 등장인물과 이미지 카드(롤20 NPC 등)를 인물 도감에 만들어요. 카드 그림과 설명도 가져와요 (같은 이름은 건너뜀, PC 카드는 제외)</span><br><label style="${lb}"><input type="checkbox" id="gb-npcmemo"> 인물에 붙은 공개한 메모 내용과 카드 설명을 인물 메모에 적기</label></div>
       <div style="${sec}"><label><input type="checkbox" id="gb-c-map"> <b>지도</b></label> <span style="font-size:.78rem;color:#7a6a48">지도 카드 ${nMap}개와 핀을 지도로 옮겨요 (퀘스트와 연결된 핀은 같이 연결, 기기에서 직접 올린 이미지는 제외)</span></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-secondary" onclick="gbClose()">닫기</button><button class="btn btn-secondary" onclick="gbSetup()">서버 연결 설정</button><button class="btn btn-secondary" onclick="gbFile()">파일에서 불러오기</button><span style="flex:1"></span><button class="btn btn-primary" onclick="gbRun()">가져오기</button></div>`);
     }
@@ -2795,10 +2796,16 @@
       }
       // 인물
       if (on('gb-c-npc')) {
-        const have = new Set((state.globalNpcs || []).map(n => n.name).concat((state.boardTex.pcs || []).map(p => p.name))); let add = 0;
-        (T.chars || []).forEach(c => { if (have.has(c.name)) return; let memo = '';
+        const have = new Set((state.globalNpcs || []).map(n => n.name).concat((state.boardTex.pcs || []).map(p => p.name))); let add = 0, skipPc = 0;
+        // 보드의 이미지 카드(롤20 캐릭터 카드 등)에서 이름 · 그림 · 설명을 모아요
+        const cardBy = {}; bds.forEach(b => (b.boxes || []).forEach(x => { if (x.t !== 'img' || !String(x.title || '').trim()) return; if (!(x.card || x.r20 || (x.who || []).length)) return; const k = String(x.title).trim(); cardBy[k] = cardBy[k] || { src: /^https?:/.test(x.src || '') ? x.src : '', body: x.body || '', pc: !!(x.r20 && x.r20.pc), id: x.id }; }));
+        const mk = (name, info, memo, cid) => { state.globalNpcs.unshift({ id: 'gnpc_' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36), name, image: (info && info.src) || '', memo, gb: cid }); have.add(name); add++; };
+        (T.chars || []).forEach(c => { const info = cardBy[c.name]; if (info && info.pc) { skipPc++; return; } if (have.has(c.name)) { const g = state.globalNpcs.find(n => n.name === c.name); if (g && g.gb && !g.image && info && info.src) { g.image = info.src; } return; } let memo = '';
           if (wantMemo) { const L = []; bds.forEach(b => (b.boxes || []).forEach(x => { if (x.t === 'memo' && (x.who || []).includes(c.id) && (x.st || 0) === 1) L.push((x.title ? x.title + ': ' : '') + (x.body || '')); })); memo = L.join('\n'); }
-          state.globalNpcs.unshift({ id: 'gnpc_' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36), name: c.name, image: '', memo, gb: c.id }); have.add(c.name); add++; });
+          if (info && info.body && wantMemo) memo = (memo ? memo + '\n' : '') + info.body;
+          mk(c.name, info, memo, c.id); });
+        Object.keys(cardBy).forEach(k => { const info = cardBy[k]; if (info.pc || have.has(k)) { if (info.pc && !have.has(k)) skipPc++; return; } mk(k, info, wantMemo ? info.body : '', info.id); });
+        if (skipPc) rep.push('PC 카드 ' + skipPc + '개는 건너뛰었어요 (PC는 저널에서 직접 만들어요)');
         rep.push('인물 ' + add + '명');
       }
       // 지도
@@ -4071,6 +4078,7 @@
     }
 
     function openFolderModal() {
+      try { const g = document.getElementById('gb-box'); if (g) g.style.display = (AUTH_S.gm && !plView()) ? '' : 'none'; } catch (e) {}
       try { landRender(); } catch (e) {}
       try { renderTexLib(); } catch (e) {}
       try { renderPcList(); } catch (e) {}
@@ -6040,7 +6048,7 @@
       const d = mbData(kind), z = mbZoom(kind), { W, H } = mbCanvasSize(kind, d);
       const prev = document.getElementById('mb-view'), sc = prev ? { l: prev.scrollLeft, t: prev.scrollTop } : null;
       const zoomBar = `<span class="bz-bar"><button class="btn btn-secondary" onclick="mbZoomStep('${kind}',-1)" aria-label="축소">−</button><span style="cursor:pointer;" onclick="state.boardTex.mbz['${kind}']=1;renderMini('${kind}')" title="100%로">${Math.round(z * 100)}%</span><button class="btn btn-secondary" onclick="mbZoomStep('${kind}',1)" aria-label="확대">+</button><button class="btn btn-secondary cardlock-btn" onclick="cardLockToggle()" title="카드 고정 (켜면 화면을 밀어도 카드가 안 움직여요)" aria-label="카드 고정">${cardLocked() ? '🔒' : '🔓'}</button></span>`;
-      const acts = (kind === 'clue' && AUTH_S.gm && !plView()) ? `<button class="btn btn-secondary" style="padding:4px 12px;font-size:.82rem" onclick="gbOpen()" title="GM 세션 보드에서 단서·떡밥을 가져와요 (GM만 보여요)">GM 보드에서 가져오기</button>` : '';
+      const acts = '';
       const lanes = kind === 'clue' ? (() => { const rs = mbLaneRects(d); return d.lanes.map((l, i) => {
         const r = rs[i];
         const st = `left:${r.x}px;top:${r.y}px;height:${r.h}px;width:${r.w}px;transform:rotate(${mbLaneTilt(l)}deg);` + (l.img ? `background-image:url(${l.img});background-size:100% 100%;` : '');
