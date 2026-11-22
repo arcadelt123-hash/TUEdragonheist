@@ -2230,6 +2230,7 @@
           <h4>GM 보드에서 가져오기 (GM 전용)</h4>
           <ul>
             <li>GM 권한이 있는 기기에서 환경설정(톱니바퀴) 안의 「GM 보드에서 가져오기」 항목을 열고 「가져오기 창 열기」를 누르면 창이 떠요. 이 항목은 GM에게만 보여요. 처음 한 번은 GM 보드 서버 주소와 비밀번호를 한 번 넣으면 이 기기에 저장돼요.</li>
+            <li>GM 보드에서 박스를 고르고 우클릭 → 「어드벤처 저널로 보내기」로 표시해 두면, 가져오기 창 맨 위의 「표시한 박스만」을 체크해 그것만 받을 수 있어요.</li>
             <li>서버에서 바로 가져오거나, GM 보드에서 「내보내기」로 받은 파일을 「파일에서 불러오기」로 열어요.</li>
             <li>가져올 항목을 고를 수 있어요: 단서 · 떡밥 메모(종류와 공개 상태로 거름, 기본은 공개한 것만), 퀘스트(고른 보드의 글 박스), 인물(인물 도감에 만들기), 지도(지도 카드와 핀, 퀘스트와 연결된 핀은 같이 연결).</li>
             <li>한 번 가져온 항목은 다시 가져와도 중복되지 않고 내용만 갱신돼요. 이 저널은 플레이어도 보니까, 미공개 단서는 직접 체크했을 때만 가져와요.</li>
@@ -2770,9 +2771,11 @@
       const ms = gbMemos(tid), kinds = [...new Set(ms.map(m => m.x.kind || '단서'))], ST = ['미공개', '공개함', '회수'];
       const cnt = k => ms.filter(m => (m.x.kind || '단서') === k).length;
       const bds = T.boards || [], nMap = bds.reduce((a, b) => a + (b.boxes || []).filter(x => x.t === 'map' && !x.jk).length, 0);
+      const nSnd = bds.reduce((a, b) => a + (b.boxes || []).filter(x => x.snd).length, 0), sndEl = document.getElementById('gb-snd'), sndOn = sndEl ? sndEl.checked : true;
       const lb = 'margin-right:12px;white-space:nowrap', sec = 'border-top:1px solid #e0d4b6;padding-top:8px';
       gbModal(`<b style="font-size:1.05rem">GM 보드에서 가져오기</b>
       <div style="font-size:.8rem;color:#7a6a48;line-height:1.5">이 저널은 플레이어도 보니까, 단서는 기본으로 공개한 것만 가져와요. 이미 가져온 항목은 다시 가져와도 중복되지 않아요. 저널에서 GM 보드로 가져왔던 항목은 건너뛰어요.</div>
+      ${nSnd ? `<div style="${sec};margin-top:6px"><label><input type="checkbox" id="gb-snd" ${sndOn ? 'checked' : ''}> <b>GM 보드에서 「저널로 보내기」로 표시한 박스만</b> (${nSnd}개)</label><div style="font-size:.76rem;color:#7a6a48">체크하면 아래 항목 중에서 표시한 박스만 가져와요. 끄면 보드 전체에서 골라요.</div></div>` : ''}
       <label>팀 <select id="gb-t" onchange="gbPick()" style="padding:5px 8px;border-radius:8px;border:1px solid #c9bb98">${ts.map(t => `<option value="${t.id}"${t.id === tid ? ' selected' : ''}>${escapeHtml(t.name)}</option>`).join('')}</select></label>
       <div style="${sec}"><label><input type="checkbox" id="gb-c-clue" checked> <b>단서 · 떡밥 메모</b></label><br>${kinds.map(k => `<label style="${lb}"><input type="checkbox" class="gb-k" value="${escapeHtml(k)}" checked> ${escapeHtml(k)} (${cnt(k)})</label>`).join('') || '<span style="color:#7a6a48">메모가 없어요</span>'}<br>${ST.map((s, i) => `<label style="${lb}"><input type="checkbox" class="gb-s" value="${i}"${i === 1 ? ' checked' : ''}> ${s} (${ms.filter(m => (m.x.st || 0) === i).length})</label>`).join('')}</div>
       <div style="${sec}"><label><input type="checkbox" id="gb-c-quest"> <b>퀘스트</b></label> <span style="font-size:.78rem;color:#7a6a48">고른 보드의 글 박스를 새 퀘스트로 만들어요 (제목 = 박스 제목, 내용 = 박스 글)</span><br>${bds.map(b => `<label style="${lb}"><input type="checkbox" class="gb-qb" value="${b.id}"> ${escapeHtml(b.name)} (${(b.boxes || []).filter(x => x.t === 'text' && !x.jk).length})</label>`).join('')}</div>
@@ -2781,7 +2784,10 @@
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-secondary" onclick="gbClose()">닫기</button><button class="btn btn-secondary" onclick="gbSetup()">서버 연결 설정</button><button class="btn btn-secondary" onclick="gbFile()">파일에서 불러오기</button><span style="flex:1"></span><button class="btn btn-primary" onclick="gbRun()">가져오기</button></div>`);
     }
     async function gbRun() {
-      const tid = document.getElementById('gb-t').value, T = (GB.d.teams || []).find(t => t.id === tid) || {}, bds = T.boards || [], on = id => document.getElementById(id).checked, rep = [];
+      const tid = document.getElementById('gb-t').value, T0 = (GB.d.teams || []).find(t => t.id === tid) || {}, on = id => !!(document.getElementById(id) || {}).checked, rep = [];
+      const snd = on('gb-snd'), bds = snd ? (T0.boards || []).map(b => Object.assign({}, b, { boxes: (b.boxes || []).filter(x => x.snd) })) : (T0.boards || []);
+      const wsnd = new Set(); bds.forEach(b => b.boxes.forEach(x => (x.who || []).forEach(w => wsnd.add(w))));
+      const T = snd ? Object.assign({}, T0, { boards: bds, chars: (T0.chars || []).filter(c => wsnd.has(c.id)) }) : T0;
       const ks = [...document.querySelectorAll('.gb-k:checked')].map(i => i.value), ss = [...document.querySelectorAll('.gb-s:checked')].map(i => +i.value), qbs = [...document.querySelectorAll('.gb-qb:checked')].map(i => i.value);
       const wantMemo = on('gb-npcmemo'), qmap = {};
       (state.quests || []).forEach(q => { if (q.gb) qmap[q.gb] = q.id; });
@@ -2828,7 +2834,7 @@
       }
       // 단서 메모
       if (on('gb-c-clue')) {
-        const pick = gbMemos(tid).filter(m => ks.includes(m.x.kind || '단서') && ss.includes(m.x.st || 0) && !m.x.jk);
+        const pick = gbMemos(tid).filter(m => (!snd || m.x.snd) && ks.includes(m.x.kind || '단서') && ss.includes(m.x.st || 0) && !m.x.jk);
         if (pick.length) {
           const d = mbData('clue'); let lane = d.lanes.find(l => l.gb);
           if (!lane) { lane = { id: 'l_gb_' + Date.now().toString(36), session: Math.max(0, ...d.lanes.map(l => Number(l.session) || 0)) + 1, label: 'GM 보드', h: MB_LANE_H, gb: 1 }; d.lanes.push(lane); }
