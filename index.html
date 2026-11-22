@@ -2595,6 +2595,7 @@
         f.addEventListener('dblclick', () => presenceRename());
         document.body.appendChild(f);
       }
+      try { const mx = Math.max(0, innerWidth - 60), my = Math.max(0, innerHeight - 40); if (f.offsetLeft > mx) f.style.left = '12px'; if (f.offsetTop > my || f.offsetTop < 0) f.style.top = Math.max(80, innerHeight - 220) + 'px'; f.style.display = ''; } catch (e) {}
       f.innerHTML = list.map(u => { const nm = (u.name || '').trim() || ('손님 ' + String(u.id).slice(-2)); return `<div ${u.id === PRES.id ? 'data-me="1"' : ''} style="display:flex;align-items:center;gap:6px;padding:2px 0;font-weight:${u.id === PRES.id ? 800 : 500}"><span style="width:10px;height:10px;border-radius:3px;background:${presHue(u.id, u.id === PRES.id ? (presColor() || u.color) : u.color)};flex:none"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(nm)}${u.id === PRES.id ? ' (나)' : ''}${u.ed && u.id !== PRES.id ? ` <small style="opacity:.7;font-weight:500">✎ ${escapeHtml(String(u.ed).split('¦')[0])}</small>` : ''}</span></div>`; }).join('');
     }
     // 새 기기에서 처음 열면 이름을 물어봐서 기존 설정과 연결
@@ -2619,7 +2620,8 @@
     (function pcAskWatch() { let n = 0; const iv = setInterval(() => { n++; try { if (localStorage.getItem('adv_pc_ask') || myRaw().length || n > 60) { clearInterval(iv); return; } if (!AUTH_S.gate && AUTH_S.st && AUTH_S.st.valid && state.boardTex && (plsList().length > 0)) { clearInterval(iv); pcAskOpen(); } } catch (e) {} }, 800); })();
     function presencePing() {
       if (document.hidden) return;
-      fetchGet('ping&id=' + encodeURIComponent(PRES.id) + '&name=' + encodeURIComponent(presShown()) + '&color=' + encodeURIComponent(presColor()) + '&ed=' + encodeURIComponent(presEditing())).then(t => { const j = typeof t === 'string' ? JSON.parse(t) : t; if (j && j.online) presenceRender(j.online); else throw 0; }).catch(() => { presenceRender([{ id: PRES.id, name: presShown() }]); });
+      let edv = ''; try { edv = presEditing(); } catch (e) {}
+      fetchGet('ping&id=' + encodeURIComponent(PRES.id) + '&name=' + encodeURIComponent(presShown()) + '&color=' + encodeURIComponent(presColor()) + '&ed=' + encodeURIComponent(edv)).then(t => { const j = typeof t === 'string' ? JSON.parse(t) : t; if (j && j.online) presenceRender(j.online); else throw 0; }).catch(() => { presenceRender([{ id: PRES.id, name: presShown() }]); });
     }
     setTimeout(() => { presencePing(); setInterval(presencePing, 25000); document.addEventListener('visibilitychange', presencePing); }, 4000);
     function fetchPost(body) { return fetchT(execUrl(), { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) }); }
@@ -4936,7 +4938,7 @@
     }
     function ctxLayerStep(d) { const r = document.getElementById('cx-rng'); if (!r || !ctxId) return; setLayer(ctxId, Number(r.value) + d); }
     function memoPickHtml(qid, noBlank) {
-      const me0 = landMe(), pcs = (state.boardTex.pcs || []).slice().sort((x, y) => (y.id === me0) - (x.id === me0));
+      const me0 = landMe(), pcs = (state.boardTex.pcs || []).filter(p => !p.off).slice().sort((x, y) => (y.id === me0) - (x.id === me0));
       const btns = pcs.map(p => `<button class="cx-b cx-pcimg" style="${p.id === me0 ? 'outline:2px solid #e6b24a;outline-offset:1px' : ''}" title="${escapeHtml(p.name || 'PC')}${p.id === me0 ? ' (내 PC)' : ''}" aria-label="${escapeHtml(p.name || 'PC')}" data-pc="${escapeHtml(p.id)}" onclick="ctxMemo(this.dataset.pc)">${pcIconImg(p)}${deadX(p)}</button>`).join('')
         + (noBlank ? '' : `<button class="cx-b cx-pcimg" data-pc="" title="이름 없음" aria-label="이름 없음" onclick="ctxMemo('')"><span class="cx-blank"></span></button>`);
       return `<div class="cx-sec"><div class="cx-pcrow">${btns}</div></div>`;
@@ -5368,14 +5370,14 @@
       const tab = (k, t) => `<button class="btn ${V === k ? 'btn-primary' : 'btn-secondary'}" onclick="jSet('jView','${k}')">${t}</button>`;
       let h = `<div class="j-tabs">${tab('pc', '일지')}${tab('items', '창고')}${tab('clues', '단서')}</div>`;
       if (V === 'pc') {
-        const pcs = state.boardTex.pcs || []; if (state.jPc == null && pcs.length) state.jPc = pcs[0].id;
+        const pcs = (state.boardTex.pcs || []).filter(p => !p.off); if ((state.jPc == null || !pcs.some(p => p.id === state.jPc)) && pcs.length) state.jPc = pcs[0].id;
         h += `<div class="j-pcs">${pcs.map(p => `<button class="j-pc${p.id === state.jPc ? ' on' : ''}" ${jdr(p.id)} title="${escapeHtml(p.name || '')}" ${pcIconSty(p)} onclick="jSet('jPc','${p.id}')">${pcIconImg(p)}</button>`).join('')}
           <button class="j-pc${pcs.some(p => p.id === state.jPc) ? '' : ' on'}" title="이름 없는 메모" onclick="jSet('jPc','')"><span class="cx-blank" style="width:44px;height:44px;"></span></button></div>`;
       }
       if (V === 'items') {
         const pcs = state.boardTex.pcs || [], cur = state.jStorePc || '';
         const pcMap = {}; pcs.forEach(p => { pcMap[p.id] = p; });
-        const btns = jStoreOrder().map(id => id === '-' ? `<button class="j-pc${cur === '-' ? ' on' : ''}" ${jdr('-')} title="소유주 없음 (공용 가방)" onclick="jSet('jStorePc','-')"><img src="${IC_BAG}" alt="공용" style="object-fit:contain;border-radius:0;"></button>` : (pcMap[id] ? `<button class="j-pc${id === cur ? ' on' : ''}" ${jdr(id)} title="${escapeHtml(pcMap[id].name || '')}" ${pcIconSty(pcMap[id])} onclick="jSet('jStorePc','${id}')">${pcIconImg(pcMap[id])}</button>` : '')).join('');
+        const btns = jStoreOrder().map(id => id === '-' ? `<button class="j-pc${cur === '-' ? ' on' : ''}" ${jdr('-')} title="소유주 없음 (공용 가방)" onclick="jSet('jStorePc','-')"><img src="${IC_BAG}" alt="공용" style="object-fit:contain;border-radius:0;"></button>` : ((pcMap[id] && !pcMap[id].off) ? `<button class="j-pc${id === cur ? ' on' : ''}" ${jdr(id)} title="${escapeHtml(pcMap[id].name || '')}" ${pcIconSty(pcMap[id])} onclick="jSet('jStorePc','${id}')">${pcIconImg(pcMap[id])}</button>` : '')).join('');
         const fOn = state.jStoreFilterOpen || state.jStoreCat || state.jStoreRar;
         h += `<div class="j-pcs"><button class="j-pc${cur === '' ? ' on' : ''}" onclick="jSet('jStorePc','')"><span style="font-weight:800;">전체</span></button>${btns}<button class="j-pc j-pc-bm${fOn ? ' on' : ''}" style="margin-left:auto" onclick="jSet('jStoreFilterOpen',!state.jStoreFilterOpen)" title="종류 · 등급별로 걸러 보기" aria-label="필터"><img src="${IC_BOOKMARK}" alt="" style="object-fit:contain;border-radius:0;"></button></div>${state.jStoreFilterOpen ? jStoreFilters() : ''}`;
       }
@@ -5798,7 +5800,7 @@
       const pcs = state.boardTex.pcs || [], cur = pcs.find(p => p.id === itemEd.pc);
       if (cur) box.innerHTML = `<div class="itm-pcchip">${pcIconImg(cur)}${deadX(cur)}<b>${escapeHtml(cur.name || 'PC')}</b><button class="btn btn-secondary" style="padding:2px 9px;font-size:.74rem;" onclick="itemPcSet('')">떼기</button></div>`;
       else if (!pcs.length) box.innerHTML = '';
-      else box.innerHTML = `<div class="itm-pcrow">${pcs.map(p => `<button type="button" class="itm-pcb" title="${escapeHtml(p.name || 'PC')}" aria-label="${escapeHtml(p.name || 'PC')}" onclick="itemPcSet('${escapeHtml(p.id)}')">${pcIconImg(p)}${deadX(p)}</button>`).join('')}</div>`;
+      else box.innerHTML = `<div class="itm-pcrow">${pcs.filter(p => !p.off).map(p => `<button type="button" class="itm-pcb" title="${escapeHtml(p.name || 'PC')}" aria-label="${escapeHtml(p.name || 'PC')}" onclick="itemPcSet('${escapeHtml(p.id)}')">${pcIconImg(p)}${deadX(p)}</button>`).join('')}</div>`;
     }
     function itemPcSet(id) { if (!itemEd) return; itemEd.pc = id; itemPcRender(); }
     function openItemModal(id, opt) {
