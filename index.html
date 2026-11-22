@@ -2229,7 +2229,6 @@
     </div>
   </div>
 
-  <script>/* 같은 GitHub 계정의 다른 사이트와 브라우저 저장소가 섞이지 않게 키에 접두어를 붙임 */(function(){var P='pandelver:',g=Storage.prototype.getItem,st=Storage.prototype.setItem,r=Storage.prototype.removeItem;Storage.prototype.getItem=function(k){return g.call(this,P+k)};Storage.prototype.setItem=function(k,v){return st.call(this,P+k,v)};Storage.prototype.removeItem=function(k){return r.call(this,P+k)};})();</script>
   <script>
     (function () {
       function show(msg) {
@@ -2317,7 +2316,7 @@
 
 
     // ===== 서버 연결: google.script.run 이 응답 없으면 같은 주소로 직접 요청(fetch)으로 자동 전환 =====
-    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxwlzAoNz3BWmwAWqRKoEiWcI7JY0pNDQ88cW8esgecWXuVkvPmJ_I_Ch8e7UAvQFv7/exec';
+    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxFF22hEZxD5QQ52eFKk-Zp800HDNWyWXrThIuQI-x8wFe6cNBadvCkS-VGVpEs0QTf/exec';
     function execUrl() { try { return localStorage.getItem('adventure_exec_url') || EXEC_URL_DEFAULT; } catch (e) { return EXEC_URL_DEFAULT; } }
     function diagShow(msg) { try { console.info('[sync]', msg); } catch (e) {} }
     const AUTH_S = { tk: (() => { try { return localStorage.getItem('adv_dev_tk') || ''; } catch (e) { return ''; } })(), gm: false, off: false, st: null, gate: false, bg: '' };
@@ -2460,6 +2459,8 @@
     authBoot();
     // ---- 접속 중인 사람 (Apps Script ping, 시트에 쓰지 않음)
     const PRES = { id: (() => { try { let v = localStorage.getItem('adv_pres_id'); if (!v) { v = 'u' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-3); localStorage.setItem('adv_pres_id', v); } return v; } catch (e) { return Math.random().toString(36).slice(2, 10); } })() };
+    // 접속 표시 이름: 연결된 PC가 있으면 그 PC 이름, 없으면 직접 정한 이름
+    function presShown() { try { const id = landMe(); if (id) { const p = landPls().find(x => x.id === id); if (p) return String(p.key || p.name || '').replace(/\s*\(GM\)\s*$/i, '').trim().slice(0, 20) || presName(); } } catch (e) {} return presName(); }
     function presName() { try { return (localStorage.getItem('adv_pres_name') || '').trim(); } catch (e) { return ''; } }
     function presencePanel(keep) {
       let p = document.getElementById('pres-panel');
@@ -2481,17 +2482,25 @@
     function presColor() { try { return localStorage.getItem('adv_pres_color') || ''; } catch (e) { return ''; } }
     function presenceRename() {
       let p = document.getElementById('pres-edit'); if (p) { p.remove(); return; }
+      if (myPcs().length > 1 && !plView()) {
+        const f = document.getElementById('pres-float'); const r = f ? f.getBoundingClientRect() : { left: 12, top: 100, bottom: 130 }, cur = landMe();
+        p = document.createElement('div'); p.id = 'pres-edit';
+        p.style.cssText = `position:fixed;z-index:410;left:${Math.max(8, Math.min(innerWidth - 232, Math.round(r.left)))}px;top:${Math.min(innerHeight - 190, Math.round(r.bottom + 6))}px;width:224px;background:#fffdf7;border:2px solid #b8893a;border-radius:12px;padding:10px;color:#3b2c12;display:flex;flex-direction:column;gap:6px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.3);`;
+        p.innerHTML = '<b>어떤 PC로 들어올까요?</b>' + myPcs().map(id => { const pc = landPls().find(x => x.id === id); return pc ? `<button type="button" onclick="presPcPick('${escapeHtml(id)}')" style="display:flex;align-items:center;gap:8px;border:1.5px solid ${id === cur ? '#b8893a' : '#e3d3a6'};border-radius:10px;background:${id === cur ? '#fde7a8' : '#fff'};padding:5px 8px;cursor:pointer;font-weight:${id === cur ? 800 : 600};color:#3b2c12"><img src="${escapeHtml(pc.img || IC_NPC)}" alt="" style="width:26px;height:26px;border-radius:50%;object-fit:cover">${escapeHtml(pc.name || 'PC')}${id === cur ? ' ✓' : ''}</button>` : ''; }).join('') + '<small style="opacity:.6">한 번에 한 PC만 활성화돼요</small>';
+        document.body.appendChild(p); return;
+      }
       const f = document.getElementById('pres-float'); const r = f ? f.getBoundingClientRect() : { left: 12, top: 100, bottom: 130 };
       p = document.createElement('div'); p.id = 'pres-edit';
       p.style.cssText = `position:fixed;z-index:410;left:${Math.max(8, Math.min(innerWidth - 232, Math.round(r.left)))}px;top:${Math.min(innerHeight - 150, Math.round(r.bottom + 6))}px;width:224px;background:#fffdf7;border:2px solid #b8893a;border-radius:12px;padding:10px;color:#3b2c12;display:flex;flex-direction:column;gap:8px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.3);`;
-      p.innerHTML = `<b>내 접속 표시</b><div style="display:flex;gap:6px;align-items:center"><input id="pe-name" type="text" maxlength="20" value="${escapeHtml(presName())}" placeholder="이름" style="flex:1;min-width:0;border:1.5px solid #e3d3a6;border-radius:8px;padding:4px 8px;background:#fff;color:#3b2c12"><input id="pe-col" type="color" value="${presHue(PRES.id, presColor())}" style="width:34px;height:30px;padding:0;border:1.5px solid #e3d3a6;border-radius:8px;background:#fff;cursor:pointer" title="내 색"></div>
+      p.innerHTML = `<b>내 접속 표시</b><div style="display:flex;gap:6px;align-items:center"><input id="pe-name" type="text" maxlength="20" value="${escapeHtml(presShown())}" placeholder="이름" ${landMe() ? 'disabled title="연결된 PC 이름이 표시돼요"' : ''} style="flex:1;min-width:0;border:1.5px solid #e3d3a6;border-radius:8px;padding:4px 8px;background:#fff;color:#3b2c12"><input id="pe-col" type="color" value="${presHue(PRES.id, presColor())}" style="width:34px;height:30px;padding:0;border:1.5px solid #e3d3a6;border-radius:8px;background:#fff;cursor:pointer" title="내 색"></div>
         <div style="display:flex;gap:6px;justify-content:space-between;align-items:center"><small style="opacity:.55" title="이 브라우저에 저장된 고정 ID">ID ${escapeHtml(PRES.id.slice(-6))}</small><span style="display:flex;gap:6px"><button type="button" onclick="document.getElementById('pres-edit').remove()" style="border:1px solid #b8893a;border-radius:8px;background:#fff;padding:3px 10px;cursor:pointer">취소</button><button type="button" onclick="presenceSave()" style="border:1px solid #b8893a;border-radius:8px;background:#f4e3b5;padding:3px 10px;cursor:pointer;font-weight:700">저장</button></span></div>`;
       document.body.appendChild(p); document.getElementById('pe-name').focus();
     }
+    function presPcPick(id) { const e = document.getElementById('pres-edit'); if (e) e.remove(); landActivate(id); presencePing(); }
     function presenceSave() {
-      const n = (document.getElementById('pe-name').value || '').trim().slice(0, 20), c = document.getElementById('pe-col').value;
-      try { localStorage.setItem('adv_pres_name', n); localStorage.setItem('adv_pres_color', c); } catch (e) {}
-      document.getElementById('pres-edit').remove(); presLink(n, true); presencePing();
+      const ne = document.getElementById('pe-name'), n = (ne.value || '').trim().slice(0, 20), c = document.getElementById('pe-col').value;
+      try { if (!ne.disabled) localStorage.setItem('adv_pres_name', n); localStorage.setItem('adv_pres_color', c); } catch (e) {}
+      document.getElementById('pres-edit').remove(); if (!ne.disabled) presLink(n, true); presencePing();
     }
     function presDedupe(list) { const seen = new Map(), out = []; (list || []).forEach(u => { const k = nameKey(u.name); if (!k) { out.push(u); return; } if (!seen.has(k)) { seen.set(k, out.length); out.push(Object.assign({}, u)); } else if (u.id === PRES.id) out[seen.get(k)] = Object.assign({}, u); }); return out; }
     function presenceRender(list) {
@@ -2529,12 +2538,12 @@
       ov.querySelectorAll('.pk').forEach(b => b.onclick = () => { const id = b.dataset.id; sel.clear(); sel.add(id); ov.querySelectorAll('.pk').forEach(x => x.classList.toggle('on', x === b)); });
       const fin = () => { try { localStorage.setItem('adv_pc_ask', '1'); } catch (e) {} ov.remove(); };
       ov.querySelector('#pk-later').onclick = e => { e.preventDefault(); fin(); };
-      ov.querySelector('#pk-go').onclick = () => { if (!sel.size) { ov.querySelector('#pk-er').textContent = '하나 이상 골라 주세요'; ov.querySelector('#pk-er').style.color = '#e58a7a'; return; } const l = [...sel]; myPcsSave(l, l[0]); fin(); try { authPushPc(); window.__landed = 0; landApply(true); setViewMode(state.viewMode, state.viewMode === 'quests' ? state.statusFilter : state.viewMode === 'journal' ? state.jView : ''); presLink2(); } catch (e) { try { renderAll(); } catch (x) {} } };
+      ov.querySelector('#pk-go').onclick = () => { if (!sel.size) { ov.querySelector('#pk-er').textContent = '하나 이상 골라 주세요'; ov.querySelector('#pk-er').style.color = '#e58a7a'; return; } const l = [...sel]; myPcsSave(l, l[0]); fin(); try { authPushPc(); presencePing(); window.__landed = 0; landApply(true); setViewMode(state.viewMode, state.viewMode === 'quests' ? state.statusFilter : state.viewMode === 'journal' ? state.jView : ''); presLink2(); } catch (e) { try { renderAll(); } catch (x) {} } };
     }
     (function pcAskWatch() { let n = 0; const iv = setInterval(() => { n++; try { if (localStorage.getItem('adv_pc_ask') || myPcs().length || n > 60) { clearInterval(iv); return; } if (!AUTH_S.gate && AUTH_S.st && AUTH_S.st.valid && state.boardTex && landPls().length > 1) { clearInterval(iv); pcAskOpen(); } } catch (e) {} }, 800); })();
     function presencePing() {
       if (document.hidden) return;
-      fetchGet('ping&id=' + encodeURIComponent(PRES.id) + '&name=' + encodeURIComponent(presName()) + '&color=' + encodeURIComponent(presColor())).then(t => { const j = typeof t === 'string' ? JSON.parse(t) : t; if (j && j.online) presenceRender(j.online); else throw 0; }).catch(() => { presenceRender([{ id: PRES.id, name: presName() }]); });
+      fetchGet('ping&id=' + encodeURIComponent(PRES.id) + '&name=' + encodeURIComponent(presShown()) + '&color=' + encodeURIComponent(presColor())).then(t => { const j = typeof t === 'string' ? JSON.parse(t) : t; if (j && j.online) presenceRender(j.online); else throw 0; }).catch(() => { presenceRender([{ id: PRES.id, name: presShown() }]); });
     }
     setTimeout(() => { presencePing(); setInterval(presencePing, 25000); document.addEventListener('visibilitychange', presencePing); }, 4000);
     function fetchPost(body) { return fetchT(execUrl(), { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) }); }
@@ -2935,9 +2944,9 @@
       try { if (val === null || val === undefined) localStorage.removeItem('adv_pref_' + k); else localStorage.setItem('adv_pref_' + k, JSON.stringify(val)); } catch (e) {}
     }
     function presLink2() { try { const me = prefMe(); const v = prefGet('arrow'); if (v) qbBarsUpdate(); const n = prefGet('navOff'); if (n !== null) document.body.classList.toggle('nav-off', !!n); buildCtx(); showToast(me ? '내 PC로 연결했어요. 저장된 개인 설정이 적용돼요.' : '연결을 해제했어요.'); } catch (e) {} }
-    function landSetMe(v) { if (plView()) return; myPcsSave(v ? [v] : [], v); landRender(); try { authPushPc(); } catch (e) {} }
-    function landAddMy(id) { if (!id || (landAllowed() && myPcs().length)) return; myPcsAdd(id, !landMe()); landTab = id; landRender(); try { authPushPc(); presLink2(); } catch (e) {} }
-    function landActivate(id) { if (plView()) return; const l = myPcs(); myPcsSave(l.includes(id) ? l : l.concat(id), id); landRender(); try { authPushPc(); presLink2(); } catch (e) {} }
+    function landSetMe(v) { if (plView()) return; myPcsSave(v ? [v] : [], v); landRender(); try { authPushPc(); presencePing(); } catch (e) {} }
+    function landAddMy(id) { if (!id || (landAllowed() && myPcs().length)) return; myPcsAdd(id, !landMe()); landTab = id; landRender(); try { authPushPc(); presLink2(); presencePing(); } catch (e) {} }
+    function landActivate(id) { if (plView()) return; const l = myPcs(); myPcsSave(l.includes(id) ? l : l.concat(id), id); landRender(); try { authPushPc(); presLink2(); presencePing(); } catch (e) {} }
     function landUnlink(id) { if (landAllowed()) return; const l = myPcs().filter(x => x !== id); myPcsSave(l, landMe() === id ? l[0] : landMe()); landRender(); try { authPushPc(); presLink2(); } catch (e) {} }
     // PL(GM이 아닌 기기)은 자기 PC 것만 바꿀 수 있어요
     function landAllowed() { if (plView()) return [plView()]; return AUTH_S.gm || AUTH_S.off ? null : myPcs(); }
