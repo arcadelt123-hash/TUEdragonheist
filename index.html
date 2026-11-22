@@ -1030,9 +1030,15 @@
 
     .modal-box.lg-box { width: min(1100px, 96vw) !important; height: min(86vh, 900px) !important; max-width: none !important; max-height: none !important; padding: 0 !important; display: flex; flex-direction: column; overflow: hidden; font-family: 'Gowun Batang', 'Nanum Myeongjo', serif; }
     .lg-rune { border: 0; background: transparent; cursor: pointer; padding: 2px 4px; line-height: 0; flex: none; } .lg-rune img { width: 14px; height: auto; display: block; filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); } .lg-rune:hover img { transform: scale(1.15); }
-    .lg-pm { margin: 6px 0 12px; padding: 6px 10px; border: 1px dashed #c9bb98; border-radius: 10px; background: rgba(255,250,235,.55); } .lg-pm summary { cursor: pointer; font-weight: 800; font-size: .82rem; color: #5a3d12; }
+    .lg-paste { position: absolute; inset: 0; z-index: 8; background: rgba(40,28,10,.45); display: none; align-items: center; justify-content: center; }
+    .lg-pbox { width: min(720px, 94%); max-height: 92%; overflow: auto; scrollbar-width: none; background: #fffdf6; border: 1px solid #c9bb98; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; color: #3b2a14; }
+    .lg-pbox::-webkit-scrollbar { display: none; }
+    .lg-pbox textarea { width: 100%; box-sizing: border-box; height: 260px; resize: vertical; padding: 8px; border: 1px solid #c9bb98; border-radius: 8px; background: #fff; font: inherit; font-size: .88rem; }
+    .lg-pbox input[type=text] { flex: 1; min-width: 0; padding: 6px 8px; border: 1px solid #c9bb98; border-radius: 8px; background: #fff; font: inherit; }
+    .lg-prow { display: flex; gap: 8px; align-items: center; } .lg-psub { font-size: .78rem; color: #7a6a48; line-height: 1.5; }
+    .lg-pm { resize: both; overflow: auto; min-width: 220px; max-width: 100%; min-height: 40px; box-sizing: border-box; margin: 6px 0 12px; padding: 6px 10px; border: 1px dashed #c9bb98; border-radius: 10px; background: rgba(255,250,235,.55); } .lg-pm summary { cursor: pointer; font-weight: 800; font-size: .82rem; color: #5a3d12; }
     .lg-pmi { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid rgba(120,90,40,.15); } .lg-pmi .pcib { width: 30px; height: 30px; background: #eadfc3; } .lg-pmb { flex: 1; min-width: 0; font-size: .85rem; word-break: break-word; } .lg-pmimg { display: block; max-width: min(100%, 280px); max-height: 220px; border-radius: 8px; margin-top: 4px; cursor: zoom-in; border: 1px solid #d8cdb4; }
-    .lg-pmf textarea { width: 100%; box-sizing: border-box; margin-top: 6px; padding: 6px 8px; border: 1px solid #c9bb98; border-radius: 8px; background: #fffaf0; font: inherit; font-size: .85rem; resize: vertical; } .lg-pmr { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+    .lg-pmf textarea { width: 100%; resize: both; max-width: 100%; box-sizing: border-box; margin-top: 6px; padding: 6px 8px; border: 1px solid #c9bb98; border-radius: 8px; background: #fffaf0; font: inherit; font-size: .85rem; resize: both; max-width: 100%; } .lg-pmr { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
     .lg-selbtn { border: 1px solid #c9bb98; background: #fffaf0; border-radius: 999px; padding: 1px 9px; font-size: .72rem; cursor: pointer; float: right; margin-right: 6px; color: #5a3d12; } .lg-selbtn.on { background: #e4d3a8; font-weight: 800; }
     #lg-main.lg-selmode .lg-m[data-i] { cursor: pointer; } #lg-main.lg-selmode .lg-m[data-i]:hover { background: rgba(228,211,168,.35); } .lg-m.lg-sel { background: rgba(230,178,74,.32) !important; outline: 1px solid rgba(184,137,58,.7); }
     .lg-m.lg-cmh { box-shadow: inset 3px 0 0 #e6b24a; }
@@ -1043,9 +1049,12 @@
     .lg-top input { flex: 1; min-width: 0; padding: 7px 10px; border: 1px solid #c9bb98; border-radius: 8px; background: #fffaf0; font: inherit; font-size: 14px; }
     .lg-top .lg-on { background: #e4d3a8 !important; border-color: #b8893a !important; color: #3b2a14 !important; font-weight: 800; } .lg-top .lg-off { opacity: .55; text-decoration: line-through; }
     .modal-box.lg-box { position: relative; box-sizing: border-box !important; }
-    .lg-deco { position: absolute; z-index: 5; top: 52px; right: 12px; width: 300px; max-height: 70vh; overflow: auto; background: #fffdf6; border: 1px solid #c9bb98; border-radius: 12px; box-shadow: 0 8px 28px rgba(0,0,0,.35); padding: 10px 12px; font-size: 13px; color: #3b2a14; }
+    .lg-deco { position: absolute; z-index: 5; top: 52px; right: 12px; width: 300px; max-height: calc(100% - 64px); overflow-y: auto; scrollbar-width: none; overscroll-behavior: contain; background: #fffdf6; border: 1px solid #c9bb98; border-radius: 12px; box-shadow: 0 8px 28px rgba(0,0,0,.35); padding: 10px 12px; font-size: 13px; color: #3b2a14; }
     .lg-deco[hidden] { display: none; } .lg-deco label { display: flex; align-items: center; gap: 6px; margin-top: 6px; } .lg-deco select, .lg-deco input[type=text] { flex: 1; min-width: 0; padding: 4px 6px; border: 1px solid #c9bb98; border-radius: 8px; background: #fff; font: inherit; } .lg-deco input[type=range] { flex: 1; } .lg-deco h4 { margin: 8px 0 0; font-size: 13px; }
     .lg-x { border: 0; background: none; font-size: 18px; cursor: pointer; color: #5a4a2c; }
+    .lg-deco::-webkit-scrollbar { display: none; }
+    .lg-main, .lg-list { scrollbar-width: thin; scrollbar-color: rgba(120,90,40,.35) transparent; }
+    .lg-top button { overflow: visible; }
     .lg-body { flex: 1; display: flex; min-height: 0; overflow: hidden; }
     .modal-box.lg-box.lg-dec .lg-top, .modal-box.lg-box.lg-dec .lg-list, .modal-box.lg-box.lg-dec .lg-main, .modal-box.lg-box.lg-dec .lg-body, .modal-box.lg-box.lg-dec .lg-list button:not(.on) { background: transparent !important; background-image: none !important; } .modal-box.lg-box.lg-dec .lg-list button:hover, .modal-box.lg-box.lg-dec .lg-list button.on { background: rgba(228,211,168,.55) !important; } .modal-box.lg-box.lg-dec .lg-top { border-bottom-color: rgba(120,90,40,.25); } .modal-box.lg-box.lg-dec .lg-list { border-right-color: rgba(120,90,40,.25); }
     .lg-list { width: 250px; flex: none; overflow-y: auto; border-right: 1px solid #d8cdb4; background: #f8f1e0; }
@@ -2072,7 +2081,7 @@
     <div id="cal-list"></div>
   </div></div>
   <div class="modal-backdrop" id="lg-modal" onclick="if(event.target===this)lgClose()"><div class="modal-box lg-box">
-    <div class="lg-top"><b>세션 로그</b><input id="lg-q" type="search" placeholder="전체 회차 검색 (대사 · 판정 · 이름)" oninput="lgSearchDeb()" autocomplete="off"><button class="btn btn-secondary" id="lg-pl" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgPlToggle()" title="켜짐(강조): PL 발언이 보여요 · 누르면 꺼지면서 PL·PC(등록된 토큰/PL 이름) 발언이 숨겨져요. 시금치와 NPC는 남아요">PL</button><button class="btn btn-secondary" id="lg-nm" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgNmToggle()" title="켜짐(강조): 이름이 보여요 · 누르면 꺼지면서 캐릭터 이미지만 보여요">이름</button><button class="btn btn-secondary" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="document.getElementById('lg-file').click()" title="롤20(.htm) / FVTT(.txt) 로그를 올려 저장" aria-label="로그 올리기"><img class="lg-ic" data-ic="feather" alt=""></button><input type="file" id="lg-file" accept=".htm,.html,.txt" multiple style="display:none" onchange="lgUpload(this)"><button class="btn btn-secondary" id="lg-deco-b" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgDecoToggle()" title="로그 화면 꾸미기 (텍스처 · 테두리)" aria-label="로그 화면 꾸미기"><img class="lg-ic" data-ic="brush" alt=""></button><button class="lg-x" onclick="lgClose()" aria-label="닫기">✕</button></div>
+    <div class="lg-top"><b>세션 로그</b><input id="lg-q" type="search" placeholder="전체 회차 검색 (대사 · 판정 · 이름)" oninput="lgSearchDeb()" autocomplete="off"><button class="btn btn-secondary" id="lg-pl" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgPlToggle()" title="켜짐(강조): PL 발언이 보여요 · 누르면 꺼지면서 PL·PC(등록된 토큰/PL 이름) 발언이 숨겨져요. 시금치와 NPC는 남아요">PL</button><button class="btn btn-secondary" id="lg-nm" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgNmToggle()" title="켜짐(강조): 이름이 보여요 · 누르면 꺼지면서 캐릭터 이미지만 보여요">이름</button><button class="btn btn-secondary" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgPasteOpen()" title="채팅 로그를 복사해서 붙여넣어 바로 저장">붙여넣기</button><button class="btn btn-secondary" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="document.getElementById('lg-file').click()" title="롤20(.htm) / FVTT(.txt) 로그를 올려 저장" aria-label="로그 올리기"><img class="lg-ic" data-ic="feather" alt=""></button><input type="file" id="lg-file" accept=".htm,.html,.txt" multiple style="display:none" onchange="lgUpload(this)"><button class="btn btn-secondary" id="lg-deco-b" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgDecoToggle()" title="로그 화면 꾸미기 (텍스처 · 테두리)" aria-label="로그 화면 꾸미기"><img class="lg-ic" data-ic="brush" alt=""></button><button class="lg-x" onclick="lgClose()" aria-label="닫기">✕</button></div>
     <div class="lg-deco" id="lg-deco" hidden></div>
     <div class="lg-body"><div class="lg-list" id="lg-list"></div><div class="lg-main" id="lg-main"></div></div>
   </div></div>
@@ -2678,6 +2687,107 @@
     // ---- 구글 캘린더 연동 (앱스크립트 서버의 calList / __cal 사용) ----
     const CAL = { m: new Date(new Date().getFullYear(), new Date().getMonth(), 1), ev: [], sel: null };
     const calP2 = n => String(n).padStart(2, '0'), calYmd = d => d.getFullYear() + '-' + calP2(d.getMonth() + 1) + '-' + calP2(d.getDate());
+
+    // ---- GM 세션 보드에서 가져오기 (GM 전용) ----
+    const GB = { d: null };
+    function gbCfg() { try { return JSON.parse(localStorage.getItem('adv_gmb') || '{}'); } catch (e) { return {}; } }
+    function gbModal(html) { let el = document.getElementById('gb-ov'); if (!el) { el = document.createElement('div'); el.id = 'gb-ov'; el.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(40,28,10,.5);display:flex;align-items:center;justify-content:center;padding:12px'; el.onclick = e => { if (e.target === el) gbClose(); }; document.body.appendChild(el); }
+      el.innerHTML = `<div style="width:min(560px,100%);max-height:90vh;overflow-y:auto;scrollbar-width:none;background:#fffdf6;color:#3b2a14;border:1px solid #c9bb98;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;font-size:.9rem">${html}</div>`; }
+    function gbClose() { const el = document.getElementById('gb-ov'); if (el) el.remove(); }
+    function gbOpen() {
+      if (!(AUTH_S.gm && !plView())) { showToast('GM 권한이 있는 기기에서만 쓸 수 있어요.'); return; }
+      const c = gbCfg();
+      if (!c.url || !c.key) return gbSetup();
+      gbFetch();
+    }
+    function gbSetup() {
+      const c = gbCfg(), i = 'width:100%;box-sizing:border-box;padding:7px 9px;border:1px solid #c9bb98;border-radius:8px;background:#fff;font:inherit';
+      gbModal(`<b style="font-size:1.05rem">GM 보드 서버 연결</b><div style="font-size:.8rem;color:#7a6a48;line-height:1.5">GM 보드의 서버 연결 창에 입력한 주소와 비밀번호예요. 한 번 저장하면 이 기기에서 다시 묻지 않아요.</div><input id="gb-u" style="${i}" placeholder="웹 앱 주소 (.../exec)" value="${escapeHtml(c.url || '')}"><input id="gb-k" type="password" style="${i}" placeholder="비밀번호" value="${escapeHtml(c.key || '')}"><div style="display:flex;gap:8px"><button class="btn btn-secondary" onclick="gbClose()">닫기</button><span style="flex:1"></span><button class="btn btn-primary" onclick="gbSaveCfg()">저장하고 불러오기</button></div>`);
+    }
+    function gbSaveCfg() { const u = document.getElementById('gb-u').value.trim(), k = document.getElementById('gb-k').value; if (!u || !k) { showToast('주소와 비밀번호를 모두 넣어 주세요.'); return; } try { localStorage.setItem('adv_gmb', JSON.stringify({ url: u, key: k })); } catch (e) {} gbFetch(); }
+    async function gbFetch() {
+      const c = gbCfg(); gbModal('<div>GM 보드에서 불러오는 중…</div>');
+      try {
+        const r = await fetch(c.url + (c.url.includes('?') ? '&' : '?') + 'key=' + encodeURIComponent(c.key) + '&action=get').then(x => x.json());
+        if (!r.ok) throw new Error(r.error === 'auth' ? '비밀번호가 달라요' : (r.error || '연결 실패'));
+        if (!r.data) throw new Error('GM 보드 서버가 비어 있어요');
+        GB.d = typeof r.data === 'string' ? JSON.parse(r.data) : r.data; gbPick();
+      } catch (e) { gbModal(`<b>불러오지 못했어요</b><div>${escapeHtml(e.message || String(e))}</div><div style="display:flex;gap:8px"><button class="btn btn-secondary" onclick="gbClose()">닫기</button><span style="flex:1"></span><button class="btn btn-primary" onclick="gbSetup()">연결 설정 고치기</button></div>`); }
+    }
+    function gbMemos(tid) { const t = (GB.d.teams || []).find(x => x.id === tid); const o = []; if (t) (t.boards || []).forEach(b => (b.boxes || []).forEach(x => { if (x.t === 'memo') o.push({ b, x }); })); return o; }
+    function gbFile() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.json,application/json'; i.onchange = async () => { const f = i.files[0]; if (!f) return; try { const d = JSON.parse(await f.text()); if (!d.teams) throw new Error('GM 보드에서 저장한 파일이 아니에요'); GB.d = d; gbPick(); } catch (e) { showToast('읽지 못했어요: ' + (e.message || e)); } }; i.click(); }
+    function gbPick() {
+      const ts = GB.d.teams || [], tid = (document.getElementById('gb-t') || {}).value || GB.d.team || (ts[0] || {}).id, T = ts.find(t => t.id === tid) || {};
+      const ms = gbMemos(tid), kinds = [...new Set(ms.map(m => m.x.kind || '단서'))], ST = ['미공개', '공개함', '회수'];
+      const cnt = k => ms.filter(m => (m.x.kind || '단서') === k).length;
+      const bds = T.boards || [], nMap = bds.reduce((a, b) => a + (b.boxes || []).filter(x => x.t === 'map' && !x.jk).length, 0);
+      const lb = 'margin-right:12px;white-space:nowrap', sec = 'border-top:1px solid #e0d4b6;padding-top:8px';
+      gbModal(`<b style="font-size:1.05rem">GM 보드에서 가져오기</b>
+      <div style="font-size:.8rem;color:#7a6a48;line-height:1.5">이 저널은 플레이어도 보니까, 단서는 기본으로 공개한 것만 가져와요. 이미 가져온 항목은 다시 가져와도 중복되지 않아요. 저널에서 GM 보드로 가져왔던 항목은 건너뛰어요.</div>
+      <label>팀 <select id="gb-t" onchange="gbPick()" style="padding:5px 8px;border-radius:8px;border:1px solid #c9bb98">${ts.map(t => `<option value="${t.id}"${t.id === tid ? ' selected' : ''}>${escapeHtml(t.name)}</option>`).join('')}</select></label>
+      <div style="${sec}"><label><input type="checkbox" id="gb-c-clue" checked> <b>단서 · 떡밥 메모</b></label><br>${kinds.map(k => `<label style="${lb}"><input type="checkbox" class="gb-k" value="${escapeHtml(k)}" checked> ${escapeHtml(k)} (${cnt(k)})</label>`).join('') || '<span style="color:#7a6a48">메모가 없어요</span>'}<br>${ST.map((s, i) => `<label style="${lb}"><input type="checkbox" class="gb-s" value="${i}"${i === 1 ? ' checked' : ''}> ${s} (${ms.filter(m => (m.x.st || 0) === i).length})</label>`).join('')}</div>
+      <div style="${sec}"><label><input type="checkbox" id="gb-c-quest"> <b>퀘스트</b></label> <span style="font-size:.78rem;color:#7a6a48">고른 보드의 글 박스를 새 퀘스트로 만들어요 (제목 = 박스 제목, 내용 = 박스 글)</span><br>${bds.map(b => `<label style="${lb}"><input type="checkbox" class="gb-qb" value="${b.id}"> ${escapeHtml(b.name)} (${(b.boxes || []).filter(x => x.t === 'text' && !x.jk).length})</label>`).join('')}</div>
+      <div style="${sec}"><label><input type="checkbox" id="gb-c-npc"> <b>인물</b></label> <span style="font-size:.78rem;color:#7a6a48">등록한 등장인물 ${(T.chars || []).length}명을 인물 도감에 만들어요 (같은 이름은 건너뜀)</span><br><label style="${lb}"><input type="checkbox" id="gb-npcmemo"> 인물에 붙은 공개한 메모 내용을 인물 메모에 적기</label></div>
+      <div style="${sec}"><label><input type="checkbox" id="gb-c-map"> <b>지도</b></label> <span style="font-size:.78rem;color:#7a6a48">지도 카드 ${nMap}개와 핀을 지도로 옮겨요 (퀘스트와 연결된 핀은 같이 연결, 기기에서 직접 올린 이미지는 제외)</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-secondary" onclick="gbClose()">닫기</button><button class="btn btn-secondary" onclick="gbSetup()">서버 연결 설정</button><button class="btn btn-secondary" onclick="gbFile()">파일에서 불러오기</button><span style="flex:1"></span><button class="btn btn-primary" onclick="gbRun()">가져오기</button></div>`);
+    }
+    async function gbRun() {
+      const tid = document.getElementById('gb-t').value, T = (GB.d.teams || []).find(t => t.id === tid) || {}, bds = T.boards || [], on = id => document.getElementById(id).checked, rep = [];
+      const ks = [...document.querySelectorAll('.gb-k:checked')].map(i => i.value), ss = [...document.querySelectorAll('.gb-s:checked')].map(i => +i.value), qbs = [...document.querySelectorAll('.gb-qb:checked')].map(i => i.value);
+      const wantMemo = on('gb-npcmemo'), qmap = {};
+      (state.quests || []).forEach(q => { if (q.gb) qmap[q.gb] = q.id; });
+      // 퀘스트
+      if (on('gb-c-quest')) {
+        let add = 0; const folder = (state.folders[0] || {}).name || '기본 폴더';
+        bds.filter(b => qbs.includes(b.id)).forEach(b => { const sn = Number((String(b.name).match(/\d+/) || [1])[0]) || 1;
+          (b.boxes || []).filter(x => x.t === 'text' && !x.jk).forEach(x => { if (qmap[x.id]) return;
+            const q = { id: 'q_' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36), gb: x.id, title: x.title || String(x.body || '').split('\n')[0].slice(0, 30) || '새로운 퀘스트', folder, status: 'active', sessionNum: sn, tags: [], npcIds: [], pins: [], bannerImage: '', description: x.body || '', outcome: '', references: [], collapsed: false, pinsCollapsed: true, refsCollapsed: true, npcsCollapsed: true, tagsCollapsed: true };
+            state.quests.unshift(q); qmap[x.id] = q.id; add++; }); });
+        rep.push('퀘스트 ' + add + '개');
+      }
+      // 인물
+      if (on('gb-c-npc')) {
+        const have = new Set((state.globalNpcs || []).map(n => n.name).concat((state.boardTex.pcs || []).map(p => p.name))); let add = 0;
+        (T.chars || []).forEach(c => { if (have.has(c.name)) return; let memo = '';
+          if (wantMemo) { const L = []; bds.forEach(b => (b.boxes || []).forEach(x => { if (x.t === 'memo' && (x.who || []).includes(c.id) && (x.st || 0) === 1) L.push((x.title ? x.title + ': ' : '') + (x.body || '')); })); memo = L.join('\n'); }
+          state.globalNpcs.unshift({ id: 'gnpc_' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36), name: c.name, image: '', memo, gb: c.id }); have.add(c.name); add++; });
+        rep.push('인물 ' + add + '명');
+      }
+      // 지도
+      if (on('gb-c-map')) {
+        let md = mapData || mapLocal();
+        if (!md) { try { md = await new Promise((ok, no) => srvMapLoad(ok, no)); } catch (e) { md = null; } }
+        if (md && typeof md === 'object' && md.data && !md.maps) md = md.data;
+        if (!md) { rep.push('지도는 현재 지도 데이터를 불러오지 못해 건너뛰었어요'); }
+        else {
+          md.maps = md.maps || []; md.pins = md.pins || []; let am = 0, ap = 0, skip = 0;
+          bds.forEach(b => (b.boxes || []).filter(x => x.t === 'map' && !x.jk).forEach(x => {
+            if (!/^https?:/.test(x.src || '')) { skip++; return; }
+            let m = md.maps.find(k => k.gb === x.id); if (!m) { m = { id: 'gm_' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36), name: x.title || '지도', url: x.src, gb: x.id }; md.maps.push(m); am++; }
+            (x.pins || []).filter(p => !p.jk).forEach(p => { if (md.pins.some(k => k.gb === p.id)) return;
+              const lq = p.link && qmap[p.link] ? [{ id: qmap[p.link] }] : [];
+              md.pins.push({ id: 'gp_' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36), gb: p.id, mapId: m.id, x: Math.round(p.x * 10000) / 100, y: Math.round(p.y * 10000) / 100, title: p.name || '', desc: p.note || '', sessions: [], quests: lq }); ap++; }); }));
+          mapSave(md, true); if (mapReady) { try { mapInit(md); } catch (e) {} }
+          rep.push('지도 ' + am + '장, 핀 ' + ap + '개' + (skip ? ' (올린 이미지라 건너뜀 ' + skip + '장)' : ''));
+        }
+      }
+      // 단서 메모
+      if (on('gb-c-clue')) {
+        const pick = gbMemos(tid).filter(m => ks.includes(m.x.kind || '단서') && ss.includes(m.x.st || 0) && !m.x.jk);
+        if (pick.length) {
+          const d = mbData('clue'); let lane = d.lanes.find(l => l.gb);
+          if (!lane) { lane = { id: 'l_gb_' + Date.now().toString(36), session: Math.max(0, ...d.lanes.map(l => Number(l.session) || 0)) + 1, label: 'GM 보드', h: MB_LANE_H, gb: 1 }; d.lanes.push(lane); }
+          const li = d.lanes.indexOf(lane), cols = Math.max(1, Math.floor((MB_PAGE - 170) / 220)); let add = 0, upd = 0;
+          pick.forEach(({ x }) => { const txt = (x.kind ? '[' + x.kind + '] ' : '') + (x.title || '') + (x.body ? '\n' + x.body : ''), ex = d.cards.find(c => c.gb === x.id);
+            if (ex) { ex.text = txt; upd++; return; }
+            d.cards.push({ id: 'k_' + Date.now().toString(36) + Math.floor(Math.random() * 1e5).toString(36), gb: x.id, text: txt, x: 0, y: 0, w: 200, h: 150, z: ++mbTopZ, paper: '', done: (x.st || 0) === 2, qids: [], lane: li, lid: lane.id }); add++; });
+          const mine = d.cards.filter(c => c.lid === lane.id); lane.h = Math.max(MB_LANE_H, Math.ceil(mine.length / cols) * 170 + 70);
+          const top = mbLaneTops(d)[li]; mine.forEach((c, i) => { if (!c.gbPlaced) { c.x = 150 + (i % cols) * 220; c.y = top + 56 + Math.floor(i / cols) * 170; c.gbPlaced = 1; } });
+          rep.push('단서 ' + add + '개 추가, ' + upd + '개 갱신');
+        } else rep.push('단서 0개');
+      }
+      persistState(); gbClose(); try { renderAll(); } catch (e) {} try { renderMini('clue'); } catch (e) {} showToast('가져왔어요: ' + rep.join(', '));
+    }
     // ---- 세션 로그 (logs/ 폴더가 있을 때만 버튼 표시) ----
     const LG = { idx: null, data: {}, av: {}, cur: 0, tm: null };
     function lgProbe() {
@@ -2698,9 +2808,10 @@
     const LG_TOK = {"taskettesaurus": "data:image/webp;base64,UklGRpwFAABXRUJQVlA4WAoAAAAQAAAARwAARwAAQUxQSCcAAAABL6CQbQTo/MFep8tpRETgewlCDYzXBTAJNNG/mQIW0f8JaDQ33w8AVlA4IE4FAADwGwCdASpIAEgAPlEkjkUjoiERTAdMOAUEtIBnthoHZ3/Xuff7/e0+cZ+r/1T8nvzD98/8B4L7Vn+E3neW7wdf3j80Pxm9en+S9DPpz/N/yM+DH81/zPGmfPv6J7AH8i/nf+z/qv4wfEF/ff43zs/mX9v/3f+G+Af+T/0D/Uf2n94+9B+wHs1/rEbbXwH/Y7+YaJ+EtJJdvqLVb1m+0MGZNVBaOL4Qq+4aVIofqT2MydMPtqc3pNBmyOeR5Y1wYUfWP7EBoggvrzH2e7jvsltl5WagNJntCK9+ba5waNtFzzP2nH/MezmQAP77abyzsQT8I+FRPVAth0U88yAnd1jvJQd+KFTF8JvQuAh8pI39IV94HVatmfypWmC6h6zz5Yk0hIj3+9c7O0SnkZoaf5cL0d+T+TXL+rNn/Q3SDhNk/YiiWBMG9zrVxnH//fihS9QS/3PfTMA+UB3naB5JeB0mhkVaNyCj8+0fnRaFiMGh1kaQ6qLQ+LLm+2TLe6ubCb0VahZI/lGocR+ugJeQpmO6yc9D7L/8Ntitr/xoWfbqVHqgNZVm34urmBxOfpzfErIeTTVbQae+mz4tAgxH8ay4ZxqEEZfO+dcydvdSH2wICS/GJfkXPjxbma6i9MPhCMDPPvdZRc1SQN4b27s0X0U1FQnlrc5wFiaiqIdpQqXmslKoCMzURMDuGORtTrrDcM6RxnFBdMcTrsyw3/QUXAYJmRuG41Blj4xOyerRENUHRY/Mp4QL4hCCwGi4QfS18efwZu51x8LeMNP2zRNw+USrtRt6/p6RQr/aGpKfNT/n4WKCugeJ7M1TgkJ57C+HjfLvF5N4eYo304tTu6zEInMRUpFPlO3OB15R6kjMrYb49vm9elf0VTO2zbV7+DsIyl7wPUbsmP5LBPp9xH7juS2ld/ncdFEroJVoa+ATx6F4j9bxJaz0BV7Pv8kdenicojvVXEotXu7s7Q6RsUEz4c5l2ysgboqzwEtCrndsW+2K7pZzO/Zm0GOmi82WfbOoWRURWAdzX0fQ3YaTyTqMed3con+9pWrXQ+r9NXaFswmx2mJi5qAQsd5UZE9fFvsCPCiWKS9tZxylyvHocAaFeFHHh70fFpOPXNDKmND4Wz1UoeJe7TNK7YLqUZ7OAvn2OfjK5xDNligojVzw6s1jAfT8TgA0L4isDEyn8rKxMioOoD9a0dLEg71gc510zr29jeXZ0xfZZpjpqlcg5hWi/FddEXPXtgcyZoSqil7CLlUvdHxAYe6uIQPPL/BrChsb9PVdcFvX+x72W7Z2KelQsDxLGfpjpffHNBPTCW/5rmHfzIMJeW9EmWGEhXXoTBqoABH9m9i/dYtOx3rofKUCAqfIl35Z1yPFuW9aduhmuMpSHlLBgnRmf7cVngJMz/3QTSPUvsuH01plMVtOcEuwNhEjgYf4Iiz//5SjUABt7589lERU3/M9cjoyymo9gerYVKDV2OTzUG+ss7dnfpinZrf1Bs6ht5r/J48MF3wWRL9jqrpm1zFDpR6II8xxwvr6+Rwl3fRCTSREBxmWGydhR2c/nUGETuG/5Mxq3v9p9XVeKxSp9mucmiMQol45o/5ixecJsCfa2VOoaC6PXLU+Foa4JHRQyIach6YQ38BMa60NokXLFpHVbtlLuFTnq8dz+U1XN4XwmQpjVIHHbd1K9UDS2Dvg3xclXaglfzYXeu9LzFy9NQ/L6Xe2PMQc+yfUUZIBDB85ikTeNdkdLnYRJZuBCThBTgBdL1HvIXKvwXg/Urv+e/c21mHrbY8wPnb7RE+sQBIbFXSPM9x28AAAAA==", "튀김": "data:image/webp;base64,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", "상자": "data:image/webp;base64,UklGRiAEAABXRUJQVlA4IBQEAABwFQCdASpIAEgAPlEkjkWjoiET2V14OAUEsYBn4LeEi23WhM9SJvOtYp6Ifvf7Vclhlb91/K7kB2nP8TvpFtHGB3Hv914wbgB6RP+l/ZPV//xP7F/ffUN9Hf8v3EP1X/3HqzewD9lfYd/bA1cr3IeVSyteoDdSxNJVHqrjsujJDd7Pw+HtETDKzgJlk+EjpY17oymDwzAEe4F80LuZesh2aY2lWY53Epo3Lo+QpHbesI4e/AAA/vuWN/9wfqD+IKl6jYN9V/hLEwt8E+wjh7qHIvV8ipItvVPBHBYI4MB2FWbN9PRPHEpOvY183LFpHMDX66Zkg/e+GGq/4WSCLKAzYfh9NWoQ+RWRLkRmcFN2l3+4Xk1/M9j40959Jw6zcyPC1M3nl20dtvxyLLCaDP/i5eh0NVdgOHMeTNwc5/NbyZWgfVeHHia5xTWz9g/SgP/HGrUyUtFq1N8U/GZZX0jpEp278hH5NcBKrpz+UI2HZHWIqwQg6dnakIsKXEaFni+loSZCLsb/grd6AnitqJpgsAnP/wRjf6Jnh4WWbOTZhCnscIYGYLHpgxIKA+vk3q6L8WKvXmtapM1MazNgxtIyJwWh3ZH51viqlEurhQct5fpImHt7ymmJSbQYjOtLOq1rVp8/MD3nzPwyabmi529Ykl7+gxUOP8b6RDshKaNi0e7GbqE7gaQcB7WhPRJGY5f4MdWHSmQF5VLya1meO0D/qx9wcF4vO8x9eTMUyTXHvP+DDFIdRemfX+MMcmmt5OZCv69C2tuz0oWOOn8Nm+Cz/wFCH90D9Yk9deF6HpNhS9cyI82u3//FjjluXN5t3goRMKTZTRD9XwmOjDyFzmT7loBf3dw3PcXlsahX7tb3Aqmbepi2Lv7UjEBCpP75feIf+O/ITBry38OPPmAQJ6ffKcf+J9s8SA5VGrn462zaG8yNXLJIHMD8nZPWWqHapGmI/l1SC0nkGH2FiG8CCJdFF87+hzM7jRbDRXHx81v6f6HG04rnx+OPLcy/G/BF3nOfivG0wCHM0NPjO07eZdaCNvY83yp7pSQyJfe/QOuJTIrgKdEVl6VV+dFgitgsbrX2MpxbbnddsI49FxU0KBkWpuij186xwEAsfuKurmWWzvN21u4dlhF9edeSL2kMQuPGraMpjCeJc5LiYb5eruP1hlLb/Md2K2nr93E2GUuSYme3kd03UtnRr7K5v8FEZW8khlrW6Ytjkv3uOB/zOqBqex81IO3beTk2jQROu4YuNwgkWx1aMS6ZysdvkTCWgkcRTfLyV2QCpfzIdYd81EVgAhtZO9Y8MoA9BgdM5RlesIra+kpjt5kN34v8jbfiwdoNPm8f8M4cufqHqzgUAdvf69fYxsLB+VxCgt1Y+Y0IXzwAAAA=", "글루텐": "data:image/webp;base64,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", "감": "data:image/webp;base64,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"};
     function lgAlt(el) { const n = el.title, a = (LG.av[LG.cur] || {})['@alt:' + n], b = (LG.av[LG.cur] || {})[n]; if (!a) return; el.src = (el.src === a) ? b : a; }
     function lgPlHide() { try { return localStorage.getItem('adv_lg_pl') === '1'; } catch (e) { return false; } }
-    function lgPlToggle() { try { localStorage.setItem('adv_lg_pl', lgPlHide() ? '0' : '1'); } catch (e) {} lgNmSync(); if (LG.cur) lgShow(LG.cur); }
+    function lgPlToggle() { try { localStorage.setItem('adv_lg_pl', lgPlHide() ? '0' : '1'); } catch (e) {} lgNmSync(); lgKeepShow(); }
     function lgNmHide() { try { return localStorage.getItem('adv_lg_nm') === '1'; } catch (e) { return false; } }
-    function lgNmToggle() { try { localStorage.setItem('adv_lg_nm', lgNmHide() ? '0' : '1'); } catch (e) {} lgNmSync(); if (LG.cur) lgShow(LG.cur); }
+    function lgNmToggle() { try { localStorage.setItem('adv_lg_nm', lgNmHide() ? '0' : '1'); } catch (e) {} lgNmSync(); lgKeepShow(); }
+    function lgKeepShow() { if (!LG.cur) return; const m = document.getElementById('lg-main'), st = m ? m.scrollTop : 0; lgShow(LG.cur); [30, 120].forEach(t => setTimeout(() => { if (m) m.scrollTop = st; }, t)); }
     function lgNmSync() { const b = document.getElementById('lg-nm'); if (b) { b.textContent = '이름'; b.classList.toggle('lg-on', !lgNmHide()); b.classList.toggle('lg-off', lgNmHide()); } const c = document.getElementById('lg-pl'); if (c) { c.textContent = 'PL'; c.classList.toggle('lg-on', !lgPlHide()); c.classList.toggle('lg-off', lgPlHide()); } }
     function lgStrip(h) { const t = document.createElement('textarea'); t.innerHTML = h.replace(/<[^>]+>/g, ''); return t.value.replace(/\s+/g, ' ').trim(); }
     function lgParse(html, seen, AV) {
@@ -2761,6 +2872,9 @@
       const label = prompt('회차 이름 (예: 19회차)', next + '회차'); if (label === null) return;
       const title = prompt('한 줄 제목 (선택)', '') || '';
       const dt = prompt('날짜 (YYYY-MM-DD)', date || calYmd(new Date())) || date;
+      return lgSaveLog(msgs, av, label, title, dt, date);
+    }
+    async function lgSaveLog(msgs, av, label, title, dt, date) {
       const meta = { id: 1000 + Date.now() % 100000000, label, title, date: dt, n: msgs.length };
       showToast('로그 저장 중… (' + msgs.length + '줄)');
       try {
@@ -2769,6 +2883,63 @@
         meta.srv = 1; LG.idx.push(meta); LG.data[meta.id] = msgs; LG.av[meta.id] = av; LG.idx.sort((p, q) => String(p.date || '').localeCompare(String(q.date || '')) || p.id - q.id);
         lgList(); lgShow(meta.id); showToast('로그를 저장했어요');
       } catch (e) { alert('로그 저장 실패: ' + (e.message || e) + '\n(앱스크립트 서버 코드를 새 버전으로 다시 배포했는지 확인해주세요)'); }
+    }
+
+    // ---- 로그 붙여넣기 ----
+    function lgKnownNames() {
+      const s = new Set(); const bt = state.boardTex || {};
+      (bt.pcs || []).forEach(p => { if (p.name) s.add(p.name); if (p.pl) s.add(p.pl); });
+      (bt.tokens || []).forEach(t => String(t.n || '').split(/[,，]/).map(x => x.trim()).filter(Boolean).forEach(a => s.add(a)));
+      (bt.npcs || []).forEach(n => { if (n && n.name) s.add(n.name); });
+      s.add('시금치 (GM)'); s.add('시금치');
+      return s;
+    }
+    function lgParsePaste(txt) {
+      txt = txt.replace(/\r/g, '');
+      if (/^\s*\[\d+\/\d+\/\d{4},/m.test(txt)) return lgParseFvtt(txt);
+      const known = lgKnownNames(), out = []; let last = '';
+      const nameOk = n => { n = n.trim(); if (!n || n.length > 24) return false; if (known.has(n) || known.has(n.replace(/\s*\(GM\)\s*$/, ''))) return true; return !/[.!?~…,。"'\d]/.test(n) && n.split(/\s+/).length <= 3; };
+      let date = '';
+      const lines = txt.split('\n');
+      for (let i = 0; i < lines.length; i++) {
+        let l = lines[i].trim(); if (!l) continue;
+        const ts = l.match(/^\[?(\d{4})[-.\/](\d{1,2})[-.\/](\d{1,2})\]?[ T]*(\d{1,2}:\d{2}(:\d{2})?)?\s*(.*)$/);
+        if (ts && !date) date = ts[1] + '-' + String(ts[2]).padStart(2, '0') + '-' + String(ts[3]).padStart(2, '0');
+        l = l.replace(/^\[?\d{1,2}:\d{2}(:\d{2})?\s*(AM|PM|오전|오후)?\]?\s*/i, '');
+        let m = l.match(/^(.{1,40}?)\s*[:：]\s*(.*)$/);
+        if (m && nameOk(m[1])) { last = m[1].trim(); if (m[2].trim()) out.push(['m', last, m[2].trim(), /\(GM\)|^시금치$/.test(last) ? 1 : 0]); continue; }
+        if (/^[^\s:：][^:：]{0,24}$/.test(l) && known.has(l.replace(/\s*[:：]$/, '')) ) { last = l.replace(/\s*[:：]$/, ''); continue; }
+        const dm = l.match(/^(.*?)\s+(rolling|굴림)\s+(.+?)\s*=\s*(.+)$/i);
+        if (dm) { out.push(['r', last, dm[3], dm[4]]); continue; }
+        out.push(['m', last, l, /\(GM\)|^시금치$/.test(last) ? 1 : 0]);
+      }
+      return { msgs: out, date, av: {} };
+    }
+    function lgPasteOpen() {
+      let el = document.getElementById('lg-paste');
+      if (!el) { el = document.createElement('div'); el.id = 'lg-paste'; el.className = 'lg-paste'; document.querySelector('#lg-modal .lg-box').appendChild(el); }
+      const next = (LG.idx || []).reduce((m, x) => Math.max(m, Number(x.id) || 0), 0) + 1;
+      el.innerHTML = `<div class="lg-pbox"><b>로그 붙여넣기</b><div class="lg-psub">채팅 창에서 복사한 글을 그대로 붙여넣어요. 롤20 복사본, FVTT 복사본(대괄호 시각 형식), "이름: 대사" 형식을 알아봐요. 캐릭터와 NPC 이미지는 이미 올려 둔 토큰과 도감에서 이름으로 찾아 붙여요.</div>
+      <textarea id="lg-ptx" placeholder="여기에 붙여넣기" oninput="lgPasteScan()"></textarea>
+      <div class="lg-prow"><input id="lg-plb" type="text" value="${next}회차" placeholder="회차 이름"><input id="lg-ptt" type="text" placeholder="한 줄 제목 (선택)"><input id="lg-pdt" type="text" placeholder="날짜 YYYY-MM-DD"></div>
+      <div id="lg-pscan" class="lg-psub"></div>
+      <div class="lg-prow"><button class="btn btn-secondary" onclick="lgPasteClose()">닫기</button><span style="flex:1"></span><button class="btn btn-primary" id="lg-pgo" onclick="lgPasteGo()">저장하고 열기</button></div></div>`;
+      el.style.display = 'flex'; setTimeout(() => document.getElementById('lg-ptx').focus(), 30);
+    }
+    function lgPasteClose() { const el = document.getElementById('lg-paste'); if (el) el.style.display = 'none'; }
+    function lgPasteScan() {
+      const r = lgParsePaste(document.getElementById('lg-ptx').value), av = {}; try { tokSeed(); } catch (e) {} lgTokAv(av);
+      const sp = {}; r.msgs.forEach(m => { if (m[1]) sp[m[1]] = (sp[m[1]] || 0) + 1; });
+      const bt = state.boardTex || {}, nk = typeof nameKey === 'function' ? nameKey : (x => x);
+      const hasImg = n => !!(av[n] || av[n.replace(/\s*\(GM\)\s*$/, '')] || (bt.pcs || []).some(p => p.name === n && (p.img || p.icon)) || (typeof LG_TOK !== 'undefined' && LG_TOK[n.replace(/\s*\(GM\)\s*$/, '')]));
+      const dt = document.getElementById('lg-pdt'); if (dt && !dt.value && r.date) dt.value = r.date;
+      document.getElementById('lg-pscan').innerHTML = r.msgs.length ? '인식: ' + r.msgs.length + '줄 / 발언자 ' + Object.keys(sp).length + '명 — ' + Object.keys(sp).map(n => escapeHtml(n) + '(' + sp[n] + (hasImg(n) ? ', 이미지 있음' : ', 이미지 없음') + ')').join(' · ') : '아직 인식된 대사가 없어요';
+    }
+    async function lgPasteGo() {
+      const r = lgParsePaste(document.getElementById('lg-ptx').value); if (!r.msgs.length) { showToast('대사를 찾지 못했어요. 붙여넣은 내용을 확인해 주세요.'); return; }
+      const av = {}; try { tokSeed(); } catch (e) {} lgTokAv(av);
+      const label = document.getElementById('lg-plb').value.trim() || '새 회차', title = document.getElementById('lg-ptt').value.trim(), dt = document.getElementById('lg-pdt').value.trim() || r.date || calYmd(new Date());
+      lgPasteClose(); await lgSaveLog(r.msgs, av, label, title, dt, r.date);
     }
     async function lgDel(id) {
       const x = LG.idx.find(a => a.id === id); if (!x || !x.srv) return; if (!confirm('"' + x.label + '" 로그를 삭제할까요?')) return;
@@ -2848,9 +3019,10 @@
       const me = (typeof landMe === 'function') ? landMe() : '', pc = (state.boardTex.pcs || []).find(p => p.id === me), nm = me === 'gm' ? '시금치 (GM)' : (pc ? pc.name : ''), L = lgPmList(id);
       const items = L.map(m => { const ap = (state.boardTex.pcs || []).find(p => (p.name || '') === m.n), can = me === 'gm' || (m.by && m.by === me); return `<div class="lg-pmi"><span class="pcib">${ap ? pcIconImg(ap) + deadX(ap) : ''}</span><div class="lg-pmb"><b>${escapeHtml(m.n || '')}</b>${m.t ? `<div>${escapeHtml(m.t).replace(/\n/g, '<br>')}</div>` : ''}${m.img ? `<img class="lg-pmimg" src="${escapeHtml(m.img)}" alt="" onclick="window.open(this.src)">` : ''}</div>${can ? `<button class="lg-rune" title="메모 삭제" aria-label="메모 삭제" onclick="lgPmDel('${id}','${m.id}')"><img src="${IC_RUNE}" alt=""></button>` : ''}</div>`; }).join('');
       const form = nm ? `<div class="lg-pmf"><textarea id="lg-pmt" rows="2" placeholder="${escapeHtml(nm)}의 한 줄 메모 (이 회차에 붙여요)"></textarea><div class="lg-pmr"><button class="btn btn-secondary" type="button" onclick="lgPmImg()">이미지</button><span id="lg-pmn" style="font-size:.72rem;opacity:.7"></span><button class="btn btn-secondary" type="button" style="margin-left:auto" onclick="lgPmAdd('${id}')">붙이기</button></div></div>` : '<div style="font-size:.76rem;opacity:.65;padding:4px 2px">PC를 고르면 메모를 쓸 수 있어요.</div>';
-      return `<details class="lg-pm"${L.length ? ' open' : ''}><summary>메모 (${L.length})</summary>${items}${form}</details>`;
+      const sz = window.__pmSz ? ` style="width:${window.__pmSz[0]}px;height:${window.__pmSz[1]}px"` : ''; return `<details class="lg-pm"${sz}${L.length ? ' open' : ''}><summary>메모 (${L.length})</summary>${items}${form}</details>`;
     }
     window.__lgPmImg = '';
+    document.addEventListener('mouseup', e => { const d = document.querySelector('#lg-main .lg-pm'); if (d && d.style.width !== undefined && (d.offsetWidth && d.offsetHeight) && (e.target.closest && e.target.closest('.lg-pm'))) { const w = d.offsetWidth, hh = d.offsetHeight; if (!window.__pmSz || Math.abs(window.__pmSz[0] - w) > 2 || Math.abs(window.__pmSz[1] - hh) > 2) { if (d.style.width || d.style.height) window.__pmSz = [w, hh]; } } });
     function lgPmImg() { const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; i.onchange = () => { const f = i.files[0]; if (!f) return; const u = URL.createObjectURL(f), im = new Image(); im.onload = () => { const k = Math.min(1, 480 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); window.__lgPmImg = c.toDataURL('image/jpeg', .68); URL.revokeObjectURL(u); const n = document.getElementById('lg-pmn'); if (n) n.textContent = '이미지 첨부됨 ✓'; }; im.src = u; }; i.click(); }
     function lgPmAdd(id) {
       const me = landMe(), pc = (state.boardTex.pcs || []).find(p => p.id === me), nm = me === 'gm' ? '시금치 (GM)' : (pc ? pc.name : ''); if (!nm) return;
@@ -2921,7 +3093,7 @@
     }
     function lgCmtDel(id, cid) { if (!confirm('이 메모를 지울까요?')) return; const M = state.boardTex.lgCmts || {}; M[id] = (M[id] || []).filter(c => c.id !== cid); persistState(); lgCmtApply(id); }
     function lgShow(id, hit) {
-      LG.cur = id; lgList(); const main = document.getElementById('lg-main'), x = LG.idx.find(a => a.id === id); main.innerHTML = '<div class="lg-empty">불러오는 중…</div>';
+      LG.cur = id; lgList(); const main = document.getElementById('lg-main'), x = LG.idx.find(a => a.id === id); if (!LG.data[id]) main.innerHTML = '<div class="lg-empty">불러오는 중…</div>';
       lgLoad(id).then(ms => {
         let prev = null, h = `<div class="lg-h">${escapeHtml(x.label)} — ${escapeHtml(x.title || '')} <small style="font-weight:400;opacity:.6">${escapeHtml(x.date || '')}</small>${x.srv ? `<button class="lg-selbtn" style="float:right" onclick="lgSelToggle()" title="대사를 여러 줄 골라 메모 달기">메모</button><button class="lg-rune" style="float:right" title="이 로그 삭제" aria-label="이 로그 삭제" onclick="lgDel(${x.id})"><img src="${IC_RUNE}" alt=""></button>` : ''}</div>`;
         h += lgPmHtml(id);
@@ -5662,7 +5834,7 @@
       const d = mbData(kind), z = mbZoom(kind), { W, H } = mbCanvasSize(kind, d);
       const prev = document.getElementById('mb-view'), sc = prev ? { l: prev.scrollLeft, t: prev.scrollTop } : null;
       const zoomBar = `<span class="bz-bar"><button class="btn btn-secondary" onclick="mbZoomStep('${kind}',-1)" aria-label="축소">−</button><span style="cursor:pointer;" onclick="state.boardTex.mbz['${kind}']=1;renderMini('${kind}')" title="100%로">${Math.round(z * 100)}%</span><button class="btn btn-secondary" onclick="mbZoomStep('${kind}',1)" aria-label="확대">+</button><button class="btn btn-secondary cardlock-btn" onclick="cardLockToggle()" title="카드 고정 (켜면 화면을 밀어도 카드가 안 움직여요)" aria-label="카드 고정">${cardLocked() ? '🔒' : '🔓'}</button></span>`;
-      const acts = '';
+      const acts = (kind === 'clue' && AUTH_S.gm && !plView()) ? `<button class="btn btn-secondary" style="padding:4px 12px;font-size:.82rem" onclick="gbOpen()" title="GM 세션 보드에서 단서·떡밥을 가져와요 (GM만 보여요)">GM 보드에서 가져오기</button>` : '';
       const lanes = kind === 'clue' ? (() => { const rs = mbLaneRects(d); return d.lanes.map((l, i) => {
         const r = rs[i];
         const st = `left:${r.x}px;top:${r.y}px;height:${r.h}px;width:${r.w}px;transform:rotate(${mbLaneTilt(l)}deg);` + (l.img ? `background-image:url(${l.img});background-size:100% 100%;` : '');
