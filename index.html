@@ -1777,6 +1777,7 @@
 
     .land-box { border: 1px solid var(--border-subtle); border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; background: rgba(255,255,255,.6); }
     .dv-bg { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; } .dv-bg select, .dv-bg input { font-size: .8rem; padding: 5px 8px; border: 1px solid var(--border-subtle); border-radius: 8px; } .dv-bg input { flex: 1; min-width: 160px; }
+    .dv-pcs { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; } .dv-chip { display: inline-flex; align-items: center; gap: 2px; background: #f3e4bd; border-radius: 999px; padding: 1px 4px 1px 9px; font-size: .78rem; } .dv-chip button { border: 0; background: transparent; cursor: pointer; font-size: .95rem; line-height: 1; padding: 0 3px; } .dv-pcs select { font-size: .78rem; padding: 3px 6px; border: 1px solid var(--border-subtle); border-radius: 8px; }
     .dv-me { font-size: .84rem; line-height: 1.9; } .dv-gm { display: inline-block; align-self: center; width: fit-content; background: #b8893a; color: #fff; border-radius: 6px; padding: 0 6px; font-size: .68rem; font-weight: 800; }
     .dv-map { display: grid; gap: 4px; } .dv-pc { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; font-size: .8rem; } .dv-pc b { min-width: 96px; } .dv-pc span { display: flex; gap: 4px; flex-wrap: wrap; } .dv-pc i { font-style: normal; background: rgba(184,137,58,.18); border-radius: 8px; padding: 1px 8px; } .dv-pc i.me { background: rgba(184,137,58,.5); font-weight: 700; } .dv-pc em { opacity: .5; font-size: .74rem; }
     .dv-list { display: grid; gap: 6px; } .dv-row { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: center; border: 1px solid var(--border-subtle); border-radius: 10px; padding: 6px 8px; } .dv-n { display: flex; flex-direction: column; font-size: .84rem; } .dv-n small { opacity: .6; font-size: .7rem; } .dv-a { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; } .dv-a .btn { padding: 3px 9px; font-size: .74rem; } .dv-a select { font-size: .76rem; max-width: 150px; } .dv-del { color: #b3261e; }
@@ -2129,6 +2130,7 @@
             <li>새 사이트를 만들 때는 그 사이트용 Apps Script를 새로 배포하고, 배포 주소만 <code>index.html</code>에 바꿔 넣으면 돼요.</li>
             <li>이미지 폴더(<code>img</code>)는 각 사이트 폴더 안에 같이 올려야 해요.</li>
             <li><b>로그인·기기 관리:</b> 처음 접속한 기기가 비밀번호를 정하고 GM 기기가 돼요. 다른 기기는 그 비밀번호를 입력해야 접속해요. GM 기기는 환경설정 → 기기 관리에서 기기 삭제, GM 권한 주기, 기기별 연결 PC 확인·변경, 비밀번호 변경을 할 수 있어요. 비밀번호를 잊으면 Apps Script 편집기에서 <code>secReset</code> 함수를 한 번 실행해 처음 상태로 되돌려요.</li>
+            <li><b>내 PC 연결:</b> 처음 접속하면 로그인 직후 내 PC를 한 명 고르는 화면이 떠요. 그 뒤 PC가 바뀌거나 더 연결해야 하면 GM이 환경설정의 「기기 관리」 기기 목록에서 PC를 추가·해제해 줘요. GM이 아닌 기기는 연결된 PC의 설정만 바꿀 수 있어요.</li>
             <li>새 사이트를 만들 때도 최신 <code>Code.gs</code>(보안 기능 포함)를 배포하고, 배포 직후 바로 접속해 비밀번호를 정해 주세요. 처음 접속한 기기가 GM이 돼요.</li>
           </ul>
           <div class="manual-note">단축키나 사용법이 바뀌면 이 설명서에도 함께 기록해 둘게요.</div>
@@ -2311,7 +2313,7 @@
 
 
     // ===== 서버 연결: google.script.run 이 응답 없으면 같은 주소로 직접 요청(fetch)으로 자동 전환 =====
-    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbwFpbjK4KbFT0GlVSMeP4jNsW1ig8CLQQmKtoASHA42HNjujTuK66R7i3QyaVqm8okH/exec';
+    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbzRR3sHsFARbSXRQdBwzK2sJroAOStVUJoMMA2QGO-W9ahkSwxp5tfFn8MnDlbrOt5s/exec';
     function execUrl() { try { return localStorage.getItem('adventure_exec_url') || EXEC_URL_DEFAULT; } catch (e) { return EXEC_URL_DEFAULT; } }
     function diagShow(msg) { try { console.info('[sync]', msg); } catch (e) {} }
     const AUTH_S = { tk: (() => { try { return localStorage.getItem('adv_dev_tk') || ''; } catch (e) { return ''; } })(), gm: false, off: false, st: null, gate: false, bg: '' };
@@ -2332,7 +2334,7 @@
 
 
     // ===== 로그인 · 기기 관리 (서버 Code.gs 와 짝) =====
-    const AUTH_CSS = '#auth-ov{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(ellipse at 50% 42%,#1c1610 0%,#0a0806 62%,#050403 100%);font-family:inherit;overflow:auto;color:#e8d5a6}#auth-ov::before{content:"";position:fixed;inset:0;background:var(--abg) center/cover no-repeat;opacity:.55;pointer-events:none}#auth-ov::after{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,.15),rgba(0,0,0,.7) 100%);pointer-events:none}#auth-ov .ab{position:relative;z-index:1;width:min(360px,100%);text-align:center;animation:authIn 1.4s ease both}@keyframes authIn{from{opacity:0;letter-spacing:.2em}to{opacity:1}}#auth-ov .ey{font-size:.64rem;letter-spacing:.5em;text-transform:uppercase;color:#a58a52;opacity:.85}#auth-ov h2{margin:14px 0 6px;font-family:"Cinzel","Noto Serif KR",serif;font-size:clamp(1.9rem,8vw,2.8rem);font-weight:700;letter-spacing:.12em;line-height:1.15;background:linear-gradient(180deg,#f3e3b4 0%,#c9a45a 55%,#8e6d34 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 0 14px rgba(214,170,80,.35))}#auth-ov .dv{height:1px;margin:14px auto 18px;width:80%;background:linear-gradient(90deg,transparent,rgba(214,170,80,.8),transparent)}#auth-ov p.tt{margin:0 0 18px;font-family:"Cinzel","Noto Serif KR",serif;font-size:1.35rem;letter-spacing:.14em;line-height:1.6;color:#e9cf8f;opacity:1;filter:drop-shadow(0 0 12px rgba(214,170,80,.35))}#auth-ov p{margin:0 0 6px;font-size:.78rem;line-height:1.7;color:#cdb98a;opacity:.85}#auth-ov label{display:none}#auth-ov input{width:100%;box-sizing:border-box;margin-top:10px;padding:9px 4px;border:0;border-bottom:1px solid rgba(214,170,80,.45);border-radius:0;background:transparent;color:#f3e3b4;font-size:.95rem;text-align:center;letter-spacing:.08em;outline:none;transition:border-color .2s,box-shadow .2s}#auth-ov input::placeholder{color:#a58a52;opacity:.7;letter-spacing:.05em}#auth-ov input:focus{border-bottom-color:#e6c36e;box-shadow:0 8px 14px -10px rgba(230,195,110,.7)}#auth-ov input:-webkit-autofill{-webkit-text-fill-color:#f3e3b4;transition:background-color 9999s}#auth-ov button.go{margin-top:26px;padding:10px 26px;border:0;background:transparent;color:#f3e3b4;font-size:.9rem;font-weight:600;letter-spacing:.32em;cursor:pointer;text-shadow:0 0 12px rgba(230,195,110,.6);position:relative;animation:authPulse 2.6s ease-in-out infinite}#auth-ov button.go::before{content:"";position:absolute;left:-30px;right:-30px;top:50%;height:30px;transform:translateY(-50%);background:radial-gradient(ellipse at center,rgba(214,170,80,.28),transparent 70%);z-index:-1}#auth-ov button.go:hover{color:#fff4cf}#auth-ov button.go:disabled{opacity:.5;animation:none;cursor:default}@keyframes authPulse{50%{opacity:.6}}#auth-ov .er{min-height:1.2em;margin-top:14px;font-size:.78rem;color:#e58a7a}#auth-ov .sub{margin-top:34px;font-size:.66rem;color:#8d7a52;line-height:1.6}';
+    const AUTH_CSS = '#auth-ov{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(ellipse at 50% 42%,#1c1610 0%,#0a0806 62%,#050403 100%);font-family:inherit;overflow:auto;color:#e8d5a6}#auth-ov::before{content:"";position:fixed;inset:0;background:var(--abg) center/cover no-repeat;opacity:.55;pointer-events:none}#auth-ov::after{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,.15),rgba(0,0,0,.7) 100%);pointer-events:none}#auth-ov .ab{position:relative;z-index:1;width:min(360px,100%);text-align:center;animation:authIn 1.4s ease both}@keyframes authIn{from{opacity:0;letter-spacing:.2em}to{opacity:1}}#auth-ov .ey{font-size:.64rem;letter-spacing:.5em;text-transform:uppercase;color:#a58a52;opacity:.85}#auth-ov h2{margin:14px 0 6px;font-family:"Cinzel","Noto Serif KR",serif;font-size:clamp(1.9rem,8vw,2.8rem);font-weight:700;letter-spacing:.12em;line-height:1.15;background:linear-gradient(180deg,#f3e3b4 0%,#c9a45a 55%,#8e6d34 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 0 14px rgba(214,170,80,.35))}#auth-ov .dv{height:1px;margin:14px auto 18px;width:80%;background:linear-gradient(90deg,transparent,rgba(214,170,80,.8),transparent)}#auth-ov p.tt{margin:0 0 18px;font-family:"Cinzel","Noto Serif KR",serif;font-size:1.35rem;letter-spacing:.14em;line-height:1.6;color:#e9cf8f;opacity:1;filter:drop-shadow(0 0 12px rgba(214,170,80,.35))}#auth-ov p{margin:0 0 6px;font-size:.78rem;line-height:1.7;color:#cdb98a;opacity:.85}#auth-ov label{display:none}#auth-ov input{width:100%;box-sizing:border-box;margin-top:10px;padding:9px 4px;border:0;border-bottom:1px solid rgba(214,170,80,.45);border-radius:0;background:transparent;color:#f3e3b4;font-size:.95rem;text-align:center;letter-spacing:.08em;outline:none;transition:border-color .2s,box-shadow .2s}#auth-ov input::placeholder{color:#a58a52;opacity:.7;letter-spacing:.05em}#auth-ov input:focus{border-bottom-color:#e6c36e;box-shadow:0 8px 14px -10px rgba(230,195,110,.7)}#auth-ov input:-webkit-autofill{-webkit-text-fill-color:#f3e3b4;transition:background-color 9999s}#auth-ov button.go{margin-top:26px;padding:10px 26px;border:0;background:transparent;color:#f3e3b4;font-size:.9rem;font-weight:600;letter-spacing:.32em;cursor:pointer;text-shadow:0 0 12px rgba(230,195,110,.6);position:relative;animation:authPulse 2.6s ease-in-out infinite}#auth-ov button.go::before{content:"";position:absolute;left:-30px;right:-30px;top:50%;height:30px;transform:translateY(-50%);background:radial-gradient(ellipse at center,rgba(214,170,80,.28),transparent 70%);z-index:-1}#auth-ov button.go:hover{color:#fff4cf}#auth-ov button.go:disabled{opacity:.5;animation:none;cursor:default}@keyframes authPulse{50%{opacity:.6}}#auth-ov .er{min-height:1.2em;margin-top:14px;font-size:.78rem;color:#e58a7a}#auth-ov .pkw{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:4px 0 6px}#auth-ov .pk{padding:8px 16px;border:1px solid rgba(214,170,80,.5);border-radius:999px;background:transparent;color:#e8d5a6;font-size:.9rem;cursor:pointer;transition:all .15s}#auth-ov .pk:hover{border-color:#e6c36e}#auth-ov .pk.on{background:rgba(214,170,80,.28);color:#fff4cf;border-color:#e6c36e;box-shadow:0 0 14px rgba(230,195,110,.35)}#auth-ov .sub{margin-top:34px;font-size:.66rem;color:#8d7a52;line-height:1.6}';
     function authDevGuess() { const u = navigator.userAgent || ''; const os = /iPhone|iPad/.test(u) ? 'iPhone/iPad' : /Android/.test(u) ? '안드로이드' : /Windows/.test(u) ? '윈도우' : /Mac/.test(u) ? '맥' : /Linux/.test(u) ? '리눅스' : '기기'; const br = /Edg\//.test(u) ? 'Edge' : /Chrome\//.test(u) ? '크롬' : /Safari\//.test(u) ? '사파리' : /Firefox\//.test(u) ? '파이어폭스' : ''; return os + (br ? ' ' + br : ''); }
     function authPost(o) { return fetchT(execUrl(), { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ tk: AUTH_S.tk }, o)) }, 30000); }
     function authCover(html) {
@@ -2368,19 +2370,23 @@
       };
       q('au-go').onclick = go; ov.addEventListener('keydown', e => { if (e.key === 'Enter') go(); }); setTimeout(() => q('au-pw').focus(), 50);
     }
+    // ---- 이 기기에 연결된 PC 목록 (한 기기에 여러 PC 가능, 첫 번째 = 지금 쓰는 PC) ----
+    function myPcs() { let a = []; try { a = JSON.parse(localStorage.getItem('adv_my_pcs') || '[]'); } catch (e) {} if (!Array.isArray(a)) a = []; let me = ''; try { me = localStorage.getItem('adv_me_pl') || ''; } catch (e) {} if (me && !a.includes(me)) a.unshift(me); return a.filter((x, i) => x && a.indexOf(x) === i); }
+    function myPcsSave(list, active) { list = list.filter((x, i) => x && list.indexOf(x) === i); if (!active || !list.includes(active)) active = list[0] || ''; try { localStorage.setItem('adv_my_pcs', JSON.stringify(list)); if (active) localStorage.setItem('adv_me_pl', active); else localStorage.removeItem('adv_me_pl'); } catch (e) {} }
+    function myPcsAdd(id, activate) { const l = myPcs(); if (!l.includes(id)) l.push(id); myPcsSave(l, activate ? id : (landMe() || l[0])); }
     function authPcName(id) { try { const p = landPls().find(x => x.id === id); return p ? (p.name || '') : ''; } catch (e) { return ''; } }
     function authPushPc() {
       if (!AUTH_S.tk || AUTH_S.off || !AUTH_S.st || !AUTH_S.st.valid) return Promise.resolve();
-      let id = ''; try { id = landMe(); } catch (e) {}
-      return authPost({ __auth: 'setpc', pc: id, pcn: authPcName(id) }).then(r => { if (r && r.pcv) { try { localStorage.setItem('adv_pcv', String(r.pcv)); } catch (e) {} } }).catch(() => {});
+      let id = '', ids = []; try { id = landMe(); ids = myPcs(); if (id) ids = [id].concat(ids.filter(x => x !== id)); } catch (e) {}
+      return authPost({ __auth: 'setpc', pc: ids.join(','), pcn: ids.map(authPcName).join(' / ') }).then(r => { if (r && r.pcv) { try { localStorage.setItem('adv_pcv', String(r.pcv)); } catch (e) {} } }).catch(() => {});
     }
     function authSyncPc(st) {
       let loc = 0; try { loc = Number(localStorage.getItem('adv_pcv') || 0); } catch (e) {}
-      if (st.pcv && st.pcv > loc) { try { const was = localStorage.getItem('adv_me_pl') || ''; localStorage.setItem('adv_pcv', String(st.pcv)); if (was !== st.pc) { localStorage.setItem('adv_me_pl', st.pc || ''); setTimeout(() => { try { landRender(); presLink2(); } catch (e) {} }, 800); } } catch (e) {} }
+      if (st.pcv && st.pcv > loc) { try { const was = localStorage.getItem('adv_me_pl') || ''; localStorage.setItem('adv_pcv', String(st.pcv)); if (was !== String(st.pc || '').split(',')[0] || true) { const arr = String(st.pc || '').split(',').filter(Boolean); localStorage.setItem('adv_my_pcs', JSON.stringify(arr)); localStorage.setItem('adv_me_pl', arr[0] || ''); setTimeout(() => { try { landRender(); presLink2(); } catch (e) {} }, 800); } } catch (e) {} }
       else if (!st.pcv) { setTimeout(() => { try { if (landMe()) authPushPc(); } catch (e) {} }, 2500); }
     }
     async function authBoot() {
-      authCover('<div class="ab"><div class="ey">Adventure Journal</div><div class="dv"></div><p style="margin:0">접속 확인 중…</p></div>');
+      authCover('<div class="ab"><p style="margin:0">접속 확인 중…</p></div>');
       const done = () => { const o = document.getElementById('auth-ov'); if (o) o.remove(); AUTH_S.gate = false; };
       const tryIt = async () => {
         let st;
@@ -2388,7 +2394,7 @@
         catch (e) {
           if (/JSON 아님/.test(String(e.message))) { AUTH_S.off = true; done(); try { showToast('서버 보안 기능이 아직 켜지지 않았어요 (Code.gs 업데이트 필요)'); } catch (x) {} return; }
           if (AUTH_S.tk) { done(); try { showToast('서버에 연결하지 못했어요 (오프라인으로 열었어요)'); } catch (x) {} return; }
-          authCover('<div class="ab"><h2>연결 실패</h2><div class="dv"></div><p>서버에 연결하지 못했어요. 인터넷을 확인하고 다시 시도해 주세요.</p><button class="go" id="au-rt">다시 시도</button></div>').querySelector('#au-rt').onclick = () => { authCover('<div class="ab"><div class="ey">Adventure Journal</div><div class="dv"></div><p style="margin:0">접속 확인 중…</p></div>'); tryIt(); }; return;
+          authCover('<div class="ab"><h2>연결 실패</h2><div class="dv"></div><p>서버에 연결하지 못했어요. 인터넷을 확인하고 다시 시도해 주세요.</p><button class="go" id="au-rt">다시 시도</button></div>').querySelector('#au-rt').onclick = () => { authCover('<div class="ab"><p style="margin:0">접속 확인 중…</p></div>'); tryIt(); }; return;
         }
         AUTH_S.st = st; if (st.bg !== undefined) { AUTH_S.bg = st.bg || ''; try { localStorage.setItem('adv_login_bg', AUTH_S.bg); } catch (e) {} const ov0 = document.getElementById('auth-ov'); if (ov0) authCover(ov0.innerHTML); }
         if (!st.configured) return authGate('setup');
@@ -2402,6 +2408,11 @@
       authPost({ __auth: 'logout' }).catch(() => {}).then(() => { try { localStorage.removeItem('adv_dev_tk'); } catch (e) {} location.reload(); });
     }
     const dvT = n => { try { return new Date(n).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
+    function dvPcMulti(d) {
+      const ids = String(d.pc || '').split(',').filter(Boolean), pls = landPls(), nm = id => (pls.find(p => p.id === id) || {}).name || id, rest = pls.filter(p => !ids.includes(p.id));
+      return `<div class="dv-pcs">${ids.map(id => `<span class="dv-chip">${escapeHtml(nm(id))}<button type="button" title="연결 해제" onclick="devPcSet('${d.id}','${escapeHtml(ids.filter(x => x !== id).join(','))}')">×</button></span>`).join('') || '<em style="opacity:.6;font-size:.78rem">연결 안 됨</em>'}${rest.length ? `<select onchange="if(this.value)devPcSet('${d.id}','${escapeHtml(ids.concat('__X__').join(','))}'.replace('__X__',this.value))"><option value="">+ PC 추가</option>${rest.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name || 'PL')}</option>`).join('')}</select>` : ''}</div>`;
+    }
+    function devPcSet(id, list) { if (id === (AUTH_S.st || {}).id) { const l = list.split(',').filter(Boolean); myPcsSave(l, l[0]); authPushPc().then(() => devRender()); return; } devSetPc(id, list); }
     function dvPcSel(cur, onch) {
       const pls = landPls(); return `<select onchange="${onch}"><option value="">연결 안 함</option>${pls.map(p => `<option value="${escapeHtml(p.id)}"${cur === p.id ? ' selected' : ''}>${escapeHtml(p.name || 'PL')}</option>`).join('')}</select>`;
     }
@@ -2411,13 +2422,13 @@
       el.innerHTML = '<div class="manual-note">불러오는 중…</div>';
       let st; try { st = await fetchT(execUrl() + '?action=authStatus&tk=' + encodeURIComponent(AUTH_S.tk || ''), { redirect: 'follow' }, 20000); } catch (e) { el.innerHTML = '<div class="manual-note">불러오지 못했어요.</div>'; return; }
       AUTH_S.st = st; AUTH_S.gm = !!st.gm; let me = ''; try { me = landMe(); } catch (e) {}
-      let h = `<div class="dv-me"><b>이 기기:</b> ${escapeHtml(st.name || '')} ${st.gm ? '<span class="dv-gm">GM</span>' : ''}<br><span>연결된 PC: ${dvPcSel(me, "devSetMe(this.value)")}</span> <button class="btn btn-secondary" style="padding:3px 10px;font-size:.78rem" onclick="authLogout()">이 기기 로그아웃</button></div>`;
+      let h = `<div class="dv-me"><b>이 기기:</b> ${escapeHtml(st.name || '')} ${st.gm ? '<span class="dv-gm">GM</span>' : ''}<br><span>연결된 PC: ${st.gm ? dvPcSel(me, "devSetMe(this.value)") : '<b>' + escapeHtml(myPcs().map(authPcName).join(', ') || '없음') + '</b> <small style="opacity:.7">(바꾸려면 GM에게 요청)</small>'}</span> <button class="btn btn-secondary" style="padding:3px 10px;font-size:.78rem" onclick="authLogout()">이 기기 로그아웃</button></div>`;
       if (st.gm) {
         let r; try { r = await authPost({ __auth: 'list' }); } catch (e) { r = null; }
         if (r && r.status === 'OK') {
-          const pls = landPls(), byPc = {}; r.devices.forEach(d => { const k = d.pc || ''; (byPc[k] = byPc[k] || []).push(d); });
+          const pls = landPls(), byPc = {}; r.devices.forEach(d => { const ks = String(d.pc || '').split(',').filter(Boolean); (ks.length ? ks : ['']).forEach(k => { (byPc[k] = byPc[k] || []).push(d); }); });
           h += `<h4>PC · PL별 연결된 기기</h4><div class="dv-map">${pls.map(p => `<div class="dv-pc"><b>${escapeHtml(p.name || 'PL')}</b><span>${(byPc[p.id] || []).map(d => `<i class="${d.me ? 'me' : ''}">${escapeHtml(d.name)}</i>`).join('') || '<em>연결된 기기 없음</em>'}</span></div>`).join('')}${(byPc[''] || []).length ? `<div class="dv-pc"><b>연결 안 됨</b><span>${byPc[''].map(d => `<i>${escapeHtml(d.name)}</i>`).join('')}</span></div>` : ''}</div>`;
-          h += `<h4>기기 목록 (${r.devices.length})</h4><div class="dv-list">${r.devices.map(d => `<div class="dv-row"><div class="dv-n"><b>${escapeHtml(d.name)}</b> ${d.gm ? '<span class="dv-gm">GM</span>' : ''}${d.me ? ' <small>(이 기기)</small>' : ''}<small>마지막 접속 ${dvT(d.last)} · 등록 ${dvT(d.created)}</small></div><div class="dv-a">${dvPcSel(d.pc, `devSetPc('${d.id}',this.value)`)}${d.me ? '' : `<button class="btn btn-secondary" onclick="devSetGm('${d.id}',${d.gm ? 'false' : 'true'})">${d.gm ? 'GM 해제' : 'GM 권한 주기'}</button><button class="btn btn-secondary dv-del" onclick="devDel('${d.id}')">삭제</button>`}</div></div>`).join('')}</div>`;
+          h += `<h4>기기 목록 (${r.devices.length})</h4><div class="dv-list">${r.devices.map(d => `<div class="dv-row"><div class="dv-n"><b>${escapeHtml(d.name)}</b> ${d.gm ? '<span class="dv-gm">GM</span>' : ''}${d.me ? ' <small>(이 기기)</small>' : ''}<small>마지막 접속 ${dvT(d.last)} · 등록 ${dvT(d.created)}</small></div><div class="dv-a">${dvPcMulti(d)}${d.me ? '' : `<button class="btn btn-secondary" onclick="devSetGm('${d.id}',${d.gm ? 'false' : 'true'})">${d.gm ? 'GM 해제' : 'GM 권한 주기'}</button><button class="btn btn-secondary dv-del" onclick="devDel('${d.id}')">삭제</button>`}</div></div>`).join('')}</div>`;
           h += `<h4>로그인 화면 배경</h4><div class="dv-bg"><select onchange="devSetBg(this.value)"><option value="">기본 (어두운 배경, 글씨만)</option>${Object.keys(LG_WC).map(k => `<option value="img/wc/${k}.webp"${(st.bg || '') === 'img/wc/' + k + '.webp' ? ' selected' : ''}>${escapeHtml(LG_WC[k])}</option>`).join('')}</select><input type="text" id="dv-bgurl" placeholder="또는 이미지 주소(https://…)" value="${/^https:/.test(st.bg || '') ? escapeHtml(st.bg) : ''}"><button class="btn btn-secondary" onclick="devSetBg(document.getElementById('dv-bgurl').value.trim())">적용</button></div><div class="manual-note">이 설정은 로그인 전 화면에도 보여서 모든 기기에 적용돼요. 이미지는 사이트의 img 폴더 그림이나 https 주소만 쓸 수 있어요.</div>`;
           h += `<div style="margin-top:8px"><button class="btn btn-secondary" onclick="devChangePw()">비밀번호 변경</button></div>`;
         } else h += '<div class="manual-note">기기 목록을 불러오지 못했어요.</div>';
@@ -2426,7 +2437,7 @@
     }
     async function devSetBg(v) { const r = await authPost({ __auth: 'setbg', bg: v }).catch(() => null); if (r && r.status === 'OK') { AUTH_S.bg = v; try { localStorage.setItem('adv_login_bg', v); } catch (e) {} showToast('로그인 화면 배경을 바꿨어요.'); } else showToast('바꾸지 못했어요. (img/… 경로나 https 주소만 가능해요)'); devRender(); }
     function devSetMe(v) { landSetMe(v); }
-    async function devSetPc(id, pc) { const r = await authPost({ __auth: 'setpc', id, pc, pcn: authPcName(pc) }).catch(() => null); showToast(r && r.status === 'OK' ? '연결을 바꿨어요. 그 기기는 다음 접속 때 반영돼요.' : '바꾸지 못했어요.'); devRender(); }
+    async function devSetPc(id, pc) { const r = await authPost({ __auth: 'setpc', id, pc, pcn: String(pc).split(',').filter(Boolean).map(authPcName).join(' / ') }).catch(() => null); showToast(r && r.status === 'OK' ? '연결을 바꿨어요. 그 기기는 다음 접속 때 반영돼요.' : '바꾸지 못했어요.'); devRender(); }
     async function devSetGm(id, gm) { if (!confirm(gm ? '이 기기에 GM 권한을 줄까요?\n(기기 삭제·관리가 가능해져요)' : '이 기기의 GM 권한을 해제할까요?')) return; const r = await authPost({ __auth: 'setgm', id, gm }).catch(() => null); showToast(r && r.status === 'OK' ? '바꿨어요.' : '바꾸지 못했어요.'); devRender(); }
     async function devDel(id) { if (!confirm('이 기기를 삭제할까요?\n삭제된 기기는 바로 접속이 막히고, 다시 들어오려면 비밀번호를 입력해야 해요.')) return; const r = await authPost({ __auth: 'del', id }).catch(() => null); showToast(r && r.status === 'OK' ? '기기를 삭제했어요.' : '삭제하지 못했어요.'); devRender(); }
     async function devChangePw() {
@@ -2500,7 +2511,16 @@
       o.querySelectorAll('.na-chip').forEach(b => b.onclick = () => { inp.value = b.dataset.n; o.querySelectorAll('.na-chip').forEach(x => x.style.background = x === b ? '#fde7a8' : '#fff'); });
       o.querySelector('#na-ok').onclick = () => done(true); o.querySelector('#na-later').onclick = () => done(false); inp.onkeydown = e => { if (e.key === 'Enter') done(true); };
     }
-    setTimeout(() => { try { if (!presName() && !localStorage.getItem('adv_name_ask') && landPls().length > 1) nameAskOpen(); } catch (e) {} }, 6500);
+    // 처음 접속한 기기: 로그인 직후 같은 화면 스타일로 내 PC를 고르게 해요 (여러 개 가능, 나중에 설정에서 추가 가능)
+    function pcAskOpen() {
+      if (document.getElementById('auth-ov')) return; const gmDev = !!AUTH_S.gm; const pls = landPls().filter(p => gmDev || p.id !== 'gm'); if (!pls.length) return;
+      const sel = new Set(); const ov = authCover(`<div class="ab"><p class="tt">내 PC 선택</p><div class="pkw">${pls.map(p => `<button type="button" class="pk" data-id="${escapeHtml(p.id)}">${escapeHtml(p.name || 'PL')}</button>`).join('')}</div><div class="er" id="pk-er" style="color:#a58a52">한 명만 고를 수 있어요. 바뀌면 GM이 바꿔 줘요</div><button class="go" id="pk-go">입장</button><div class="sub"><a href="#" id="pk-later" style="color:inherit">나중에 고르기</a></div></div>`);
+      ov.querySelectorAll('.pk').forEach(b => b.onclick = () => { const id = b.dataset.id; sel.clear(); sel.add(id); ov.querySelectorAll('.pk').forEach(x => x.classList.toggle('on', x === b)); });
+      const fin = () => { try { localStorage.setItem('adv_pc_ask', '1'); } catch (e) {} ov.remove(); };
+      ov.querySelector('#pk-later').onclick = e => { e.preventDefault(); fin(); };
+      ov.querySelector('#pk-go').onclick = () => { if (!sel.size) { ov.querySelector('#pk-er').textContent = '하나 이상 골라 주세요'; ov.querySelector('#pk-er').style.color = '#e58a7a'; return; } const l = [...sel]; myPcsSave(l, l[0]); fin(); try { authPushPc(); window.__landed = 0; landApply(true); setViewMode(state.viewMode, state.viewMode === 'quests' ? state.statusFilter : state.viewMode === 'journal' ? state.jView : ''); presLink2(); } catch (e) { try { renderAll(); } catch (x) {} } };
+    }
+    (function pcAskWatch() { let n = 0; const iv = setInterval(() => { n++; try { if (localStorage.getItem('adv_pc_ask') || myPcs().length || n > 60) { clearInterval(iv); return; } if (!AUTH_S.gate && AUTH_S.st && AUTH_S.st.valid && state.boardTex && landPls().length > 1) { clearInterval(iv); pcAskOpen(); } } catch (e) {} }, 800); })();
     function presencePing() {
       if (document.hidden) return;
       fetchGet('ping&id=' + encodeURIComponent(PRES.id) + '&name=' + encodeURIComponent(presName()) + '&color=' + encodeURIComponent(presColor())).then(t => { const j = typeof t === 'string' ? JSON.parse(t) : t; if (j && j.online) presenceRender(j.online); else throw 0; }).catch(() => { presenceRender([{ id: PRES.id, name: presName() }]); });
@@ -2888,7 +2908,7 @@
     function landByName(n) { const k = nameKey(n); if (!k) return ''; const m = landPls().find(p => nameKey(p.key || p.name) === k || nameKey(p.name) === k); return m ? m.id : ''; }
     // 같은 이름 = 같은 사람: 이름을 저장하면 등록된 PL(설정)과 연결하고, 그 사람의 첫 화면 · 보기 방식을 바로 적용
     function presLink(n, applyNow) {
-      const id = landByName(n); try { if (id) localStorage.setItem('adv_me_pl', id); else localStorage.removeItem('adv_me_pl'); } catch (e) {}
+      const id = landByName(n); try { if (id) myPcsAdd(id, true); else localStorage.removeItem('adv_me_pl'); } catch (e) {}
       if (!id) { if (n) showToast('등록된 이름이 아니에요. 이름은 환경 설정의 PL 목록과 같게 적어 주세요.'); return ''; }
       const nm = (landPls().find(p => p.id === id) || {}).name || n; showToast('‘' + nm + '’님으로 연결했어요. 저장된 설정이 적용돼요.');
       if (applyNow) { try { window.__landed = 0; landApply(true); setViewMode(state.viewMode, state.viewMode === 'quests' ? state.statusFilter : state.viewMode === 'journal' ? state.jView : ''); } catch (e) { try { renderAll(); } catch (x) {} } }
@@ -2903,8 +2923,14 @@
       try { if (val === null || val === undefined) localStorage.removeItem('adv_pref_' + k); else localStorage.setItem('adv_pref_' + k, JSON.stringify(val)); } catch (e) {}
     }
     function presLink2() { try { const me = prefMe(); const v = prefGet('arrow'); if (v) qbBarsUpdate(); const n = prefGet('navOff'); if (n !== null) document.body.classList.toggle('nav-off', !!n); buildCtx(); showToast(me ? '내 PC로 연결했어요. 저장된 개인 설정이 적용돼요.' : '연결을 해제했어요.'); } catch (e) {} }
-    function landSetMe(v) { try { localStorage.setItem('adv_me_pl', v); } catch (e) {} landRender(); try { authPushPc(); } catch (e) {} }
-    function landSet(pc, v) { const L = landCfg(); if (pc) { if (v) L.pl[pc] = v; else delete L.pl[pc]; } else L.def = v; persistState(); }
+    function landSetMe(v) { myPcsSave(v ? [v] : [], v); landRender(); try { authPushPc(); } catch (e) {} }
+    function landAddMy(id) { if (!id || (landAllowed() && myPcs().length)) return; myPcsAdd(id, !landMe()); landTab = id; landRender(); try { authPushPc(); presLink2(); } catch (e) {} }
+    function landActivate(id) { const l = myPcs(); myPcsSave(l.includes(id) ? l : l.concat(id), id); landRender(); try { authPushPc(); presLink2(); } catch (e) {} }
+    function landUnlink(id) { if (landAllowed()) return; const l = myPcs().filter(x => x !== id); myPcsSave(l, landMe() === id ? l[0] : landMe()); landRender(); try { authPushPc(); presLink2(); } catch (e) {} }
+    // PL(GM이 아닌 기기)은 자기 PC 것만 바꿀 수 있어요
+    function landAllowed() { return AUTH_S.gm || AUTH_S.off ? null : myPcs(); }
+    function landDeny(pc) { const a = landAllowed(); if (a && (!pc || !a.includes(pc))) { showToast('내 PC의 설정만 바꿀 수 있어요.'); return true; } return false; }
+    function landSet(pc, v) { if (landDeny(pc)) return; const L = landCfg(); if (pc) { if (v) L.pl[pc] = v; else delete L.pl[pc]; } else L.def = v; persistState(); }
     // ---- 설정: PC별 탭 + 접기 + 드래그 정렬 ----
     let landTab = 'def';
     const LAND_SECS = [['start', '시작 페이지'], ['vm', '인물 보기 모드'], ['arrow', '스크롤바 화살'], ['tok', 'PL 토큰 — 이후 올리는 로그부터 적용']];
@@ -2925,8 +2951,8 @@
     function landOpenGet() { try { return JSON.parse(localStorage.getItem('adv_land_open') || '{}'); } catch (e) { return {}; } }
     function landOpenSet(k, v) { const o = landOpenGet(); o[k] = v ? 1 : 0; try { localStorage.setItem('adv_land_open', JSON.stringify(o)); } catch (e) {} }
     function landSecOrder() { const sv = prefGet('landSec') || [], o = []; sv.concat(LAND_SECS.map(x => x[0])).forEach(k => { if (LAND_SECS.some(x => x[0] === k) && !o.includes(k)) o.push(k); }); return o; }
-    function landTabSet(t) { landTab = t; landRender(); }
-    function landArrowSet(pc, v) {
+    function landTabSet(t) { if (landAllowed() && !landAllowed().includes(t)) return; landTab = t; landRender(); }
+    function landArrowSet(pc, v) { if (landDeny(pc)) return;
       if (!pc) { state.boardTex.arrow = v || state.boardTex.arrow; persistState(); try { qbBarsUpdate(); } catch (e) {} return; }
       if (pc === prefMe()) { if (v) qbArrowSet(v); else { prefSet('arrow', null); try { localStorage.removeItem('adv_arrow'); qbBarsUpdate(); } catch (e) {} } return; }
       const L = landCfg(); L.prefs = L.prefs || {}; L.prefs[pc] = L.prefs[pc] || {}; if (v) L.prefs[pc].arrow = v; else delete L.prefs[pc].arrow; persistState();
@@ -2958,8 +2984,9 @@
     }
     function landRender() {
       try { setInit(); } catch (e) {}
-      const el = document.getElementById('land-body'); if (!el) return; const L = landCfg(), pcs = landPls(), me = landMe();
-      if (landTab !== 'def' && !pcs.some(p => p.id === landTab)) landTab = 'def';
+      const el = document.getElementById('land-body'); if (!el) return; const L = landCfg(), allPcs = landPls(), me = landMe(), allow = landAllowed();
+      const pcs = allow ? allPcs.filter(p => allow.includes(p.id)) : allPcs;
+      if (allow) { if (!pcs.some(p => p.id === landTab)) landTab = (pcs.find(p => p.id === me) || pcs[0] || {}).id || ''; } else if (landTab !== 'def' && !pcs.some(p => p.id === landTab)) landTab = 'def';
       const t = landTab, pc = t === 'def' ? '' : t, meP = pcs.find(p => p.id === me), op = landOpenGet();
       const sel = (cur, pc, blank) => `<select onchange="landSet('${pc}',this.value)">${blank ? `<option value="">${blank}</option>` : ''}${LAND_OPTS.map(o => `<option value="${o[0]}"${cur === o[0] ? ' selected' : ''}>${o[1]}</option>`).join('')}</select>`;
       const selV = (cur, pc, blank) => `<select onchange="landSetVm('${pc}',this.value)">${blank ? `<option value="">${blank}</option>` : ''}${VM_OPTS.map(o => `<option value="${o[0]}"${cur === o[0] ? ' selected' : ''}>${o[1]}</option>`).join('')}</select>`;
@@ -2980,16 +3007,18 @@
         vm: `<div class="land-row"><span>${pc ? '보기 방식' : '기본'}</span>${pc ? selV((L.vmPl || {})[pc] || '', pc, '기본 따름') : selV(L.vm || 'simple', '', '')}</div>`,
         arrow: `<div class="land-row"><span>${pc ? '내 화살' : '기본 화살'}</span>${selA}</div><div style="font-size:.74rem;opacity:.65;margin-top:4px">화살 직접 만들기는 아래 「보드 스크롤바 · 화살 모양」에서 할 수 있어요.</div>`
       };
-      const tabs = `<div class="land-tabs"><button class="${t === 'def' ? 'on' : ''}" onclick="landTabSet('def')">공통 기본</button>${pcs.map(p => `<button class="${t === p.id ? 'on' : ''}" onclick="landTabSet('${escapeHtml(p.id)}')"><img src="${escapeHtml(p.img || IC_NPC)}" alt="">${escapeHtml(p.name || 'PL')}${me === p.id ? ' ✓' : ''}</button>`).join('')}</div>`;
-      const link = pc ? `<div class="land-row"><span>이 기기</span>${me === pc ? '<b>이 PC로 연결됨 ✓</b> <button class="btn btn-secondary" style="padding:3px 8px" onclick="landSetMe(\'\');presLink2()">연결 해제</button>' : `<button class="btn btn-secondary" style="padding:3px 10px" onclick="landSetMe('${escapeHtml(pc)}');presLink2()">이 기기를 이 PC로 연결</button>`}</div>` : '';
-      el.innerHTML = `<div class="land-row" style="margin-top:2px"><span>${meP ? '이 기기: <b>' + escapeHtml(meP.name) + '</b>' : '<b style="color:#b45309">PC 연결 안 됨</b>'}</span><small style="opacity:.65">개인 설정은 연결된 PC 이름으로 저장돼요</small></div>` + myTok + tabs + link
-        + `<div id="land-secs">` + landSecOrder().filter(k => k !== 'tok' || (pc && pc !== 'gm')).map(k => `<div class="land-sec" data-sid="${k}"><div class="land-sh">${LAND_SECS.find(x => x[0] === k)[1]}<span class="dnd-grip" title="끌어서 순서 바꾸기">⋮⋮</span></div>${body[k]}</div>`).join('') + `</div>`;
+      const addable = AUTH_S.gm || AUTH_S.off ? allPcs.filter(p => !myPcs().includes(p.id)) : [];
+      const addRow = addable.length ? `<div class="land-row"><span>내 PC 추가</span><select onchange="landAddMy(this.value)"><option value="">PC 고르기…</option>${addable.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name || 'PL')}</option>`).join('')}</select></div>` : '';
+      const tabs = `<div class="land-tabs">${allow ? '' : `<button class="${t === 'def' ? 'on' : ''}" onclick="landTabSet('def')">공통 기본</button>`}${pcs.map(p => `<button class="${t === p.id ? 'on' : ''}" onclick="landTabSet('${escapeHtml(p.id)}')"><img src="${escapeHtml(p.img || IC_NPC)}" alt="">${escapeHtml(p.name || 'PL')}${me === p.id ? ' ✓' : ''}</button>`).join('')}</div>`;
+      const isMine = myPcs().includes(pc), link = pc ? `<div class="land-row"><span>이 기기</span>${me === pc ? '<b>지금 쓰는 PC ✓</b>' : isMine ? `<button class="btn btn-secondary" style="padding:3px 10px" onclick="landActivate('${escapeHtml(pc)}')">이 PC로 전환</button>` : `<button class="btn btn-secondary" style="padding:3px 10px" onclick="landAddMy('${escapeHtml(pc)}')">이 기기에 이 PC 추가</button>`}${isMine && !allow ? ` <button class="btn btn-secondary" style="padding:3px 8px" onclick="landUnlink('${escapeHtml(pc)}')">연결 해제</button>` : ''}</div>` : '';
+      el.innerHTML = `<div class="land-row" style="margin-top:2px"><span>${meP ? '이 기기: <b>' + escapeHtml(meP.name) + '</b>' : '<b style="color:#b45309">PC 연결 안 됨</b>'}${myPcs().length > 1 ? ' <small style="opacity:.7">(PC ' + myPcs().length + '개 연결)</small>' : ''}</span><small style="opacity:.65">개인 설정은 연결된 PC 이름으로 저장돼요</small></div>` + myTok + addRow + tabs + link
+        + `<div id="land-secs">` + (allow && !pc ? [] : landSecOrder()).filter(k => k !== 'tok' || (pc && pc !== 'gm')).map(k => `<div class="land-sec" data-sid="${k}"><div class="land-sh">${LAND_SECS.find(x => x[0] === k)[1]}<span class="dnd-grip" title="끌어서 순서 바꾸기">⋮⋮</span></div>${body[k]}</div>`).join('') + `</div>`;
       const sc = document.getElementById('land-secs'); sc.querySelectorAll('.land-sec').forEach(d => { d.style.position = 'relative'; });
       dndInit(sc, o => prefSet('landSec', o));
     }
     const VM_OPTS = [['simple', '간단히 보기'], ['card', 'NPC 카드로 보기'], ['fan', '부채꼴 펼쳐 보기']];
     function landVm() { try { const L = (state.boardTex || {}).landing || {}, v = (L.vmPl && L.vmPl[landMe()]) || L.vm; return VM_OPTS.some(o => o[0] === v) ? v : 'simple'; } catch (e) { return 'simple'; } }
-    function landSetVm(pc, v) { const L = landCfg(); L.vmPl = L.vmPl || {}; if (pc) { if (v) L.vmPl[pc] = v; else delete L.vmPl[pc]; } else L.vm = v; persistState(); window.__vm = null; }
+    function landSetVm(pc, v) { if (landDeny(pc)) return; const L = landCfg(); L.vmPl = L.vmPl || {}; if (pc) { if (v) L.vmPl[pc] = v; else delete L.vmPl[pc]; } else L.vm = v; persistState(); window.__vm = null; }
     function landApply(canPersist) {
       if (window.__landed) return; const L = (state.boardTex || {}).landing;
       const v = L && ((L.pl && L.pl[landMe()]) || L.def);
