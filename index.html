@@ -3359,12 +3359,33 @@
         const AVm = LG.av[id] || {}, AVn = {}, stat = !((LG.idx.find(a => a.id === id)) || {}).srv, hid = lgNmHide(); Object.keys(AVm).forEach(k => { AVn[nameKey(k)] = AVm[k]; });
         const avu = n => (stat ? LG_TOK[String(n).replace(/\s*\(GM\)\s*$/, '')] : '') || AVm[n] || AVn[nameKey(n)] || lgAvG(n) || '', avh = n => avu(n) ? `<img class="lg-av" loading="lazy" src="${escapeHtml(avu(n))}" alt="" title="${escapeHtml(n)}" ${AVm['@alt:' + n] ? 'style="cursor:pointer" onclick="lgAlt(this)"' : ''} onerror="this.remove()">` : '', nmh = n => (hid && avu(n)) ? '' : escapeHtml(n);
         { // 등장인물 (이 회차에서 말한 PC · NPC — GM · PL은 뺌)
-          const cnt = {}, order = []; ms.forEach(m => { const n = String(m[1] || '').trim(); if (!n || m[0] === 'd') return; if (!(n in cnt)) { cnt[n] = 0; order.push(n); } cnt[n]++; });
-          const pcN = new Set((state.boardTex.pcs || []).map(p => nameKey(p.name || ''))), exN = lgCastExclude();
-          const dl = (state.boardTex.lgCastDel || {})[id] || {}, list = order.filter(n => !exN.has(nameKey(n)) && !/\(GM\)\s*$/.test(n) && !dl[nameKey(n)]);
-          const pcs = list.filter(n => pcN.has(nameKey(n))), npcs = list.filter(n => !pcN.has(nameKey(n)));
+          const cnt = {}, order = [], keyOf = n => {
+            const hit = typeof resolveCodexByName === 'function' ? resolveCodexByName(n) : null;
+            return hit ? (hit.kind + ':' + nameKey(hit.item.name)) : ('raw:' + nameKey(n));
+          };
+          ms.forEach(m => {
+            const n = String(m[1] || '').trim(); if (!n || m[0] === 'd') return;
+            const k = keyOf(n);
+            if (!(k in cnt)) { cnt[k] = 0; order.push(n); }
+            cnt[k]++;
+          });
+          const isPcEnt = n => {
+            const hit = typeof resolveCodexByName === 'function' ? resolveCodexByName(n) : null;
+            if (hit) return hit.kind === 'pc';
+            return (state.boardTex.pcs || []).some(p => [p.name].concat(typeof aliasList === 'function' ? aliasList(p) : []).some(nm => nameKey(nm) === nameKey(n)));
+          };
+          const exN = lgCastExclude();
+          const dl = (state.boardTex.lgCastDel || {})[id] || {}, seenK = new Set();
+          const list = order.filter(n => {
+            const nk = nameKey(n), gk = keyOf(n);
+            if (!nk || seenK.has(gk)) return false;
+            if (exN.has(nk) || /\(GM\)\s*$/.test(n) || dl[nk]) return false;
+            seenK.add(gk);
+            return true;
+          });
+          const pcs = list.filter(n => isPcEnt(n)), npcs = list.filter(n => !isPcEnt(n));
           const cs = lgCastState(), memoCnt = {}; lgPmList(id).forEach(m => { if (m.c) memoCnt[nameKey(m.c)] = (memoCnt[nameKey(m.c)] || 0) + 1; });
-          const card = (n, isPc) => { const u = avu(n), on = !!cs.pin[nameKey(n)], mc = memoCnt[nameKey(n)] || 0, st = lgStGet(n); return `<div class="lg-cc${isPc ? ' pc' : ''}${u ? '' : ' def'}${on ? ' on' : ''}${st ? ' st-' + st : ''}" onclick="lgCastPin(${JSON.stringify(n).replace(/"/g, '&quot;')})" oncontextmenu="lgCastCtx(event,${JSON.stringify(n).replace(/"/g, '&quot;')},${id})" title="${escapeHtml(n)} · ${cnt[n]}줄 · 누르면 강조 / 우클릭: 메모 · 이미지"><img src="${escapeHtml(u || IC_NPC)}" alt="" onerror="this.src=IC_NPC">${st && ST_ICON[st] && st !== 'gray' && st !== 'foe' ? `<img class="lg-cst" src="${ST_ICON[st]}" alt="">` : ''}<span>${escapeHtml(n)}</span><small>${mc ? '메모 ' + mc : (u ? cnt[n] + '줄' : '이미지 추가')}</small></div>`; };
+          const card = (n, isPc) => { const u = avu(n), on = !!cs.pin[nameKey(n)], mc = memoCnt[nameKey(n)] || 0, st = lgStGet(n); return `<div class="lg-cc${isPc ? ' pc' : ''}${u ? '' : ' def'}${on ? ' on' : ''}${st ? ' st-' + st : ''}" onclick="lgCastPin(${JSON.stringify(n).replace(/"/g, '&quot;')})" oncontextmenu="lgCastCtx(event,${JSON.stringify(n).replace(/"/g, '&quot;')},${id})" title="${escapeHtml(n)} · ${cnt[keyOf(n)]}줄 · 누르면 강조 / 우클릭: 메모 · 이미지"><img src="${escapeHtml(u || IC_NPC)}" alt="" onerror="this.src=IC_NPC">${st && ST_ICON[st] && st !== 'gray' && st !== 'foe' ? `<img class="lg-cst" src="${ST_ICON[st]}" alt="">` : ''}<span>${escapeHtml(n)}</span><small>${mc ? '메모 ' + mc : (u ? cnt[keyOf(n)] + '줄' : '이미지 추가')}</small></div>`; };
           const grp = (arr, isPc, key) => { if (!arr.length) return ''; const open = !!cs[key], shown = open ? arr : arr.filter(n => cs.pin[nameKey(n)]), hid = arr.length - shown.length;
             return `<div class="lg-cg"><button class="lg-cgt" onclick="lgCastToggle('${key}')">${open ? '접기' : '펼치기 (' + arr.length + ')'}</button>${shown.map(n => card(n, isPc)).join('')}</div>`; };
           if (pcs.length || npcs.length || Object.keys(dl).length) h += `<div class="lg-cast"><b class="lg-castt">등장인물</b>${grp(pcs, true, 'pcOpen')}${grp(npcs, false, 'npcOpen')}${Object.keys(dl).length ? `<div style="margin-top:6px"><button class="lg-cgt" onclick="lgCastRestore(${id})">숨긴 카드 복원 (${Object.keys(dl).length})</button></div>` : ''}</div>`;
