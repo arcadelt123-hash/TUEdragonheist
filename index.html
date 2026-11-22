@@ -3162,7 +3162,7 @@
         const d = document.createElement('div'); d.className = 'lg-cb'; d.innerHTML = `<div class="q">↳ ${idx.length}줄 · “${escapeHtml(q)}…”</div><div class="by"><span class="pcib">${ap ? pcIconImg(ap) + deadX(ap) : ''}</span>${escapeHtml(c.n || '')}</div><div>${escapeHtml(c.t || '').replace(/\n/g, '<br>')}</div>${can ? `<button class="lg-rune" title="메모 삭제" aria-label="메모 삭제" onclick="lgCmtDel('${id}','${c.id}')"><img src="${IC_RUNE}" alt=""></button>` : ''}`;
         last.after(d);
       });
-      if (!main.querySelector('.lg-cbar')) main.insertAdjacentHTML('beforeend', `<div class="lg-cbar"><span id="lg-cn" style="font-size:.78rem;white-space:nowrap">0줄 선택</span><textarea id="lg-ct" rows="1" placeholder="선택한 대사에 메모…"></textarea><button class="btn btn-secondary" onclick="lgCmtAdd()">달기</button><button class="btn btn-secondary" onclick="lgSelToggle(false)">닫기</button></div>`);
+      if (false && !main.querySelector('.lg-cbar')) main.insertAdjacentHTML('beforeend', `<div class="lg-cbar"><span id="lg-cn" style="font-size:.78rem;white-space:nowrap">0줄 선택</span><textarea id="lg-ct" rows="1" placeholder="선택한 대사에 메모…"></textarea><button class="btn btn-secondary" onclick="lgCmtAdd()">달기</button><button class="btn btn-secondary" onclick="lgSelToggle(false)">닫기</button></div>`);
     }
     function lgSelToggle(on) { const m = document.getElementById('lg-main'); if (!m) return; if (on === undefined) on = !m.classList.contains('lg-selmode'); m.classList.toggle('lg-selmode', !!on); document.querySelectorAll('.lg-selbtn').forEach(b => b.classList.toggle('on', !!on)); if (!on) { m.querySelectorAll('.lg-sel').forEach(e => e.classList.remove('lg-sel')); lgCmtCount(); } }
     function lgCmtCount() { const n = document.querySelectorAll('#lg-main .lg-m.lg-sel').length, e = document.getElementById('lg-cn'); if (e) e.textContent = n + '줄 선택'; }
@@ -3173,11 +3173,41 @@
       const id = LG.cur, M = (state.boardTex.lgCmts = state.boardTex.lgCmts || {}); (M[id] = M[id] || []).push({ id: 'cm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 4), idx: rows.map(r => Number(r.dataset.i)), n: U.nm, by: U.me, t, ts: Date.now() });
       persistState(); document.getElementById('lg-ct').value = ''; rows.forEach(r => r.classList.remove('lg-sel')); lgCmtApply(id); lgCmtCount();
     }
+    // 대사를 드래그해서 고른 뒤 우클릭 > 메모 추가
+    function lgSelRows(e) {
+      const sel = window.getSelection(), main = document.getElementById('lg-main'); let rows = [];
+      if (sel && !sel.isCollapsed && sel.rangeCount) { const r = sel.getRangeAt(0); rows = [...main.querySelectorAll('.lg-m[data-i]')].filter(n => { try { return r.intersectsNode(n); } catch (x) { return false; } }); }
+      if (!rows.length) { const one = e.target.closest && e.target.closest('#lg-main .lg-m[data-i]'); if (one) rows = [one]; }
+      return rows;
+    }
+    document.addEventListener('contextmenu', e => {
+      const main = document.getElementById('lg-main'); if (!main || !e.target.closest || !e.target.closest('#lg-main')) return;
+      if (e.target.closest('#lg-main .lg-cc, #lg-main .lg-pmw, #lg-main textarea, #lg-main input')) return;
+      const rows = lgSelRows(e); if (!rows.length) return;
+      e.preventDefault(); const old = document.getElementById('lg-cctx'); if (old) old.remove();
+      const m = document.createElement('div'); m.id = 'lg-cctx'; m.className = 'lg-deco'; m.style.cssText = 'position:fixed;width:auto;padding:6px;z-index:99999;left:' + Math.min(e.clientX, innerWidth - 170) + 'px;top:' + Math.min(e.clientY, innerHeight - 60) + 'px';
+      m.innerHTML = '<button class="btn btn-secondary">메모 추가 (' + rows.length + '줄)</button>'; document.body.appendChild(m);
+      const idx = rows.map(r => Number(r.dataset.i)); m.querySelector('button').onclick = () => { m.remove(); lgCmtPanel(idx); };
+      setTimeout(() => document.addEventListener('pointerdown', function f(ev) { if (!ev.target.closest('#lg-cctx')) m.remove(); document.removeEventListener('pointerdown', f, true); }, true), 0);
+    });
+    function lgCmtPanel(idx) {
+      const U = lgCmtMe(); if (!U.nm) { showToast('PC를 먼저 골라 주세요.'); return; }
+      const ms = LG.data[LG.cur] || [], q = idx.slice(0, 4).map(i => { const m = ms[i]; return m ? escapeHtml((m[1] ? m[1] + ': ' : '') + String(m[2] || '').slice(0, 80)) : ''; }).filter(Boolean).join('<br>') + (idx.length > 4 ? '<br>… 외 ' + (idx.length - 4) + '줄' : '');
+      let el = document.getElementById('lg-paste'); if (!el) { el = document.createElement('div'); el.id = 'lg-paste'; el.className = 'lg-paste'; document.querySelector('#lg-modal .lg-box').appendChild(el); }
+      window.__lgCmtIdx = idx;
+      el.innerHTML = `<div class="lg-pbox" style="width:min(480px,94%)"><b>대사에 메모 달기</b><div class="lg-psub" style="background:rgba(228,211,168,.4);padding:6px 8px;border-radius:8px">${q}</div><textarea id="lg-ct2" style="height:110px" placeholder="메모 내용"></textarea><div class="lg-prow"><button class="btn btn-secondary" onclick="lgPasteClose()">닫기</button><span style="flex:1"></span><button class="btn btn-primary" onclick="lgCmtPanelAdd()">붙이기</button></div></div>`;
+      el.style.display = 'flex'; setTimeout(() => document.getElementById('lg-ct2').focus(), 30);
+    }
+    function lgCmtPanelAdd() {
+      const U = lgCmtMe(), t = ((document.getElementById('lg-ct2') || {}).value || '').trim(); if (!t) { showToast('메모 내용을 써 주세요.'); return; }
+      const id = LG.cur, M = (state.boardTex.lgCmts = state.boardTex.lgCmts || {}); (M[id] = M[id] || []).push({ id: 'cm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 4), idx: window.__lgCmtIdx.slice(), n: U.nm, by: U.me, t, ts: Date.now() });
+      persistState(); lgPasteClose(); lgCmtApply(id);
+    }
     function lgCmtDel(id, cid) { if (!confirm('이 메모를 지울까요?')) return; const M = state.boardTex.lgCmts || {}; M[id] = (M[id] || []).filter(c => c.id !== cid); persistState(); lgCmtApply(id); }
     function lgShow(id, hit) {
       LG.cur = id; lgList(); const main = document.getElementById('lg-main'), x = LG.idx.find(a => a.id === id); if (!LG.data[id]) main.innerHTML = '<div class="lg-empty">불러오는 중…</div>';
       lgLoad(id).then(ms => {
-        let prev = null, h = `<div class="lg-h">${escapeHtml(x.label)} — ${escapeHtml(x.title || '')} <small style="font-weight:400;opacity:.6">${escapeHtml(x.date || '')}</small></div>${x.srv ? `<div class="lg-hb"><button class="lg-selbtn" onclick="lgSelToggle()" title="대사를 여러 줄 골라 메모 달기">메모</button><button class="lg-rune" title="이 로그 삭제" aria-label="이 로그 삭제" onclick="lgDel(${x.id})"><img src="${IC_RUNE}" alt=""></button></div>` : ''}`;
+        let prev = null, h = `<div class="lg-h">${escapeHtml(x.label)} — ${escapeHtml(x.title || '')} <small style="font-weight:400;opacity:.6">${escapeHtml(x.date || '')}</small></div>${x.srv ? `<div class="lg-hb"><button class="lg-rune" title="이 로그 삭제" aria-label="이 로그 삭제" onclick="lgDel(${x.id})"><img src="${IC_RUNE}" alt=""></button></div>` : ''}`;
         const pmH = lgPmHtml(id);
         const AVm = LG.av[id] || {}, AVn = {}, stat = !((LG.idx.find(a => a.id === id)) || {}).srv, hid = lgNmHide(); Object.keys(AVm).forEach(k => { AVn[nameKey(k)] = AVm[k]; });
         const avu = n => (stat ? LG_TOK[String(n).replace(/\s*\(GM\)\s*$/, '')] : '') || AVm[n] || AVn[nameKey(n)] || lgAvG(n) || '', avh = n => avu(n) ? `<img class="lg-av" loading="lazy" src="${escapeHtml(avu(n))}" alt="" title="${escapeHtml(n)}" ${AVm['@alt:' + n] ? 'style="cursor:pointer" onclick="lgAlt(this)"' : ''} onerror="this.remove()">` : '', nmh = n => (hid && avu(n)) ? '' : escapeHtml(n);
