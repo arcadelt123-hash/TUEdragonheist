@@ -1805,6 +1805,7 @@
     #pcc-prev .pc-tb { pointer-events: auto; cursor: move; touch-action: none; outline: 1px dashed rgba(230,178,74,.7); }
     .tb-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 5px 0; border-bottom: 1px solid rgba(120,90,40,.2); font-size: .76rem; } .tb-row textarea { flex: 1 1 100%; font: inherit; font-size: .82rem; padding: 4px 6px; border-radius: 6px; border: 1px solid #c9bb98; resize: vertical; }
     .bk-st { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; flex: 1 1 100%; padding-left: 18px; font-size: .72rem; } .bk-st input[type=range] { width: 90px; } .bk-st select { font-size: .72rem; max-width: 120px; }
+    .pres-glow { box-shadow: 0 0 0 2px var(--pg, #e6b24a), 0 0 12px 3px var(--pg, #e6b24a) !important; animation: presGl 1.6s ease-in-out infinite; } @keyframes presGl { 50% { box-shadow: 0 0 0 2px var(--pg, #e6b24a), 0 0 20px 6px var(--pg, #e6b24a); } }
     .dx { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #e11d1d; font: 900 28px/1 sans-serif; font-style: normal; text-shadow: 0 0 3px #fff, 0 0 2px #fff; pointer-events: none; z-index: 3; }
     .cx-pcrow .cx-pcimg, .itm-pcb, .itm-pcchip, .land-tabs button, .iv-tag, .pcib { position: relative; }
     .pcib { display: inline-flex; width: 26px; height: 26px; border-radius: 50%; overflow: hidden; vertical-align: middle; flex: none; }
@@ -1829,7 +1830,7 @@
     .pcc-cols { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
     .pcc-c { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding-left: 12px; border-left: 1px dashed var(--border-subtle); }
     .pcc-c1 { width: 210px; flex: none; padding-left: 0; border-left: 0; } .pcc-c1 .pcc-prev { width: 100%; position: static; }
-    .pcc-c2 { width: 190px; flex: none; } .pcc-c3 { flex: 1 1 200px; } .pcc-c4 { flex: 1.4 1 260px; }
+    .pcc-c1b { width: 230px; flex: none; } .pcc-c2 { width: 190px; flex: none; } .pcc-c3 { flex: 1 1 200px; } .pcc-c4 { flex: 1.4 1 260px; }
     .pcc-h { font-size: .85rem; } .pcc-none { font-size: .76rem; color: var(--text-muted); }
     .pcc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 6px; max-height: 520px; overflow-y: auto; padding: 2px; align-content: start; }
     .pcc-grid button { border: 2px solid transparent; border-radius: 6px; background: #8884; padding: 2px; cursor: pointer; } .pcc-grid button.on { border-color: #ca8a04; }
@@ -2561,8 +2562,25 @@
       document.getElementById('pres-edit').remove(); if (!ne.disabled) presLink(n, true); presencePing();
     }
     function presDedupe(list) { const seen = new Map(), out = []; (list || []).forEach(u => { const k = nameKey(u.name); if (!k) { out.push(u); return; } if (!seen.has(k)) { seen.set(k, out.length); out.push(Object.assign({}, u)); } else if (u.id === PRES.id) out[seen.get(k)] = Object.assign({}, u); }); return out; }
+    const PRES_ROOT = '[data-mid],[data-nid],[data-qid],[data-pcid],[data-did],[data-sid],[data-lane],[id]';
+    function presFieldKey(el) {
+      try { if (!el || !isTyp(el) || el.type === 'password' || el.closest('#auth-ov,#pres-float')) return ''; if (el.id) return '#' + el.id;
+        const r = el.parentElement && el.parentElement.closest(PRES_ROOT); if (!r) return ''; const rk = r.id ? '#' + r.id : Object.keys(r.dataset).filter(k => /^(mid|nid|qid|pcid|did|sid|lane)$/.test(k)).map(k => k + '=' + r.dataset[k]).join('&');
+        const sel = el.tagName.toLowerCase() + (el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/)[0] : ''); let n = 0; const all = r.querySelectorAll(el.tagName); for (let i = 0; i < all.length; i++) { if (all[i] === el) { n = i; break; } }
+        return rk + '>' + sel + '#' + n; } catch (e) { return ''; }
+    }
+    function presGlowApply() {
+      try { document.querySelectorAll('.pres-glow').forEach(e => { e.classList.remove('pres-glow'); e.style.removeProperty('--pg'); });
+        const L = (window.__presList || []).filter(u => u.id !== PRES.id && u.ed && String(u.ed).includes('¦')); if (!L.length) return;
+        const map = new Map(); L.forEach(u => map.set(String(u.ed).split('¦')[1], u));
+        document.querySelectorAll('input,textarea,select').forEach(el => { const u = map.get(presFieldKey(el)); if (u) { el.classList.add('pres-glow'); el.style.setProperty('--pg', presHue(u.id, u.color)); el.title = ((u.name || '').trim() || '다른 사람') + ' 님도 이 칸을 보고 있어요'; } });
+      } catch (e) {}
+    }
+    let _pgT = 0; function presKick() { clearTimeout(_pgT); _pgT = setTimeout(() => { try { presencePing(); } catch (e) {} }, 700); }
+    document.addEventListener('focusin', presKick, true); document.addEventListener('focusout', presKick, true);
+    setInterval(() => { if ((window.__presList || []).some(u => u.id !== PRES.id && u.ed && String(u.ed).includes('¦'))) presGlowApply(); }, 3000);
     function presenceRender(list) {
-      list = presDedupe(list); window.__presList = list;
+      list = presDedupe(list); window.__presList = list; setTimeout(presGlowApply, 0);
       let f = document.getElementById('pres-float');
       if (!f) {
         f = document.createElement('div'); f.id = 'pres-float';
@@ -2577,7 +2595,7 @@
         f.addEventListener('dblclick', () => presenceRename());
         document.body.appendChild(f);
       }
-      f.innerHTML = list.map(u => { const nm = (u.name || '').trim() || ('손님 ' + String(u.id).slice(-2)); return `<div ${u.id === PRES.id ? 'data-me="1"' : ''} style="display:flex;align-items:center;gap:6px;padding:2px 0;font-weight:${u.id === PRES.id ? 800 : 500}"><span style="width:10px;height:10px;border-radius:3px;background:${presHue(u.id, u.id === PRES.id ? (presColor() || u.color) : u.color)};flex:none"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(nm)}${u.id === PRES.id ? ' (나)' : ''}${u.ed && u.id !== PRES.id ? ` <small style="opacity:.7;font-weight:500">✎ ${escapeHtml(u.ed)}</small>` : ''}</span></div>`; }).join('');
+      f.innerHTML = list.map(u => { const nm = (u.name || '').trim() || ('손님 ' + String(u.id).slice(-2)); return `<div ${u.id === PRES.id ? 'data-me="1"' : ''} style="display:flex;align-items:center;gap:6px;padding:2px 0;font-weight:${u.id === PRES.id ? 800 : 500}"><span style="width:10px;height:10px;border-radius:3px;background:${presHue(u.id, u.id === PRES.id ? (presColor() || u.color) : u.color)};flex:none"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(nm)}${u.id === PRES.id ? ' (나)' : ''}${u.ed && u.id !== PRES.id ? ` <small style="opacity:.7;font-weight:500">✎ ${escapeHtml(String(u.ed).split('¦')[0])}</small>` : ''}</span></div>`; }).join('');
     }
     // 새 기기에서 처음 열면 이름을 물어봐서 기존 설정과 연결
     function nameAskOpen() {
@@ -3470,7 +3488,7 @@
     }
     function syncMergeFromServer(retry) {
       if (!SYNC_BASE || syncMergeN >= 3) { syncMergeN = 0; persistState(true); return; }
-      syncMergeN++; syncConf = false; setSyncBadge('syncing', '다른 기기 변경과 합치는 중...');
+      syncMergeN++; syncConf = false; 
       srvLoad(theirs => {
         try {
           const base = JSON.parse(SYNC_BASE), mine = JSON.parse(syncSnap()), merged = {};
@@ -3492,7 +3510,8 @@
     function syncRender0() { try { if (document.getElementById('lg-modal').classList.contains('open')) lgDecoApply(); } catch (e) {} }
     function syncRender() { if (typingHost()) { window.__renderLater = 1; return; } try { updateActiveTheme(); renderAll(); } catch (e) {} syncRender0(); }
     document.addEventListener('focusout', () => { setTimeout(() => { if (window.__renderLater && !typingHost()) { window.__renderLater = 0; try { renderAll(); } catch (e) {} } }, 250); });
-    function presEditing() { try { if (typeof sheetOpenId !== 'undefined' && sheetOpenId) { const id = (typeof sheetCurId === 'function' && sheetCurId()) || sheetOpenId, p = (state.boardTex.pcs || []).find(x => x.id === id); return '시트 · ' + ((p && p.name) || 'PC'); } const m = document.querySelector('.modal-backdrop.open'); if (m) { const h = m.querySelector('h1,h2,h3,.modal-title'); return ((h && h.textContent) || '편집 중').trim().slice(0, 24); } } catch (e) {} return ''; }
+    function presEditing() { const l = presEditing0(), k = presFieldKey(document.activeElement); return (l || k) ? (l || '입력 중') + (k ? '¦' + k : '') : ''; }
+    function presEditing0() { try { if (typeof sheetOpenId !== 'undefined' && sheetOpenId) { const id = (typeof sheetCurId === 'function' && sheetCurId()) || sheetOpenId, p = (state.boardTex.pcs || []).find(x => x.id === id); return '시트 · ' + ((p && p.name) || 'PC'); } const m = document.querySelector('.modal-backdrop.open'); if (m) { const h = m.querySelector('h1,h2,h3,.modal-title'); return ((h && h.textContent) || '편집 중').trim().slice(0, 24); } } catch (e) {} return ''; }
     function syncPollTick() {
       try {
         if (document.hidden || !SYNC_BASE || loadSettled === false || document.querySelector('#auth-ov')) return;
@@ -6937,7 +6956,9 @@
             <label style="font-size:.8rem;display:flex;gap:6px;align-items:center;"><input type="checkbox" ${p.showInfo ? 'checked' : ''} onchange="pcCfgSet('showInfo',this.checked)"> 기타 정보 표시</label>
             <textarea rows="2" maxlength="90" placeholder="추가 문구" oninput="pcCfgSet('extra',this.value)" style="resize:none;">${escapeHtml(p.extra || '')}</textarea>
             <div class="pcc-colors"><label>테두리 <input type="color" value="${p.cBorder || '#b8893a'}" oninput="pcCfgSet('cBorder',this.value)"></label><label>글자 <input type="color" value="${p.cText || '#3b2410'}" oninput="pcCfgSet('cText',this.value)"></label><label>배경 <input type="color" value="${p.cBg || '#fbf1d9'}" oninput="pcCfgSet('cBg',this.value)"></label><button class="btn btn-secondary" style="padding:2px 8px;font-size:.72rem;" onclick="['cBorder','cText','cBg'].forEach(k=>pcCfgSet(k,'',false));pcCfgRender()">색 초기화</button></div>
-            <div class="pcc-colors" style="margin-top:4px"><label>글씨체 <select onchange="pcCfgSet('cFont',this.value,true)" style="font-size:.78rem"><option value="">기본</option>${MEMO_FONTS.map(f => `<option value="${f.k}"${p.cFont === f.k ? ' selected' : ''}>${f.n}</option>`).join('')}</select></label><label>글씨 크기 <input type="range" min="60" max="220" step="5" value="${Number(p.cTs) || 100}" oninput="pcCfgSet('cTs',Number(this.value));this.nextElementSibling.textContent=this.value+'%'"><span style="font-size:.72rem;min-width:34px">${Number(p.cTs) || 100}%</span></label><button class="btn btn-secondary" style="padding:2px 8px;font-size:.72rem;" onclick="pcCfgSet('cFont','');pcCfgSet('cTs','',true)">글씨 초기화</button></div>
+          </div>
+          <div class="pcc-c pcc-c1b">
+            <div class="pcc-colors"><label>글씨체 <select onchange="pcCfgSet('cFont',this.value,true)" style="font-size:.78rem"><option value="">기본</option>${MEMO_FONTS.map(f => `<option value="${f.k}"${p.cFont === f.k ? ' selected' : ''}>${f.n}</option>`).join('')}</select></label><label>글씨 크기 <input type="range" min="60" max="220" step="5" value="${Number(p.cTs) || 100}" oninput="pcCfgSet('cTs',Number(this.value));this.nextElementSibling.textContent=this.value+'%'"><span style="font-size:.72rem;min-width:34px">${Number(p.cTs) || 100}%</span></label><button class="btn btn-secondary" style="padding:2px 8px;font-size:.72rem;" onclick="pcCfgSet('cFont','');pcCfgSet('cTs','',true)">글씨 초기화</button></div>
             ${pcTbHtml()}
             ${memo}${tokBox}</div>
           <div class="pcc-c pcc-c2"><b class="pcc-h">조절</b>${sliders}</div>
