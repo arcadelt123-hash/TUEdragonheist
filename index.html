@@ -483,7 +483,8 @@
     .top-bar > .cal-chip { margin-left: 8px; margin-right:0; flex: none; min-width:0; max-width: none; padding-left: 4px !important; padding-right: 4px !important; background: transparent; border-color: transparent; }
     .cal-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 260px; font-size: .78rem; padding: 4px 10px; white-space: nowrap; text-align: center; line-height: 1.3; }
     .cal-chip svg { flex: none; } .cal-chip span { overflow: visible; }
-    .cal-chip.soon { color: #b8893a; font-weight: 700; }
+    .cal-chip.soon { color: #5a3d12; font-weight: 700; }
+    .cal-chip[data-c], .cal-chip.soon[data-c] { color: var(--calc) !important; text-shadow: var(--calsh, none); }
     @media (max-width: 760px) { .cal-chip { max-width: 120px; } }
     /* 좁은 화면: 검색창이 열려도 아이콘이 화면 밖으로 밀리지 않게 */
     #quest-srch-slot, #npc-srch-slot { min-width: 0; }
@@ -1037,7 +1038,7 @@
     .lg-deco[hidden] { display: none; } .lg-deco label { display: flex; align-items: center; gap: 6px; margin-top: 6px; } .lg-deco select, .lg-deco input[type=text] { flex: 1; min-width: 0; padding: 4px 6px; border: 1px solid #c9bb98; border-radius: 8px; background: #fff; font: inherit; } .lg-deco input[type=range] { flex: 1; } .lg-deco h4 { margin: 8px 0 0; font-size: 13px; }
     .lg-x { border: 0; background: none; font-size: 18px; cursor: pointer; color: #5a4a2c; }
     .lg-body { flex: 1; display: flex; min-height: 0; overflow: hidden; }
-    .modal-box.lg-box.lg-dec .lg-top, .modal-box.lg-box.lg-dec .lg-list, .modal-box.lg-box.lg-dec .lg-main { background: transparent !important; } .modal-box.lg-box.lg-dec .lg-top { border-bottom-color: rgba(120,90,40,.25); } .modal-box.lg-box.lg-dec .lg-list { border-right-color: rgba(120,90,40,.25); }
+    .modal-box.lg-box.lg-dec .lg-top, .modal-box.lg-box.lg-dec .lg-list, .modal-box.lg-box.lg-dec .lg-main, .modal-box.lg-box.lg-dec .lg-body, .modal-box.lg-box.lg-dec .lg-list button:not(.on) { background: transparent !important; background-image: none !important; } .modal-box.lg-box.lg-dec .lg-list button:hover, .modal-box.lg-box.lg-dec .lg-list button.on { background: rgba(228,211,168,.55) !important; } .modal-box.lg-box.lg-dec .lg-top { border-bottom-color: rgba(120,90,40,.25); } .modal-box.lg-box.lg-dec .lg-list { border-right-color: rgba(120,90,40,.25); }
     .lg-list { width: 250px; flex: none; overflow-y: auto; border-right: 1px solid #d8cdb4; background: #f8f1e0; }
     .lg-list button { display: block; width: 100%; text-align: left; padding: 9px 12px; border: 0; border-bottom: 1px solid #e6dcc3; background: none; cursor: pointer; font: inherit; color: #3b2a14; }
     .lg-list button:hover { background: #efe4c9; } .lg-list button.on { background: #e4d3a8; }
@@ -2108,6 +2109,7 @@
 
       <div class="folder-mgmt-item">
         <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-main);">전체 배경 이미지 (연결된 PL별로 저장돼요 · '전체' 탭 선택 시)</div>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><b style="font-size:.78rem;white-space:nowrap">상단 일정 글씨색</b><input type="color" id="calclr" value="#5a3d12" oninput="calClrSet(this.value)" style="width:38px;height:26px;padding:0"><button class="btn btn-secondary" style="font-size:.75rem" onclick="calClrSet('')">기본</button></div>
         <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><b style="font-size:.78rem;white-space:nowrap">로그인 화면</b><select id="lgbg-sel" style="flex:1;font-size:0.8rem" onchange="plLoginBg(this.value?'img/wc/'+this.value+'.webp':'')"><option value="">내 로그인 배경 고르기…</option></select><input type="text" id="lgbg-url" placeholder="https://… 주소" style="flex:1;font-size:0.8rem"><button class="btn btn-secondary" style="font-size:.75rem" onclick="plLoginBg(document.getElementById('lgbg-url').value.trim())">적용</button></div>
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><select id="bg-wc-sel" style="flex:1;font-size:0.8rem" onchange="if(this.value){document.getElementById('bg-url-input').value='img/wc/'+this.value+'.webp';applyDefaultBgUrl();}"><option value="">수채 배경에서 고르기…</option></select></div>
         <div style="display: flex; gap: 8px; align-items: center;">
@@ -2816,6 +2818,9 @@
     function calMsg(t) { const e = document.getElementById('cal-msg'); if (e) e.textContent = t || ''; }
     function calEvDay(e) { return e.allDay ? e.start : calYmd(new Date(e.start)); }
     // 상단 탭줄 일정 칩: 가장 가까운 일정 표시
+    function calClrApply() { try { const c = document.getElementById('cal-chip'); if (!c) return; let v = null; try { v = prefGet('calClr'); } catch (e) {} if (v === null || v === undefined) v = localStorage.getItem('adv_calclr') || ''; if (v) { c.dataset.c = '1'; c.style.setProperty('--calc', v); c.style.setProperty('color', v, 'important'); } else { delete c.dataset.c; c.style.removeProperty('--calc'); c.style.removeProperty('color'); } const i = document.getElementById('calclr'); if (i && v) i.value = v; } catch (e) {} }
+    function calClrSet(v) { try { if (v) localStorage.setItem('adv_calclr', v); else localStorage.removeItem('adv_calclr'); if (prefMe()) prefSet('calClr', v || null); } catch (e) {} calClrApply(); }
+    setTimeout(calClrApply, 1500); setTimeout(calClrApply, 5000);
     function calNext() {
       const a = new Date(), b = new Date(a.getTime() + 120 * 864e5), chip = document.getElementById('cal-chip'), tx = document.getElementById('cal-chip-t'); if (!chip || !tx) return;
       fetchGet('calList&from=' + encodeURIComponent(new Date(a.getTime() - 864e5).toISOString()) + '&to=' + encodeURIComponent(b.toISOString())).then(t => {
@@ -2986,7 +2991,7 @@
       if (me) { const L = landCfg(), key = lk(me); L.prefs = L.prefs || {}; L.prefs[key] = L.prefs[key] || {}; if (val === null || val === undefined) { delete L.prefs[key][k]; if (L.prefs[me]) delete L.prefs[me][k]; } else L.prefs[key][k] = val; persistState(); }
       try { if (val === null || val === undefined) localStorage.removeItem('adv_pref_' + k); else localStorage.setItem('adv_pref_' + k, JSON.stringify(val)); } catch (e) {}
     }
-    function presLink2() { try { const me0 = prefMe(); if (me0) { const k0 = lk(me0), lb = prefGet('loginBg'); localStorage.setItem('adv_last_pl', k0); if (lb) localStorage.setItem('adv_loginbg_' + k0, lb); } } catch (e) {} try { const me = prefMe(); const v = prefGet('arrow'); if (v) qbBarsUpdate(); const n = prefGet('navOff'); if (n !== null) document.body.classList.toggle('nav-off', !!n); buildCtx(); showToast(me ? '내 PC로 연결했어요. 저장된 개인 설정이 적용돼요.' : '연결을 해제했어요.'); } catch (e) {} }
+    function presLink2() { try { calClrApply(); } catch (e) {} try { const me0 = prefMe(); if (me0) { const k0 = lk(me0), lb = prefGet('loginBg'); localStorage.setItem('adv_last_pl', k0); if (lb) localStorage.setItem('adv_loginbg_' + k0, lb); } } catch (e) {} try { const me = prefMe(); const v = prefGet('arrow'); if (v) qbBarsUpdate(); const n = prefGet('navOff'); if (n !== null) document.body.classList.toggle('nav-off', !!n); buildCtx(); showToast(me ? '내 PC로 연결했어요. 저장된 개인 설정이 적용돼요.' : '연결을 해제했어요.'); } catch (e) {} }
     function landSetMe(v) { if (plView()) return; myPcsSave(v ? [v] : [], v); landRender(); try { authPushPc(); presencePing(); } catch (e) {} }
     function pcActiveToggle(id) { const p = (state.boardTex.pcs || []).find(x => x.id === id); if (!p) return; p.off = !p.off; if (!p.off) delete p.off; persistState(); try { landRender(); renderAll(); } catch (e) {} showToast((p.off ? '‘' + (p.name || 'PC') + '’을(를) 비활성화했어요.' : '‘' + (p.name || 'PC') + '’을(를) 활성화했어요.')); try { presencePing(); } catch (e) {} }
     function landAddMy(id) { if (!id || (landAllowed() && myPcs().length)) return; myPcsAdd(id, !landMe()); landTab = id; landRender(); try { authPushPc(); presLink2(); presencePing(); } catch (e) {} }
@@ -3385,7 +3390,8 @@
     const isTyp = ae => !!ae && (/INPUT|TEXTAREA|SELECT/.test(ae.tagName || '') || ae.isContentEditable);
     function typingHost() { return isTyp(document.activeElement); }
     function typingSheet() { try { const fr = document.getElementById('sheet-frame'); return !!(fr && fr.contentWindow && isTyp(fr.contentWindow.document.activeElement)); } catch (e) { return false; } }
-    function syncRender() { if (typingHost()) { window.__renderLater = 1; return; } try { updateActiveTheme(); renderAll(); } catch (e) {} }
+    function syncRender0() { try { if (document.getElementById('lg-modal').classList.contains('open')) lgDecoApply(); } catch (e) {} }
+    function syncRender() { if (typingHost()) { window.__renderLater = 1; return; } try { updateActiveTheme(); renderAll(); } catch (e) {} syncRender0(); }
     document.addEventListener('focusout', () => { setTimeout(() => { if (window.__renderLater && !typingHost()) { window.__renderLater = 0; try { renderAll(); } catch (e) {} } }, 250); });
     function presEditing() { try { if (typeof sheetOpenId !== 'undefined' && sheetOpenId) { const id = (typeof sheetCurId === 'function' && sheetCurId()) || sheetOpenId, p = (state.boardTex.pcs || []).find(x => x.id === id); return '시트 · ' + ((p && p.name) || 'PC'); } const m = document.querySelector('.modal-backdrop.open'); if (m) { const h = m.querySelector('h1,h2,h3,.modal-title'); return ((h && h.textContent) || '편집 중').trim().slice(0, 24); } } catch (e) {} return ''; }
     function syncPollTick() {
