@@ -1776,6 +1776,9 @@
     .tcg-skinp .pcc-row { border-top-color: #ca8a0455; color: #f1e6c8; } .tcg-skinp .pcc-row:first-child { border-top: 0; padding-top: 0; } .tcg-skinp .pcc-sl { color: #c9b98a; }
 
     .land-box { border: 1px solid var(--border-subtle); border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; background: rgba(255,255,255,.6); }
+    .dv-me { font-size: .84rem; line-height: 1.9; } .dv-gm { background: #b8893a; color: #fff; border-radius: 6px; padding: 0 6px; font-size: .68rem; font-weight: 800; }
+    .dv-map { display: grid; gap: 4px; } .dv-pc { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; font-size: .8rem; } .dv-pc b { min-width: 96px; } .dv-pc span { display: flex; gap: 4px; flex-wrap: wrap; } .dv-pc i { font-style: normal; background: rgba(184,137,58,.18); border-radius: 8px; padding: 1px 8px; } .dv-pc i.me { background: rgba(184,137,58,.5); font-weight: 700; } .dv-pc em { opacity: .5; font-size: .74rem; }
+    .dv-list { display: grid; gap: 6px; } .dv-row { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: center; border: 1px solid var(--border-subtle); border-radius: 10px; padding: 6px 8px; } .dv-n { display: flex; flex-direction: column; font-size: .84rem; } .dv-n small { opacity: .6; font-size: .7rem; } .dv-a { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; } .dv-a .btn { padding: 3px 9px; font-size: .74rem; } .dv-a select { font-size: .76rem; max-width: 150px; } .dv-del { color: #b3261e; }
     .manual { font-size: .82rem; line-height: 1.55; color: var(--text-main); padding-top: 6px; } .manual h4 { margin: 10px 0 4px; font-size: .86rem; } .manual table { border-collapse: collapse; width: 100%; } .manual th { text-align: left; white-space: nowrap; vertical-align: top; padding: 4px 10px 4px 0; font-weight: 800; color: #7a5a22; } .manual td { padding: 4px 0; } .manual tr + tr > * { border-top: 1px dashed var(--border-subtle); } .manual ul { margin: 0; padding-left: 18px; } .manual code { background: rgba(0,0,0,.06); padding: 0 4px; border-radius: 4px; } .manual-note { margin-top: 8px; font-size: .74rem; color: var(--text-muted); }
     .land-box > summary { cursor: pointer; font-weight: 800; font-size: .92rem; }
     .land-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-size: .84rem; } .land-row > span { width: 150px; flex: none; display: flex; align-items: center; gap: 6px; font-weight: 700; } .land-row img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; } .land-row select { flex: 1; min-width: 0; }
@@ -2098,6 +2101,7 @@
           <button class="btn btn-primary" onclick="addNewFolderFromModal()">+ 폴더 추가</button>
         </div>
       </details>
+      <details class="land-box" id="dev-box" ontoggle="if(this.open)devRender()"><summary>🔐 기기 관리 · 보안 (로그인)</summary><div id="dev-body" class="manual"></div></details>
       <details class="land-box" id="manual-box"><summary>📖 사이트 설명서 (단축키 · 사용법)</summary>
         <div class="manual">
           <h4>단축키</h4>
@@ -2123,6 +2127,8 @@
             <li>이 도구는 사이트마다 따로 저장돼요 (드래곤하이스트 · 판델버 · 평일). 데이터가 서로 섞이지 않아요.</li>
             <li>새 사이트를 만들 때는 그 사이트용 Apps Script를 새로 배포하고, 배포 주소만 <code>index.html</code>에 바꿔 넣으면 돼요.</li>
             <li>이미지 폴더(<code>img</code>)는 각 사이트 폴더 안에 같이 올려야 해요.</li>
+            <li><b>로그인·기기 관리:</b> 처음 접속한 기기가 비밀번호를 정하고 GM 기기가 돼요. 다른 기기는 그 비밀번호를 입력해야 접속해요. GM 기기는 환경설정 → 기기 관리에서 기기 삭제, GM 권한 주기, 기기별 연결 PC 확인·변경, 비밀번호 변경을 할 수 있어요. 비밀번호를 잊으면 Apps Script 편집기에서 <code>secReset</code> 함수를 한 번 실행해 처음 상태로 되돌려요.</li>
+            <li>새 사이트를 만들 때도 최신 <code>Code.gs</code>(보안 기능 포함)를 배포하고, 배포 직후 바로 접속해 비밀번호를 정해 주세요. 처음 접속한 기기가 GM이 돼요.</li>
           </ul>
           <div class="manual-note">단축키나 사용법이 바뀌면 이 설명서에도 함께 기록해 둘게요.</div>
         </div>
@@ -2304,20 +2310,128 @@
 
 
     // ===== 서버 연결: google.script.run 이 응답 없으면 같은 주소로 직접 요청(fetch)으로 자동 전환 =====
-    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxWNO_NAzNLeew8R6eVNwOdzIU8W372wADs1ypL7Y3yoR4uKwXycotx4Jcy2Pdpj-9P/exec';
+    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbzVswvi3aJomL1slrFMKxHuSl6-JE8otLLE23HP2zgo2R7zkE0guEDtXxBg-aZ9ute6/exec';
     function execUrl() { try { return localStorage.getItem('adventure_exec_url') || EXEC_URL_DEFAULT; } catch (e) { return EXEC_URL_DEFAULT; } }
     function diagShow(msg) { try { console.info('[sync]', msg); } catch (e) {} }
+    const AUTH_S = { tk: (() => { try { return localStorage.getItem('adv_dev_tk') || ''; } catch (e) { return ''; } })(), gm: false, off: false, st: null, gate: false };
     function fetchT(url, opt, ms) {
+      if (AUTH_S.tk && String(url).indexOf(execUrl()) === 0) {
+        if (!opt || opt.method !== 'POST') url += (String(url).indexOf('?') < 0 ? '?' : '&') + 'tk=' + encodeURIComponent(AUTH_S.tk);
+        else if (typeof opt.body === 'string' && opt.body.charAt(0) === '{' && opt.body.indexOf('"__auth"') < 0) opt = Object.assign({}, opt, { body: opt.body === '{}' ? '{"tk":"' + AUTH_S.tk + '"}' : '{"tk":"' + AUTH_S.tk + '",' + opt.body.slice(1) });
+      }
       const ac = (typeof AbortController !== 'undefined') ? new AbortController() : null;
       const to = setTimeout(() => { try { ac && ac.abort(); } catch (e) {} }, ms || 12000);
       return fetch(url, Object.assign({ signal: ac ? ac.signal : undefined }, opt)).then(r => {
         clearTimeout(to);
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.text();
-      }).then(t => { try { return JSON.parse(t); } catch (e) { throw new Error('JSON 아님: ' + t.slice(0, 120).replace(/\s+/g, ' ')); } }, e => { clearTimeout(to); throw e; });
+      }).then(t => { let j; try { j = JSON.parse(t); } catch (e) { throw new Error('JSON 아님: ' + t.slice(0, 120).replace(/\s+/g, ' ')); } if (j && j.status === 'AUTH' && !AUTH_S.off) { try { authGate('login', AUTH_S.tk ? '로그인이 풀렸어요. 다시 입력해 주세요.' : ''); } catch (e) {} throw new Error('로그인이 필요해요'); } return j; }, e => { clearTimeout(to); throw e; });
     }
     function fetchGet(q) { return fetchT(execUrl() + '?action=' + q, { redirect: 'follow' }); }
 
+
+    // ===== 로그인 · 기기 관리 (서버 Code.gs 와 짝) =====
+    const AUTH_CSS = '#auth-ov{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(ellipse at 50% 30%,#f7efd9,#e6d6b0);font-family:inherit}#auth-ov .ab{width:min(380px,100%);background:#fffaf0;border:2px solid #b8893a;border-radius:16px;padding:22px 20px;box-shadow:0 10px 40px rgba(60,40,10,.35);color:#3b2a14}#auth-ov h2{margin:0 0 4px;font-size:1.15rem}#auth-ov p{margin:4px 0 12px;font-size:.82rem;opacity:.8;line-height:1.5}#auth-ov label{display:block;font-size:.78rem;font-weight:700;margin:10px 0 3px}#auth-ov input{width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid #c9b88a;border-radius:9px;font-size:.95rem;background:#fff}#auth-ov button.go{width:100%;margin-top:14px;padding:10px;border:0;border-radius:10px;background:#b8893a;color:#fff;font-weight:800;font-size:.95rem;cursor:pointer}#auth-ov .er{min-height:1.2em;margin-top:8px;font-size:.8rem;color:#b3261e;font-weight:700}#auth-ov .sub{margin-top:10px;font-size:.72rem;opacity:.65;line-height:1.45}';
+    function authDevGuess() { const u = navigator.userAgent || ''; const os = /iPhone|iPad/.test(u) ? 'iPhone/iPad' : /Android/.test(u) ? '안드로이드' : /Windows/.test(u) ? '윈도우' : /Mac/.test(u) ? '맥' : /Linux/.test(u) ? '리눅스' : '기기'; const br = /Edg\//.test(u) ? 'Edge' : /Chrome\//.test(u) ? '크롬' : /Safari\//.test(u) ? '사파리' : /Firefox\//.test(u) ? '파이어폭스' : ''; return os + (br ? ' ' + br : ''); }
+    function authPost(o) { return fetchT(execUrl(), { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ tk: AUTH_S.tk }, o)) }, 30000); }
+    function authCover(html) {
+      let ov = document.getElementById('auth-ov');
+      if (!ov) { const st = document.createElement('style'); st.textContent = AUTH_CSS; document.head.appendChild(st); ov = document.createElement('div'); ov.id = 'auth-ov'; document.body.appendChild(ov); }
+      ov.innerHTML = html; return ov;
+    }
+    function authGate(mode, msg) {
+      AUTH_S.gate = true; const setup = mode === 'setup';
+      const ov = authCover(`<div class="ab"><h2>${setup ? '🔐 처음 설정' : '🔐 로그인'}</h2><p>${setup ? '이 기기가 <b>GM 기기</b>가 돼요. 사이트에 들어올 때 쓸 비밀번호를 정해 주세요. (6자 이상)<br>다른 기기는 이 비밀번호를 입력해야 접속할 수 있어요.' : '접속하려면 비밀번호를 입력해 주세요. 한 번 로그인한 기기는 다음부터 자동으로 들어와요.'}</p>
+        <label>비밀번호</label><input type="password" id="au-pw" autocomplete="${setup ? 'new-password' : 'current-password'}">
+        ${setup ? '<label>비밀번호 확인</label><input type="password" id="au-pw2" autocomplete="new-password">' : ''}
+        <label>이 기기 이름</label><input type="text" id="au-nm" maxlength="24" value="${escapeHtml((() => { try { return localStorage.getItem('adv_dev_name') || authDevGuess(); } catch (e) { return authDevGuess(); } })())}">
+        <div class="er" id="au-er">${escapeHtml(msg || '')}</div><button class="go" id="au-go">${setup ? '비밀번호 정하고 시작' : '들어가기'}</button>
+        <div class="sub">${setup ? '⚠ 처음 접속한 기기가 GM이 되니, 배포 직후 바로 이 설정을 끝내 주세요.' : '비밀번호는 서버에만 저장돼요. 기기 목록은 GM 기기의 환경설정 → 기기 관리에서 볼 수 있어요.'}</div></div>`);
+      const q = id => ov.querySelector('#' + id), er = t => { q('au-er').textContent = t; };
+      const go = async () => {
+        const pw = q('au-pw').value, nm = q('au-nm').value.trim();
+        if (!pw) return er('비밀번호를 입력해 주세요.');
+        if (setup) { if (pw.length < 6) return er('비밀번호는 6자 이상이어야 해요.'); if (pw !== q('au-pw2').value) return er('비밀번호 확인이 달라요.'); }
+        q('au-go').disabled = true; er('확인 중…');
+        try {
+          const r = await fetchT(execUrl(), { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ __auth: setup ? 'init' : 'login', pw, name: nm }) }, 30000);
+          if (r.status === 'OK' && r.tk) { try { localStorage.setItem('adv_dev_tk', r.tk); localStorage.setItem('adv_dev_name', nm); localStorage.removeItem('adv_pcv'); } catch (e) {} location.reload(); return; }
+          q('au-go').disabled = false;
+          if (r.status === 'BAD') er('비밀번호가 달라요. (남은 시도 ' + r.left + '번)');
+          else if (r.status === 'LOCKED') er('실패가 너무 많아 ' + (r.wait || 10) + '분 동안 잠겼어요.');
+          else if (r.status === 'EXISTS') { er('이미 설정되어 있어요. 로그인 화면으로 돌아갑니다…'); setTimeout(() => authGate('login'), 900); }
+          else if (r.status === 'SHORT') er('비밀번호는 6자 이상이어야 해요.');
+          else er('처리하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
+        } catch (e) { q('au-go').disabled = false; er('서버에 연결하지 못했어요.'); }
+      };
+      q('au-go').onclick = go; ov.addEventListener('keydown', e => { if (e.key === 'Enter') go(); }); setTimeout(() => q('au-pw').focus(), 50);
+    }
+    function authPcName(id) { try { const p = landPls().find(x => x.id === id); return p ? (p.name || '') : ''; } catch (e) { return ''; } }
+    function authPushPc() {
+      if (!AUTH_S.tk || AUTH_S.off || !AUTH_S.st || !AUTH_S.st.valid) return Promise.resolve();
+      let id = ''; try { id = landMe(); } catch (e) {}
+      return authPost({ __auth: 'setpc', pc: id, pcn: authPcName(id) }).then(r => { if (r && r.pcv) { try { localStorage.setItem('adv_pcv', String(r.pcv)); } catch (e) {} } }).catch(() => {});
+    }
+    function authSyncPc(st) {
+      let loc = 0; try { loc = Number(localStorage.getItem('adv_pcv') || 0); } catch (e) {}
+      if (st.pcv && st.pcv > loc) { try { const was = localStorage.getItem('adv_me_pl') || ''; localStorage.setItem('adv_pcv', String(st.pcv)); if (was !== st.pc) { localStorage.setItem('adv_me_pl', st.pc || ''); setTimeout(() => { try { landRender(); presLink2(); } catch (e) {} }, 800); } } catch (e) {} }
+      else if (!st.pcv) { setTimeout(() => { try { if (landMe()) authPushPc(); } catch (e) {} }, 2500); }
+    }
+    async function authBoot() {
+      authCover('<div class="ab" style="text-align:center"><p style="margin:0">접속 확인 중…</p></div>');
+      const done = () => { const o = document.getElementById('auth-ov'); if (o) o.remove(); AUTH_S.gate = false; };
+      const tryIt = async () => {
+        let st;
+        try { st = await fetchT(execUrl() + '?action=authStatus&tk=' + encodeURIComponent(AUTH_S.tk || ''), { redirect: 'follow' }, 20000); }
+        catch (e) {
+          if (/JSON 아님/.test(String(e.message))) { AUTH_S.off = true; done(); try { showToast('서버 보안 기능이 아직 켜지지 않았어요 (Code.gs 업데이트 필요)'); } catch (x) {} return; }
+          if (AUTH_S.tk) { done(); try { showToast('서버에 연결하지 못했어요 (오프라인으로 열었어요)'); } catch (x) {} return; }
+          authCover('<div class="ab"><h2>연결 실패</h2><p>서버에 연결하지 못했어요. 인터넷을 확인하고 다시 시도해 주세요.</p><button class="go" id="au-rt">다시 시도</button></div>').querySelector('#au-rt').onclick = () => { authCover('<div class="ab" style="text-align:center"><p style="margin:0">접속 확인 중…</p></div>'); tryIt(); }; return;
+        }
+        AUTH_S.st = st;
+        if (!st.configured) return authGate('setup');
+        if (!st.valid) { if (AUTH_S.tk) { AUTH_S.tk = ''; try { localStorage.removeItem('adv_dev_tk'); } catch (e) {} } return authGate('login', AUTH_S.tk ? '' : ''); }
+        AUTH_S.gm = !!st.gm; done(); try { authSyncPc(st); } catch (e) {}
+      };
+      tryIt();
+    }
+    function authLogout() {
+      if (!confirm('이 기기를 로그아웃할까요?\n(다음에 들어올 때 비밀번호를 다시 입력해야 해요)')) return;
+      authPost({ __auth: 'logout' }).catch(() => {}).then(() => { try { localStorage.removeItem('adv_dev_tk'); } catch (e) {} location.reload(); });
+    }
+    const dvT = n => { try { return new Date(n).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
+    function dvPcSel(cur, onch) {
+      const pls = landPls(); return `<select onchange="${onch}"><option value="">연결 안 함</option>${pls.map(p => `<option value="${escapeHtml(p.id)}"${cur === p.id ? ' selected' : ''}>${escapeHtml(p.name || 'PL')}</option>`).join('')}</select>`;
+    }
+    async function devRender() {
+      const el = document.getElementById('dev-body'); if (!el) return;
+      if (AUTH_S.off) { el.innerHTML = '<div class="manual-note">서버에 보안 기능(Code.gs 새 버전)이 아직 적용되지 않았어요. 적용하면 여기서 기기를 관리할 수 있어요.</div>'; return; }
+      el.innerHTML = '<div class="manual-note">불러오는 중…</div>';
+      let st; try { st = await fetchT(execUrl() + '?action=authStatus&tk=' + encodeURIComponent(AUTH_S.tk || ''), { redirect: 'follow' }, 20000); } catch (e) { el.innerHTML = '<div class="manual-note">불러오지 못했어요.</div>'; return; }
+      AUTH_S.st = st; AUTH_S.gm = !!st.gm; let me = ''; try { me = landMe(); } catch (e) {}
+      let h = `<div class="dv-me"><b>이 기기:</b> ${escapeHtml(st.name || '')} ${st.gm ? '<span class="dv-gm">GM</span>' : ''}<br><span>연결된 PC: ${dvPcSel(me, "devSetMe(this.value)")}</span> <button class="btn btn-secondary" style="padding:3px 10px;font-size:.78rem" onclick="authLogout()">이 기기 로그아웃</button></div>`;
+      if (st.gm) {
+        let r; try { r = await authPost({ __auth: 'list' }); } catch (e) { r = null; }
+        if (r && r.status === 'OK') {
+          const pls = landPls(), byPc = {}; r.devices.forEach(d => { const k = d.pc || ''; (byPc[k] = byPc[k] || []).push(d); });
+          h += `<h4>PC · PL별 연결된 기기</h4><div class="dv-map">${pls.map(p => `<div class="dv-pc"><b>${escapeHtml(p.name || 'PL')}</b><span>${(byPc[p.id] || []).map(d => `<i class="${d.me ? 'me' : ''}">${escapeHtml(d.name)}</i>`).join('') || '<em>연결된 기기 없음</em>'}</span></div>`).join('')}${(byPc[''] || []).length ? `<div class="dv-pc"><b>연결 안 됨</b><span>${byPc[''].map(d => `<i>${escapeHtml(d.name)}</i>`).join('')}</span></div>` : ''}</div>`;
+          h += `<h4>기기 목록 (${r.devices.length})</h4><div class="dv-list">${r.devices.map(d => `<div class="dv-row"><div class="dv-n"><b>${escapeHtml(d.name)}</b> ${d.gm ? '<span class="dv-gm">GM</span>' : ''}${d.me ? ' <small>(이 기기)</small>' : ''}<small>마지막 접속 ${dvT(d.last)} · 등록 ${dvT(d.created)}</small></div><div class="dv-a">${dvPcSel(d.pc, `devSetPc('${d.id}',this.value)`)}${d.me ? '' : `<button class="btn btn-secondary" onclick="devSetGm('${d.id}',${d.gm ? 'false' : 'true'})">${d.gm ? 'GM 해제' : 'GM 권한 주기'}</button><button class="btn btn-secondary dv-del" onclick="devDel('${d.id}')">삭제</button>`}</div></div>`).join('')}</div>`;
+          h += `<div style="margin-top:8px"><button class="btn btn-secondary" onclick="devChangePw()">비밀번호 변경 (다른 기기는 다시 로그인)</button></div>`;
+        } else h += '<div class="manual-note">기기 목록을 불러오지 못했어요.</div>';
+      } else h += '<div class="manual-note">기기 삭제·관리는 GM 기기에서만 할 수 있어요.</div>';
+      el.innerHTML = h;
+    }
+    function devSetMe(v) { landSetMe(v); }
+    async function devSetPc(id, pc) { const r = await authPost({ __auth: 'setpc', id, pc, pcn: authPcName(pc) }).catch(() => null); showToast(r && r.status === 'OK' ? '연결을 바꿨어요. 그 기기는 다음 접속 때 반영돼요.' : '바꾸지 못했어요.'); devRender(); }
+    async function devSetGm(id, gm) { if (!confirm(gm ? '이 기기에 GM 권한을 줄까요?\n(기기 삭제·관리가 가능해져요)' : '이 기기의 GM 권한을 해제할까요?')) return; const r = await authPost({ __auth: 'setgm', id, gm }).catch(() => null); showToast(r && r.status === 'OK' ? '바꿨어요.' : '바꾸지 못했어요.'); devRender(); }
+    async function devDel(id) { if (!confirm('이 기기를 삭제할까요?\n삭제된 기기는 바로 접속이 막히고, 다시 들어오려면 비밀번호를 입력해야 해요.')) return; const r = await authPost({ __auth: 'del', id }).catch(() => null); showToast(r && r.status === 'OK' ? '기기를 삭제했어요.' : '삭제하지 못했어요.'); devRender(); }
+    async function devChangePw() {
+      const a = prompt('새 비밀번호 (6자 이상)'); if (a == null) return; if (a.length < 6) return showToast('6자 이상이어야 해요.');
+      const b = prompt('새 비밀번호 확인'); if (b == null) return; if (a !== b) return showToast('확인 값이 달라요.');
+      const r = await authPost({ __auth: 'pw', pw: a }).catch(() => null);
+      if (r && r.status === 'OK' && r.tk) { AUTH_S.tk = r.tk; try { localStorage.setItem('adv_dev_tk', r.tk); } catch (e) {} showToast('비밀번호를 바꿨어요. 다른 기기는 다시 로그인해야 해요.'); } else showToast('바꾸지 못했어요.');
+    }
+    authBoot();
     // ---- 접속 중인 사람 (Apps Script ping, 시트에 쓰지 않음)
     const PRES = { id: (() => { try { let v = localStorage.getItem('adv_pres_id'); if (!v) { v = 'u' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-3); localStorage.setItem('adv_pres_id', v); } return v; } catch (e) { return Math.random().toString(36).slice(2, 10); } })() };
     function presName() { try { return (localStorage.getItem('adv_pres_name') || '').trim(); } catch (e) { return ''; } }
@@ -2785,7 +2899,7 @@
       try { if (val === null || val === undefined) localStorage.removeItem('adv_pref_' + k); else localStorage.setItem('adv_pref_' + k, JSON.stringify(val)); } catch (e) {}
     }
     function presLink2() { try { const me = prefMe(); const v = prefGet('arrow'); if (v) qbBarsUpdate(); const n = prefGet('navOff'); if (n !== null) document.body.classList.toggle('nav-off', !!n); buildCtx(); showToast(me ? '내 PC로 연결했어요. 저장된 개인 설정이 적용돼요.' : '연결을 해제했어요.'); } catch (e) {} }
-    function landSetMe(v) { try { localStorage.setItem('adv_me_pl', v); } catch (e) {} landRender(); }
+    function landSetMe(v) { try { localStorage.setItem('adv_me_pl', v); } catch (e) {} landRender(); try { authPushPc(); } catch (e) {} }
     function landSet(pc, v) { const L = landCfg(); if (pc) { if (v) L.pl[pc] = v; else delete L.pl[pc]; } else L.def = v; persistState(); }
     // ---- 설정: PC별 탭 + 접기 + 드래그 정렬 ----
     let landTab = 'def';
@@ -5435,7 +5549,7 @@
       const bkPanel = sp.bkItems ? `<div class="tcg-panel"><b class="pcc-h">뒷면에 보일 정보</b><div class="bk-list">${sp.bkItems().map(x => `<label><input type="checkbox" ${bkOn(d, x[0]) ? 'checked' : ''} onchange="tcgBkToggle('${x[0]}')"> ${escapeHtml(x[1])}</label>`).join('')}</div></div>` : '';
       const right = tcgPanel ? `<div class="tcg-r">${sp.card ? '' : panel}${bkPanel}<div class="tcg-panel tcg-skinp"><div class="pcc-top2"><button class="tcg-ib" onclick="tcgUpOpen()" title="이미지 올리기 (틀 · 배경)" aria-label="이미지 올리기"><img src="${IC_UPSPLASH}" alt=""></button><button class="tcg-mini" onclick="tcgTxtFree()" title="미리보기에서 글자를 끌어 원하는 곳에 놓아요">${d.tx != null ? '글자 위치 원래대로' : '✥ 글자 위치'}</button>${sk ? '<button class="tcg-mini" onclick="tcgSkinClear()">틀 · 배경 해제</button>' : ''}</div>
         <div class="pcc-cols pcc-cols3"><div class="pcc-c pcc-c2"><b class="pcc-h">조절</b>${sliders}</div>
-          <div class="pcc-c pcc-c3"><b class="pcc-h">틀</b><div class="pcc-grid">${frameList().filter(f => !isHid('fr', f.k)).map(f => `<button class="${d.frame === frUrl(f) ? 'on' : ''}" title="${f.n}" onclick="tcgUseFrame('${f.k}')"><img src="${escapeHtml(frUrl(f))}" alt="${f.n}" loading="lazy"></button>`).join('')}</div></div>
+          <div class="pcc-c pcc-c3"><b class="pcc-h">틀</b><div class="pcc-grid">${frameList().filter(f => !isHid('fr', f.k)).map(f => `<button class="${d.frame === frUrl(f) ? 'on' : ''}" title="${f.n}" onclick="tcgUseFrame('${f.k}')"><img src="${escapeHtml(frSrc(frUrl(f)))}" alt="${f.n}" loading="lazy"></button>`).join('')}</div></div>
           <div class="pcc-c pcc-c4"><b class="pcc-h">배경</b>${d.frame && (frDefOf(d.frame) || {}).nobg ? '<div class="pcc-none">이 틀은 배경 없이 캐릭터 이미지만 얹어요</div>' : ''}<div class="pcc-grid pcc-grid-bg"${d.frame && (frDefOf(d.frame) || {}).nobg ? ' style="display:none"' : ''}><label class="pcc-col" title="배경 색"><input type="color" value="${d.fBgc || '#f4ecd8'}" oninput="tcgSkinSet('fBgc',this.value)"></label>${patList().filter(x => !isHid('bg', 'i_' + x.k)).map(x => `<button class="${d.fBgi === bgUrl(x) ? 'on' : ''}" title="${x.n}" onclick="tcgToggleBg('${x.k}')"><img src="${escapeHtml(bgUrl(x))}" alt="${x.n}" loading="lazy" style="aspect-ratio:1;object-fit:cover;"></button>`).join('')}</div></div></div></div></div>` : '';
       ov.innerHTML = `<div class="tcg-wrap${tcgPanel ? ' wide' : ''}"><div class="tcg-l">${tcgHtml(sp, anim)}<div class="tcg-bar"><button class="tcg-ib b-brush" onclick="tcgPanelToggle()" title="꾸미기" aria-label="꾸미기"><img src="${IC_BRUSH}" alt=""></button>${sp.edit ? (sp.editLabel === '내용 수정' ? `<button class="tcg-ib" onclick="tcgEdit()" title="내용 수정" aria-label="내용 수정"><img src="${IC_FEATHER}" alt=""></button>` : `<button class="tcg-ib" onclick="tcgEdit()" title="${sp.editLabel || '수정'}" aria-label="${sp.editLabel || '수정'}"><img src="${IC_SHEETBACK}" alt=""></button>`) : ''}<button class="tcg-ib b-close" onclick="tcgClose()" title="닫기" aria-label="닫기"><img src="${IC_BROOM}" alt=""></button></div></div>${right}</div>`;
       tcgStrip(ov);
@@ -6487,7 +6601,7 @@
       const rg = (lab, k, min, max, step, def) => `<label>${lab} <input type="range" min="${min}" max="${max}" step="${step}" value="${p[k] == null ? def : p[k]}" oninput="pcCfgSet('${k}',Number(this.value))"></label>`;
       const sl = (lab, k, min, max, step, def) => `<label class="pcc-sl"><span>${lab}</span><input type="range" min="${min}" max="${max}" step="${step}" value="${p[k] == null ? def : p[k]}" oninput="pcCfgSet('${k}',Number(this.value))"></label>`;
       const isFree = p.tx != null && p.ty != null && p.tx !== '';
-      const frameGrid = ty === 'custom' ? `<div class="pcc-grid">${frameList().filter(f => !isHid('fr', f.k)).map(f => `<button class="${p.frame === frUrl(f) ? 'on' : ''}" title="${f.n}" onclick="pcCfgUseFrame('${f.k}')"><img src="${escapeHtml(frUrl(f))}" alt="${f.n}" loading="lazy"></button>`).join('')}</div>` : '';
+      const frameGrid = ty === 'custom' ? `<div class="pcc-grid">${frameList().filter(f => !isHid('fr', f.k)).map(f => `<button class="${p.frame === frUrl(f) ? 'on' : ''}" title="${f.n}" onclick="pcCfgUseFrame('${f.k}')"><img src="${escapeHtml(frSrc(frUrl(f)))}" alt="${f.n}" loading="lazy"></button>`).join('')}</div>` : '';
       const bgGrid = ty === 'custom' && p.frame && (frDefOf(p.frame) || {}).nobg ? '<div class="pcc-none">이 틀은 배경 없이 캐릭터 이미지만 얹어요</div>' : ty === 'custom' && (p.fHole || !p.frame) ? `<div class="pcc-grid pcc-grid-bg"><label class="pcc-col" title="배경 색"><input type="color" value="${p.fBgc || '#f4ecd8'}" oninput="pcCfgSet('fBgc',this.value)"></label>${patList().filter(x => !isHid('bg', 'i_' + x.k)).map(x => `<button class="${p.fBgi === bgUrl(x) ? 'on' : ''}" title="${x.n}" onclick="pcCfgToggleBg('${x.k}')"><img src="${escapeHtml(bgUrl(x))}" alt="${x.n}" loading="lazy" style="aspect-ratio:1;object-fit:cover;"></button>`).join('')}</div>` : '<div class="pcc-none">틀을 고르면 배경을 고를 수 있어요</div>';
       const sliders = (ty === 'custom' ? (p.frame ? '' : sl('카드 비율', 'frameR', 0.5, 1.2, 0.01, 0.7)) + sl('칸 왼쪽', 'wx', 0, 60, 1, 15) + sl('칸 위', 'wy', 0, 60, 1, 12) + sl('칸 너비', 'ww', 20, 100, 1, 70) + sl('칸 높이', 'wh', 20, 100, 1, 76) + sl('모서리', 'wr', 0, 50, 1, 0) : '') + (full ? sl('확대', 'imgZ', 100, 300, 5, 100) + sl('가로 위치', 'imgX', 0, 100, 5, 50) + sl('세로 위치', 'imgY', 0, 100, 5, 50) : sl('사진 너비', 'imgS', 40, 100, 5, 100) + (ty === 'classic' ? sl('사진 높이', 'imgR', 0.6, 2, 0.1, 1.2) : ''));
       const tkP = pccNpc ? [] : tokList().filter(t => t.owner === p.id && t.kind !== 'pl');
@@ -6509,14 +6623,16 @@
         </div>`;
       pcCfgPrev();
     }
-    const PC_FRAMES = [{"k": "b_arab", "n": "아라베스크", "r": 0.7, "x": 15.2, "y": 4.3, "w": 69.5, "h": 91.3}, {"k": "b_frame", "n": "금박 액자", "r": 0.7, "x": 17.6, "y": 12.2, "w": 64.8, "h": 75.6}, {"k": "frame1_floral", "n": "꽃무늬 아치", "r": 0.6091, "x": 3.9, "y": 2.4, "w": 92.2, "h": 95.3}, {"k": "frame2_lattice", "n": "격자 네이비", "r": 0.6772, "x": 14.4, "y": 9.9, "w": 71.1, "h": 79.8}, {"k": "frame3_cream", "n": "청록 패턴", "r": 0.7034, "x": 12.7, "y": 6.7, "w": 74.7, "h": 86.6}, {"k": "frame5_navy", "n": "네이비 문양", "r": 0.701, "x": 12.0, "y": 7.3, "w": 75.6, "h": 87.2}, {"k": "frame6_teal_arch", "n": "청록 아치", "r": 0.6667, "x": 17.0, "y": 29.1, "w": 66.0, "h": 58.4, "bg": 1}, {"k": "frame7_floral_arch", "n": "꽃 아치", "r": 0.7152, "x": 11.9, "y": 12.7, "w": 84.7, "h": 77.0, "bg": 1}, {"k": "frame8_lantern", "n": "랜턴", "r": 0.5632, "x": 8.1, "y": 8.8, "w": 83.9, "h": 83.1, "bg": 1}, {"k": "frame9_blue_mandala", "n": "블루 만다라", "r": 0.7144, "x": 19.8, "y": 0, "w": 60.5, "h": 67.9}, {"k": "frame10_swirl", "n": "물감 소용돌이", "r": 0.7, "x": 14, "y": 11, "w": 72, "h": 78}, {"k": "n_star", "n": "별과 달 (남색)", "r": 0.6667, "x": 21.4, "y": 22.3, "w": 55.8, "h": 57.1, "flat": 1}, {"k": "n_herald", "n": "문장 양피지", "r": 0.6656, "x": 15.9, "y": 12.0, "w": 68.4, "h": 75.7, "flat": 1, "nobg": 1}, {"k": "n_floral", "n": "분홍 꽃 틀", "r": 1.0, "x": 14.4, "y": 12.8, "w": 70.0, "h": 71.1, "flat": 1, "nobg": 1}, {"k": "n_knot", "n": "붉은 매듭 틀", "r": 1.0, "x": 16.8, "y": 16.8, "w": 66.8, "h": 67.0, "flat": 1}, {"k": "n_band", "n": "붉은 청색 덩굴", "r": 1.75, "x": 14.5, "y": 23.4, "w": 70.2, "h": 51.7, "bg": 1, "flat": 1}, {"k": "n_flourish", "n": "노란 화환", "r": 1.0, "x": 22, "y": 18, "w": 56, "h": 64, "flat": 1}, {"k": "n_botanic", "n": "새와 꽃 액자", "r": 0.6322, "x": 13.7, "y": 7.9, "w": 73.1, "h": 72.3, "bg": 1}, {"k": "n_nouveau", "n": "주황 아르누보", "r": 1.0, "x": 10, "y": 11.5, "w": 76, "h": 76, "flat": 1}];
+    const PC_FRAMES = [{"k": "b_arab", "n": "아라베스크", "r": 0.7, "x": 15.2, "y": 4.3, "w": 69.5, "h": 91.3}, {"k": "b_frame", "n": "금박 액자", "r": 0.7, "x": 17.6, "y": 12.2, "w": 64.8, "h": 75.6}, {"k": "frame1_floral", "n": "꽃무늬 아치", "r": 0.6091, "x": 3.9, "y": 2.4, "w": 92.2, "h": 95.3}, {"k": "frame2_lattice", "n": "격자 네이비", "r": 0.6772, "x": 14.4, "y": 9.9, "w": 71.1, "h": 79.8}, {"k": "frame3_cream", "n": "청록 패턴", "r": 0.7034, "x": 12.7, "y": 6.7, "w": 74.7, "h": 86.6}, {"k": "frame5_navy", "n": "네이비 문양", "r": 0.701, "x": 12.0, "y": 7.3, "w": 75.6, "h": 87.2}, {"k": "frame6_teal_arch", "n": "청록 아치", "r": 0.6667, "x": 17.0, "y": 29.1, "w": 66.0, "h": 58.4, "bg": 1}, {"k": "frame7_floral_arch", "n": "꽃 아치", "r": 0.7152, "x": 11.9, "y": 12.7, "w": 84.7, "h": 77.0, "bg": 1}, {"k": "frame8_lantern", "n": "랜턴", "r": 0.5632, "x": 8.1, "y": 8.8, "w": 83.9, "h": 83.1, "bg": 1}, {"k": "frame9_blue_mandala", "n": "블루 만다라", "r": 0.7144, "x": 19.8, "y": 0, "w": 60.5, "h": 67.9}, {"k": "frame10_swirl", "n": "물감 소용돌이", "r": 0.7, "x": 14, "y": 11, "w": 72, "h": 78}, {"k": "n_star", "n": "별과 달 (남색)", "r": 0.6667, "x": 21.4, "y": 22.3, "w": 55.8, "h": 57.1, "flat": 1}, {"k": "n_herald", "n": "문장 양피지", "r": 0.6656, "x": 15.9, "y": 12.0, "w": 68.4, "h": 75.7, "flat": 1, "nobg": 1}, {"k": "n_floral", "n": "분홍 꽃 틀", "r": 1.0, "x": 14.4, "y": 12.8, "w": 70.0, "h": 71.1, "flat": 1, "nobg": 1}, {"k": "n_knot", "n": "붉은 매듭 틀", "r": 1.0, "x": 16.8, "y": 16.8, "w": 66.8, "h": 67.0, "flat": 1, "nobg": 1}, {"k": "n_band", "n": "붉은 청색 덩굴", "r": 1.75, "x": 14.5, "y": 23.4, "w": 70.2, "h": 51.7, "bg": 1, "flat": 1, "nobg": 1}, {"k": "n_flourish", "n": "노란 화환", "r": 1.0, "x": 22, "y": 18, "w": 56, "h": 64, "flat": 1, "nobg": 1}, {"k": "n_botanic", "n": "새와 꽃 액자", "r": 0.6322, "x": 13.7, "y": 7.9, "w": 73.1, "h": 72.3, "bg": 1}, {"k": "n_nouveau", "n": "주황 아르누보", "r": 1.0, "x": 10, "y": 11.5, "w": 76, "h": 76, "flat": 1, "nobg": 1}];
     const FR_OLD = {"n_star": [25.8, 28.2, 48.1, 44.9], "n_herald": [15.0, 22.8, 70.1, 56.0], "n_floral": [21.9, 31.4, 55.6, 34.2], "n_knot": [27.7, 22.6, 53.3, 58.4], "n_band": [14.5, 23.4, 70.2, 51.7], "n_flourish": [25.6, 20.6, 48.7, 58.8], "n_nouveau": [17.0, 13.5, 68.0, 72.8]};
     function frKey(u) { const m = /frames\/([A-Za-z0-9_]+)\.webp/.exec(String(u || '')); return m ? m[1] : ''; }
+    function frSrc(u) { const f = frDefOf(u); return f && f.flat ? String(u).split('?')[0] + '?v=2' : u; }
     function frDefOf(u) { const k = frKey(u); return k ? PC_FRAMES.find(f => f.k === k) : null; }
     // 틀이 바뀐 옛 카드: 저장된 칸 위치가 예전 기본값이면 새 값으로, 배경 이미지는 없는 틀이면 숨김
     function frFixP(p) {
       const f = p && p.frame ? frDefOf(p.frame) : null; if (!f || !f.flat) return p;
       const o = FR_OLD[f.k], q = Object.assign({}, p);
+      q.frame = frSrc(p.frame);
       if (o && [p.wx, p.wy, p.ww, p.wh].every((v, i) => v != null && Math.abs(Number(v) - o[i]) < .06)) { q.wx = f.x; q.wy = f.y; q.ww = f.w; q.wh = f.h; }
       if (!f.bg) q.fBg = '';
       if (f.nobg) { q.fBgc = ''; q.fBgi = ''; }
@@ -6591,7 +6707,7 @@
     // ---- 사용자 틀 · 배경 / 순서 ----
     function orderBy(arr, kf, order) { if (!order || !order.length) return arr.slice(); const pos = new Map(order.map((k, i) => [k, i])); return arr.map((x, i) => [x, i]).sort((a, b) => { const pa = pos.has(kf(a[0])) ? pos.get(kf(a[0])) : 1e6 + a[1], pb = pos.has(kf(b[0])) ? pos.get(kf(b[0])) : 1e6 + b[1]; return pa - pb; }).map(a => a[0]); }
     function frameList() { const bt = state.boardTex; return orderBy(PC_FRAMES.concat(bt.customFrames || []), f => f.k, bt.frOrder); }
-    function patList() { const bt = state.boardTex; return orderBy(PAT_IMGS.concat(bt.customBgs || []), x => 'i_' + x.k, bt.bgOrder); }
+    function patList() { const bt = state.boardTex; return orderBy(PAT_IMGS.filter(x => !/^n_/.test(x.k)).concat(bt.customBgs || []), x => 'i_' + x.k, bt.bgOrder); }
     function clueBgList() { const bt = state.boardTex; return orderBy(CLUE_BGS.concat((bt.customBgs || []).map(x => ['i_' + x.k, x.n])), x => x[0], bt.bgOrder); }
     function frUrl(f) { return f.url || ('img/frames/' + f.k + '.webp'); }
     function bgUrl(x) { return x.url || ('img/pat/bg_' + x.k + '.webp'); }
@@ -6627,7 +6743,7 @@
     function fbMgrRender() {
       const el = document.getElementById('fb-mgr'); if (!el) return;
       const cell = (inner, name, off, t, k, i, cust) => `<div class="pm-c${off ? ' off' : ''}" data-dl="${t}" data-di="${i}" draggable="true">${inner}<span>${escapeHtml(name)}</span>${cust ? `<button class="pm-b" onclick="armX(this,()=>fbDelCustom('${t === 'fr' ? 'frame' : 'bg'}','${k.replace(/^i_/, '')}'))">삭제</button>` : off ? `<button class="pm-b" onclick="unhideItem('${t}','${k}')">복원</button>` : `<button class="pm-b" onclick="armX(this,()=>hideItem('${t}','${k}'))">지우기</button>`}</div>`;
-      const fr = frameList().map((f, i) => cell(`<img src="${escapeHtml(frUrl(f))}" alt="" style="height:90px;object-fit:contain;background:#8883;border-radius:6px;">`, f.n, isHid('fr', f.k), 'fr', f.k, i, f.custom)).join('');
+      const fr = frameList().map((f, i) => cell(`<img src="${escapeHtml(frSrc(frUrl(f)))}" alt="" style="height:90px;object-fit:contain;background:#8883;border-radius:6px;">`, f.n, isHid('fr', f.k), 'fr', f.k, i, f.custom)).join('');
       const cb = clueBgList(), cm = new Set((state.boardTex.customBgs || []).map(x => 'i_' + x.k));
       const bg = cb.map((x, i) => { const pp = patOf(x[0]); return cell(`<div class="pm-sw ${pp && pp.cls ? pp.cls : ''}" style="${pp ? pp.st.replace(/"/g, '&quot;') : ''}"></div>`, x[1], isHid('bg', x[0]), 'bg', x[0], i, cm.has(x[0])); }).join('');
       const addRow = kind => `<div class="pcup-ic" style="margin:6px 0;align-items:center;"><button title="URL로 연결" onclick="document.getElementById('fba-${kind}').style.display='block';document.getElementById('fba-${kind}').focus()">${SVG_CHAIN}</button><button title="파일 업로드" onclick="fbAddFile('${kind}')">${SVG_UP}</button><input type="text" id="fba-${kind}" placeholder="이미지 주소 + Enter" style="display:none;flex:1;padding:6px 8px;border:1.5px solid #000;border-radius:8px;font-size:.8rem;" onkeydown="if(event.key==='Enter')fbAddUrl('${kind}')"></div>`;
