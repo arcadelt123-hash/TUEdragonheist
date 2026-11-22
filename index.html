@@ -1777,7 +1777,7 @@
 
     .land-box { border: 1px solid var(--border-subtle); border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; background: rgba(255,255,255,.6); }
     .dv-bg { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; } .dv-bg select, .dv-bg input { font-size: .8rem; padding: 5px 8px; border: 1px solid var(--border-subtle); border-radius: 8px; } .dv-bg input { flex: 1; min-width: 160px; }
-    .dv-me { font-size: .84rem; line-height: 1.9; } .dv-gm { background: #b8893a; color: #fff; border-radius: 6px; padding: 0 6px; font-size: .68rem; font-weight: 800; }
+    .dv-me { font-size: .84rem; line-height: 1.9; } .dv-gm { display: inline-block; align-self: center; width: fit-content; background: #b8893a; color: #fff; border-radius: 6px; padding: 0 6px; font-size: .68rem; font-weight: 800; }
     .dv-map { display: grid; gap: 4px; } .dv-pc { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; font-size: .8rem; } .dv-pc b { min-width: 96px; } .dv-pc span { display: flex; gap: 4px; flex-wrap: wrap; } .dv-pc i { font-style: normal; background: rgba(184,137,58,.18); border-radius: 8px; padding: 1px 8px; } .dv-pc i.me { background: rgba(184,137,58,.5); font-weight: 700; } .dv-pc em { opacity: .5; font-size: .74rem; }
     .dv-list { display: grid; gap: 6px; } .dv-row { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: center; border: 1px solid var(--border-subtle); border-radius: 10px; padding: 6px 8px; } .dv-n { display: flex; flex-direction: column; font-size: .84rem; } .dv-n small { opacity: .6; font-size: .7rem; } .dv-a { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; } .dv-a .btn { padding: 3px 9px; font-size: .74rem; } .dv-a select { font-size: .76rem; max-width: 150px; } .dv-del { color: #b3261e; }
     .manual { font-size: .82rem; line-height: 1.55; color: var(--text-main); padding-top: 6px; } .manual h4 { margin: 10px 0 4px; font-size: .86rem; } .manual table { border-collapse: collapse; width: 100%; } .manual th { text-align: left; white-space: nowrap; vertical-align: top; padding: 4px 10px 4px 0; font-weight: 800; color: #7a5a22; } .manual td { padding: 4px 0; } .manual tr + tr > * { border-top: 1px dashed var(--border-subtle); } .manual ul { margin: 0; padding-left: 18px; } .manual code { background: rgba(0,0,0,.06); padding: 0 4px; border-radius: 4px; } .manual-note { margin-top: 8px; font-size: .74rem; color: var(--text-muted); }
@@ -2103,7 +2103,7 @@
         </div>
       </details>
       <details class="land-box" id="dev-box" ontoggle="if(this.open)devRender()"><summary>기기 관리 · 보안 (로그인)</summary><div id="dev-body" class="manual"></div></details>
-      <details class="land-box" id="manual-box"><summary>📖 사이트 설명서 (단축키 · 사용법)</summary>
+      <details class="land-box" id="manual-box"><summary>사용설명서</summary>
         <div class="manual">
           <h4>단축키</h4>
           <table>
