@@ -1776,6 +1776,7 @@
     .tcg-skinp .pcc-row { border-top-color: #ca8a0455; color: #f1e6c8; } .tcg-skinp .pcc-row:first-child { border-top: 0; padding-top: 0; } .tcg-skinp .pcc-sl { color: #c9b98a; }
 
     .land-box { border: 1px solid var(--border-subtle); border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; background: rgba(255,255,255,.6); }
+    .dv-bg { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; } .dv-bg select, .dv-bg input { font-size: .8rem; padding: 5px 8px; border: 1px solid var(--border-subtle); border-radius: 8px; } .dv-bg input { flex: 1; min-width: 160px; }
     .dv-me { font-size: .84rem; line-height: 1.9; } .dv-gm { background: #b8893a; color: #fff; border-radius: 6px; padding: 0 6px; font-size: .68rem; font-weight: 800; }
     .dv-map { display: grid; gap: 4px; } .dv-pc { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; font-size: .8rem; } .dv-pc b { min-width: 96px; } .dv-pc span { display: flex; gap: 4px; flex-wrap: wrap; } .dv-pc i { font-style: normal; background: rgba(184,137,58,.18); border-radius: 8px; padding: 1px 8px; } .dv-pc i.me { background: rgba(184,137,58,.5); font-weight: 700; } .dv-pc em { opacity: .5; font-size: .74rem; }
     .dv-list { display: grid; gap: 6px; } .dv-row { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: center; border: 1px solid var(--border-subtle); border-radius: 10px; padding: 6px 8px; } .dv-n { display: flex; flex-direction: column; font-size: .84rem; } .dv-n small { opacity: .6; font-size: .7rem; } .dv-a { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; } .dv-a .btn { padding: 3px 9px; font-size: .74rem; } .dv-a select { font-size: .76rem; max-width: 150px; } .dv-del { color: #b3261e; }
@@ -2101,7 +2102,7 @@
           <button class="btn btn-primary" onclick="addNewFolderFromModal()">+ 폴더 추가</button>
         </div>
       </details>
-      <details class="land-box" id="dev-box" ontoggle="if(this.open)devRender()"><summary>🔐 기기 관리 · 보안 (로그인)</summary><div id="dev-body" class="manual"></div></details>
+      <details class="land-box" id="dev-box" ontoggle="if(this.open)devRender()"><summary>기기 관리 · 보안 (로그인)</summary><div id="dev-body" class="manual"></div></details>
       <details class="land-box" id="manual-box"><summary>📖 사이트 설명서 (단축키 · 사용법)</summary>
         <div class="manual">
           <h4>단축키</h4>
@@ -2310,10 +2311,10 @@
 
 
     // ===== 서버 연결: google.script.run 이 응답 없으면 같은 주소로 직접 요청(fetch)으로 자동 전환 =====
-    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbzVswvi3aJomL1slrFMKxHuSl6-JE8otLLE23HP2zgo2R7zkE0guEDtXxBg-aZ9ute6/exec';
+    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbwlUqA6vWwVLz-XM_Qmng6JVQ1CmfZTxLFQt-06TbuJ10ovRtWBNY9GgbJ1h1_Ynemv/exec';
     function execUrl() { try { return localStorage.getItem('adventure_exec_url') || EXEC_URL_DEFAULT; } catch (e) { return EXEC_URL_DEFAULT; } }
     function diagShow(msg) { try { console.info('[sync]', msg); } catch (e) {} }
-    const AUTH_S = { tk: (() => { try { return localStorage.getItem('adv_dev_tk') || ''; } catch (e) { return ''; } })(), gm: false, off: false, st: null, gate: false };
+    const AUTH_S = { tk: (() => { try { return localStorage.getItem('adv_dev_tk') || ''; } catch (e) { return ''; } })(), gm: false, off: false, st: null, gate: false, bg: '' };
     function fetchT(url, opt, ms) {
       if (AUTH_S.tk && String(url).indexOf(execUrl()) === 0) {
         if (!opt || opt.method !== 'POST') url += (String(url).indexOf('?') < 0 ? '?' : '&') + 'tk=' + encodeURIComponent(AUTH_S.tk);
@@ -2331,22 +2332,23 @@
 
 
     // ===== 로그인 · 기기 관리 (서버 Code.gs 와 짝) =====
-    const AUTH_CSS = '#auth-ov{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(ellipse at 50% 30%,#f7efd9,#e6d6b0);font-family:inherit}#auth-ov .ab{width:min(380px,100%);background:#fffaf0;border:2px solid #b8893a;border-radius:16px;padding:22px 20px;box-shadow:0 10px 40px rgba(60,40,10,.35);color:#3b2a14}#auth-ov h2{margin:0 0 4px;font-size:1.15rem}#auth-ov p{margin:4px 0 12px;font-size:.82rem;opacity:.8;line-height:1.5}#auth-ov label{display:block;font-size:.78rem;font-weight:700;margin:10px 0 3px}#auth-ov input{width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid #c9b88a;border-radius:9px;font-size:.95rem;background:#fff}#auth-ov button.go{width:100%;margin-top:14px;padding:10px;border:0;border-radius:10px;background:#b8893a;color:#fff;font-weight:800;font-size:.95rem;cursor:pointer}#auth-ov .er{min-height:1.2em;margin-top:8px;font-size:.8rem;color:#b3261e;font-weight:700}#auth-ov .sub{margin-top:10px;font-size:.72rem;opacity:.65;line-height:1.45}';
+    const AUTH_CSS = '#auth-ov{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(ellipse at 50% 42%,#1c1610 0%,#0a0806 62%,#050403 100%);font-family:inherit;overflow:auto;color:#e8d5a6}#auth-ov::before{content:"";position:fixed;inset:0;background:var(--abg) center/cover no-repeat;opacity:.55;pointer-events:none}#auth-ov::after{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,.15),rgba(0,0,0,.7) 100%);pointer-events:none}#auth-ov .ab{position:relative;z-index:1;width:min(360px,100%);text-align:center;animation:authIn 1.4s ease both}@keyframes authIn{from{opacity:0;letter-spacing:.2em}to{opacity:1}}#auth-ov .ey{font-size:.64rem;letter-spacing:.5em;text-transform:uppercase;color:#a58a52;opacity:.85}#auth-ov h2{margin:14px 0 6px;font-family:"Cinzel","Noto Serif KR",serif;font-size:clamp(1.9rem,8vw,2.8rem);font-weight:700;letter-spacing:.12em;line-height:1.15;background:linear-gradient(180deg,#f3e3b4 0%,#c9a45a 55%,#8e6d34 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 0 14px rgba(214,170,80,.35))}#auth-ov .dv{height:1px;margin:14px auto 18px;width:80%;background:linear-gradient(90deg,transparent,rgba(214,170,80,.8),transparent)}#auth-ov p{margin:0 0 6px;font-size:.78rem;line-height:1.7;color:#cdb98a;opacity:.85}#auth-ov label{display:none}#auth-ov input{width:100%;box-sizing:border-box;margin-top:10px;padding:9px 4px;border:0;border-bottom:1px solid rgba(214,170,80,.45);border-radius:0;background:transparent;color:#f3e3b4;font-size:.95rem;text-align:center;letter-spacing:.08em;outline:none;transition:border-color .2s,box-shadow .2s}#auth-ov input::placeholder{color:#a58a52;opacity:.7;letter-spacing:.05em}#auth-ov input:focus{border-bottom-color:#e6c36e;box-shadow:0 8px 14px -10px rgba(230,195,110,.7)}#auth-ov input:-webkit-autofill{-webkit-text-fill-color:#f3e3b4;transition:background-color 9999s}#auth-ov button.go{margin-top:26px;padding:10px 26px;border:0;background:transparent;color:#f3e3b4;font-size:.9rem;font-weight:600;letter-spacing:.32em;cursor:pointer;text-shadow:0 0 12px rgba(230,195,110,.6);position:relative;animation:authPulse 2.6s ease-in-out infinite}#auth-ov button.go::before{content:"";position:absolute;left:-30px;right:-30px;top:50%;height:30px;transform:translateY(-50%);background:radial-gradient(ellipse at center,rgba(214,170,80,.28),transparent 70%);z-index:-1}#auth-ov button.go:hover{color:#fff4cf}#auth-ov button.go:disabled{opacity:.5;animation:none;cursor:default}@keyframes authPulse{50%{opacity:.6}}#auth-ov .er{min-height:1.2em;margin-top:14px;font-size:.78rem;color:#e58a7a}#auth-ov .sub{margin-top:34px;font-size:.66rem;color:#8d7a52;line-height:1.6}';
     function authDevGuess() { const u = navigator.userAgent || ''; const os = /iPhone|iPad/.test(u) ? 'iPhone/iPad' : /Android/.test(u) ? '안드로이드' : /Windows/.test(u) ? '윈도우' : /Mac/.test(u) ? '맥' : /Linux/.test(u) ? '리눅스' : '기기'; const br = /Edg\//.test(u) ? 'Edge' : /Chrome\//.test(u) ? '크롬' : /Safari\//.test(u) ? '사파리' : /Firefox\//.test(u) ? '파이어폭스' : ''; return os + (br ? ' ' + br : ''); }
     function authPost(o) { return fetchT(execUrl(), { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ tk: AUTH_S.tk }, o)) }, 30000); }
     function authCover(html) {
       let ov = document.getElementById('auth-ov');
       if (!ov) { const st = document.createElement('style'); st.textContent = AUTH_CSS; document.head.appendChild(st); ov = document.createElement('div'); ov.id = 'auth-ov'; document.body.appendChild(ov); }
+      try { const b = AUTH_S.bg || localStorage.getItem('adv_login_bg') || ''; ov.style.setProperty('--abg', b ? 'url("' + String(b).replace(/["\\()\s]/g, c => encodeURIComponent(c)) + '")' : 'none'); } catch (e) {}
       ov.innerHTML = html; return ov;
     }
     function authGate(mode, msg) {
       AUTH_S.gate = true; const setup = mode === 'setup';
-      const ov = authCover(`<div class="ab"><h2>${setup ? '🔐 처음 설정' : '🔐 로그인'}</h2><p>${setup ? '이 기기가 <b>GM 기기</b>가 돼요. 사이트에 들어올 때 쓸 비밀번호를 정해 주세요. (6자 이상)<br>다른 기기는 이 비밀번호를 입력해야 접속할 수 있어요.' : '접속하려면 비밀번호를 입력해 주세요. 한 번 로그인한 기기는 다음부터 자동으로 들어와요.'}</p>
-        <label>비밀번호</label><input type="password" id="au-pw" autocomplete="${setup ? 'new-password' : 'current-password'}">
-        ${setup ? '<label>비밀번호 확인</label><input type="password" id="au-pw2" autocomplete="new-password">' : ''}
-        <label>이 기기 이름</label><input type="text" id="au-nm" maxlength="24" value="${escapeHtml((() => { try { return localStorage.getItem('adv_dev_name') || authDevGuess(); } catch (e) { return authDevGuess(); } })())}">
-        <div class="er" id="au-er">${escapeHtml(msg || '')}</div><button class="go" id="au-go">${setup ? '비밀번호 정하고 시작' : '들어가기'}</button>
-        <div class="sub">${setup ? '⚠ 처음 접속한 기기가 GM이 되니, 배포 직후 바로 이 설정을 끝내 주세요.' : '비밀번호는 서버에만 저장돼요. 기기 목록은 GM 기기의 환경설정 → 기기 관리에서 볼 수 있어요.'}</div></div>`);
+      const ov = authCover(`<div class="ab"><div class="ey">${escapeHtml(document.title || 'Adventure Journal')}</div><h2>${setup ? '처음 설정' : '로그인'}</h2><div class="dv"></div><p>${setup ? '이 기기가 <b>GM 기기</b>가 돼요.<br>접속에 쓸 비밀번호를 정해 주세요. (6자 이상)' : '비밀번호를 입력하면 입장할 수 있어요.<br>한 번 로그인한 기기는 다음부터 바로 들어와요.'}</p>
+        <label>비밀번호</label><input type="password" id="au-pw" placeholder="비밀번호" autocomplete="${setup ? 'new-password' : 'current-password'}">
+        ${setup ? '<label>비밀번호 확인</label><input type="password" id="au-pw2" placeholder="비밀번호 확인" autocomplete="new-password">' : ''}
+        <label>이 기기 이름</label><input type="text" id="au-nm" placeholder="이 기기 이름" maxlength="24" value="${escapeHtml((() => { try { return localStorage.getItem('adv_dev_name') || authDevGuess(); } catch (e) { return authDevGuess(); } })())}">
+        <div class="er" id="au-er">${escapeHtml(msg || '')}</div><button class="go" id="au-go">${setup ? '비밀번호 정하고 시작' : '입장하기'}</button>
+        <div class="sub">${setup ? '처음 접속한 기기가 GM이 돼요' : ''}</div></div>`);
       const q = id => ov.querySelector('#' + id), er = t => { q('au-er').textContent = t; };
       const go = async () => {
         const pw = q('au-pw').value, nm = q('au-nm').value.trim();
@@ -2378,7 +2380,7 @@
       else if (!st.pcv) { setTimeout(() => { try { if (landMe()) authPushPc(); } catch (e) {} }, 2500); }
     }
     async function authBoot() {
-      authCover('<div class="ab" style="text-align:center"><p style="margin:0">접속 확인 중…</p></div>');
+      authCover('<div class="ab"><div class="ey">Adventure Journal</div><div class="dv"></div><p style="margin:0">접속 확인 중…</p></div>');
       const done = () => { const o = document.getElementById('auth-ov'); if (o) o.remove(); AUTH_S.gate = false; };
       const tryIt = async () => {
         let st;
@@ -2386,9 +2388,9 @@
         catch (e) {
           if (/JSON 아님/.test(String(e.message))) { AUTH_S.off = true; done(); try { showToast('서버 보안 기능이 아직 켜지지 않았어요 (Code.gs 업데이트 필요)'); } catch (x) {} return; }
           if (AUTH_S.tk) { done(); try { showToast('서버에 연결하지 못했어요 (오프라인으로 열었어요)'); } catch (x) {} return; }
-          authCover('<div class="ab"><h2>연결 실패</h2><p>서버에 연결하지 못했어요. 인터넷을 확인하고 다시 시도해 주세요.</p><button class="go" id="au-rt">다시 시도</button></div>').querySelector('#au-rt').onclick = () => { authCover('<div class="ab" style="text-align:center"><p style="margin:0">접속 확인 중…</p></div>'); tryIt(); }; return;
+          authCover('<div class="ab"><h2>연결 실패</h2><div class="dv"></div><p>서버에 연결하지 못했어요. 인터넷을 확인하고 다시 시도해 주세요.</p><button class="go" id="au-rt">다시 시도</button></div>').querySelector('#au-rt').onclick = () => { authCover('<div class="ab"><div class="ey">Adventure Journal</div><div class="dv"></div><p style="margin:0">접속 확인 중…</p></div>'); tryIt(); }; return;
         }
-        AUTH_S.st = st;
+        AUTH_S.st = st; if (st.bg !== undefined) { AUTH_S.bg = st.bg || ''; try { localStorage.setItem('adv_login_bg', AUTH_S.bg); } catch (e) {} const ov0 = document.getElementById('auth-ov'); if (ov0) authCover(ov0.innerHTML); }
         if (!st.configured) return authGate('setup');
         if (!st.valid) { if (AUTH_S.tk) { AUTH_S.tk = ''; try { localStorage.removeItem('adv_dev_tk'); } catch (e) {} } return authGate('login', AUTH_S.tk ? '' : ''); }
         AUTH_S.gm = !!st.gm; done(); try { authSyncPc(st); } catch (e) {}
@@ -2416,11 +2418,13 @@
           const pls = landPls(), byPc = {}; r.devices.forEach(d => { const k = d.pc || ''; (byPc[k] = byPc[k] || []).push(d); });
           h += `<h4>PC · PL별 연결된 기기</h4><div class="dv-map">${pls.map(p => `<div class="dv-pc"><b>${escapeHtml(p.name || 'PL')}</b><span>${(byPc[p.id] || []).map(d => `<i class="${d.me ? 'me' : ''}">${escapeHtml(d.name)}</i>`).join('') || '<em>연결된 기기 없음</em>'}</span></div>`).join('')}${(byPc[''] || []).length ? `<div class="dv-pc"><b>연결 안 됨</b><span>${byPc[''].map(d => `<i>${escapeHtml(d.name)}</i>`).join('')}</span></div>` : ''}</div>`;
           h += `<h4>기기 목록 (${r.devices.length})</h4><div class="dv-list">${r.devices.map(d => `<div class="dv-row"><div class="dv-n"><b>${escapeHtml(d.name)}</b> ${d.gm ? '<span class="dv-gm">GM</span>' : ''}${d.me ? ' <small>(이 기기)</small>' : ''}<small>마지막 접속 ${dvT(d.last)} · 등록 ${dvT(d.created)}</small></div><div class="dv-a">${dvPcSel(d.pc, `devSetPc('${d.id}',this.value)`)}${d.me ? '' : `<button class="btn btn-secondary" onclick="devSetGm('${d.id}',${d.gm ? 'false' : 'true'})">${d.gm ? 'GM 해제' : 'GM 권한 주기'}</button><button class="btn btn-secondary dv-del" onclick="devDel('${d.id}')">삭제</button>`}</div></div>`).join('')}</div>`;
+          h += `<h4>로그인 화면 배경</h4><div class="dv-bg"><select onchange="devSetBg(this.value)"><option value="">기본 (어두운 배경, 글씨만)</option>${Object.keys(LG_WC).map(k => `<option value="img/wc/${k}.webp"${(st.bg || '') === 'img/wc/' + k + '.webp' ? ' selected' : ''}>${escapeHtml(LG_WC[k])}</option>`).join('')}</select><input type="text" id="dv-bgurl" placeholder="또는 이미지 주소(https://…)" value="${/^https:/.test(st.bg || '') ? escapeHtml(st.bg) : ''}"><button class="btn btn-secondary" onclick="devSetBg(document.getElementById('dv-bgurl').value.trim())">적용</button></div><div class="manual-note">이 설정은 로그인 전 화면에도 보여서 모든 기기에 적용돼요. 이미지는 사이트의 img 폴더 그림이나 https 주소만 쓸 수 있어요.</div>`;
           h += `<div style="margin-top:8px"><button class="btn btn-secondary" onclick="devChangePw()">비밀번호 변경 (다른 기기는 다시 로그인)</button></div>`;
         } else h += '<div class="manual-note">기기 목록을 불러오지 못했어요.</div>';
       } else h += '<div class="manual-note">기기 삭제·관리는 GM 기기에서만 할 수 있어요.</div>';
       el.innerHTML = h;
     }
+    async function devSetBg(v) { const r = await authPost({ __auth: 'setbg', bg: v }).catch(() => null); if (r && r.status === 'OK') { AUTH_S.bg = v; try { localStorage.setItem('adv_login_bg', v); } catch (e) {} showToast('로그인 화면 배경을 바꿨어요.'); } else showToast('바꾸지 못했어요. (img/… 경로나 https 주소만 가능해요)'); devRender(); }
     function devSetMe(v) { landSetMe(v); }
     async function devSetPc(id, pc) { const r = await authPost({ __auth: 'setpc', id, pc, pcn: authPcName(pc) }).catch(() => null); showToast(r && r.status === 'OK' ? '연결을 바꿨어요. 그 기기는 다음 접속 때 반영돼요.' : '바꾸지 못했어요.'); devRender(); }
     async function devSetGm(id, gm) { if (!confirm(gm ? '이 기기에 GM 권한을 줄까요?\n(기기 삭제·관리가 가능해져요)' : '이 기기의 GM 권한을 해제할까요?')) return; const r = await authPost({ __auth: 'setgm', id, gm }).catch(() => null); showToast(r && r.status === 'OK' ? '바꿨어요.' : '바꾸지 못했어요.'); devRender(); }
