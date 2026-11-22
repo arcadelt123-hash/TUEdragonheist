@@ -1038,7 +1038,7 @@
     .lg-prow { display: flex; gap: 8px; align-items: center; } .lg-psub { font-size: .78rem; color: #7a6a48; line-height: 1.5; }
     .lg-pm { color: var(--pm-fg, inherit); resize: both; overflow: auto; min-width: 220px; max-width: 100%; min-height: 40px; box-sizing: border-box; margin: 6px 0 12px; padding: 6px 10px; border: 1px var(--pm-bs, dashed) var(--pm-bc, #c9bb98); border-radius: var(--pm-r, 10px); background: var(--pm-img, none) center / 100% 100% no-repeat, var(--pm-bg, rgba(255,250,235,.55)); } .lg-pm summary { cursor: pointer; font-weight: 800; font-size: .82rem; color: var(--pm-fg, #5a3d12); }
     .lg-pmi { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid rgba(120,90,40,.15); } .lg-pmi .pcib { width: 30px; height: 30px; background: #eadfc3; } .lg-pmb { flex: 1; min-width: 0; font-size: .85rem; word-break: break-word; } .lg-pmimg { display: block; max-width: min(100%, 280px); max-height: 220px; border-radius: 8px; margin-top: 4px; cursor: zoom-in; border: 1px solid #d8cdb4; }
-    .lg-pmf textarea { width: 100%; resize: both; max-width: 100%; box-sizing: border-box; margin-top: 6px; padding: 6px 8px; border: 1px solid #c9bb98; border-radius: 8px; background: #fffaf0; font: inherit; font-size: .85rem; resize: both; max-width: 100%; } .lg-pmr { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+    .lg-pmf textarea { width: calc(100% - 18px); resize: none; height: 34px; transition: height .12s; max-width: 100%; box-sizing: border-box; margin-top: 6px; padding: 6px 8px; border: 1px solid #c9bb98; border-radius: 8px; background: #fffaf0; font: inherit; font-size: .85rem; } .lg-pmr { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
     .lg-selbtn { border: 1px solid #c9bb98; background: #fffaf0; border-radius: 999px; padding: 1px 9px; font-size: .72rem; cursor: pointer; float: right; margin-right: 6px; color: #5a3d12; } .lg-selbtn.on { background: #e4d3a8; font-weight: 800; }
     #lg-main.lg-selmode .lg-m[data-i] { cursor: pointer; } #lg-main.lg-selmode .lg-m[data-i]:hover { background: rgba(228,211,168,.35); } .lg-m.lg-sel { background: rgba(230,178,74,.32) !important; outline: 1px solid rgba(184,137,58,.7); }
     .lg-m.lg-cmh { box-shadow: inset 3px 0 0 #e6b24a; }
@@ -1066,6 +1066,7 @@
         .lg-cc { display: flex; flex-direction: column; align-items: center; width: 84px; padding: 6px 4px 5px; border: var(--cc-bw, 1px) var(--cc-bs, solid) var(--cc-bc, #d8cdb4); border-radius: var(--cc-r, 12px); background: var(--cc-bg, rgba(255,250,235,.75)); cursor: pointer; text-align: center; box-shadow: 0 1px 3px rgba(60,40,10,.15); } .lg-cc:hover { background: #ffe9a8; }
     .lg-cc img { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; background: #eadfc3; } .lg-cc span { margin-top: 4px; font-weight: 700; font-size: .78rem; line-height: 1.2; word-break: keep-all; max-width: 100%; } .lg-cc small { font-size: .66rem; color: #7a6a48; }
     .lg-cc.pc { border-color: var(--cc-pc, #b8893a); background: rgba(228,211,168,.7); } .lg-cc.def { border-style: dashed; } .lg-cc.def img { opacity: .55; }
+    .lg-pmf textarea:focus { height: 84px; } .lg-pmf { padding-right: 14px; }
     .lg-pmw { resize: both; overflow: hidden; display: flex; min-width: 220px; max-width: 100%; min-height: 56px; box-sizing: border-box; margin: 6px 0 12px; padding-bottom: 18px; }
     .lg-pmw .lg-pm { flex: 1; min-width: 0; resize: none !important; overflow: auto !important; margin: 0 !important; scrollbar-width: thin; }
     .lg-pmtag { font-size: .68rem; padding: 0 7px; border: 1px solid #b8893a; border-radius: 999px; background: rgba(228,211,168,.7); color: #5a3d12; font-weight: 700; }
@@ -3059,6 +3060,35 @@
       const label = document.getElementById('lg-plb').value.trim() || '새 회차', title = document.getElementById('lg-ptt').value.trim(), dt = document.getElementById('lg-pdt').value.trim() || r.date || calYmd(new Date());
       lgPasteClose(); await lgSaveLog(r.msgs, av, label, title, dt, r.date);
     }
+    function lgEditable() { const x = LG.idx.find(a => a.id === LG.cur); return !!(x && x.srv && AUTH_S.gm && !plView()); }
+    async function lgPersist(id) {
+      const x = LG.idx.find(a => a.id === id), msgs = LG.data[id]; if (!x || !msgs) throw new Error('로그를 찾지 못했어요');
+      const meta = { id, label: x.label, title: x.title || '', date: x.date || '', n: msgs.length }; x.n = msgs.length;
+      const r = await fetchT(execUrl(), { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ __log: 'put', meta, msgs, av: LG.av[id] || {} }) }, 90000);
+      if (r.status !== 'OK') throw new Error(r.message || r.status);
+    }
+    function lgInfoEdit(id) {
+      const x = LG.idx.find(a => a.id === id); if (!x) return;
+      let el = document.getElementById('lg-paste'); if (!el) { el = document.createElement('div'); el.id = 'lg-paste'; el.className = 'lg-paste'; document.querySelector('#lg-modal .lg-box').appendChild(el); }
+      el.innerHTML = `<div class="lg-pbox" style="width:min(440px,94%)"><b>로그 정보 고치기</b><input id="lg-ei1" type="text" placeholder="회차 이름" value="${escapeHtml(x.label || '')}"><input id="lg-ei2" type="text" placeholder="한 줄 제목" value="${escapeHtml(x.title || '')}"><input id="lg-ei3" type="text" placeholder="날짜 (YYYY-MM-DD)" value="${escapeHtml(x.date || '')}"><div class="lg-prow"><button class="btn btn-secondary" onclick="lgPasteClose()">닫기</button><span style="flex:1"></span><button class="btn btn-primary" onclick="lgInfoSave(${id})">저장</button></div></div>`;
+      el.style.display = 'flex';
+    }
+    async function lgInfoSave(id) {
+      const x = LG.idx.find(a => a.id === id); if (!x) return; const o = { label: x.label, title: x.title, date: x.date };
+      x.label = document.getElementById('lg-ei1').value.trim() || x.label; x.title = document.getElementById('lg-ei2').value.trim(); x.date = document.getElementById('lg-ei3').value.trim() || x.date;
+      try { await lgLoad(id).then(m => { LG.data[id] = m; }); await lgPersist(id); lgPasteClose(); LG.idx.sort((p, q) => String(p.date || '').localeCompare(String(q.date || '')) || p.id - q.id); lgList(); lgShow(id); showToast('고쳤어요'); }
+      catch (e) { Object.assign(x, o); alert('저장 실패: ' + (e.message || e)); }
+    }
+    async function lgLineEdit(i) {
+      const id = LG.cur, ms = LG.data[id], m = ms && ms[i]; if (!m) return;
+      const v = prompt('대사 고치기 (' + (m[1] || '') + ')', m[2] || ''); if (v === null || v === m[2]) return; const old = m[2]; m[2] = v;
+      try { await lgPersist(id); lgKeepShow(); showToast('고쳤어요'); } catch (e) { m[2] = old; alert('저장 실패: ' + (e.message || e)); }
+    }
+    async function lgLineDel(idx) {
+      const id = LG.cur, ms = LG.data[id]; if (!ms) return; if (!confirm(idx.length + '줄을 로그에서 지울까요?\n(이 회차에 단 대사 메모의 줄 위치가 어긋날 수 있어요)')) return;
+      const old = ms.slice(), set = new Set(idx); LG.data[id] = ms.filter((_, k) => !set.has(k));
+      try { await lgPersist(id); lgKeepShow(); showToast('지웠어요'); } catch (e) { LG.data[id] = old; alert('저장 실패: ' + (e.message || e)); }
+    }
     async function lgDel(id) {
       const x = LG.idx.find(a => a.id === id); if (!x || !x.srv) return; if (!confirm('"' + x.label + '" 로그를 삭제할까요?')) return;
       try { const r = await fetchT(execUrl(), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ __log: 'del', id }) }, 30000); if (r.status !== 'OK') throw new Error(r.message); LG.idx = LG.idx.filter(a => a.id !== id); LG.cur = 0; lgList(); document.getElementById('lg-main').innerHTML = '<div class="lg-empty">삭제했어요</div>'; } catch (e) { alert('삭제 실패: ' + (e.message || e)); }
@@ -3149,7 +3179,7 @@
     function lgPmHtml(id) {
       const me = (typeof landMe === 'function') ? landMe() : '', pc = (state.boardTex.pcs || []).find(p => p.id === me), nm = me === 'gm' ? '시금치 (GM)' : (pc ? pc.name : ''), L = lgPmList(id);
       const items = L.map(m => { const ap = (state.boardTex.pcs || []).find(p => (p.name || '') === m.n), can = me === 'gm' || (m.by && m.by === me); return `<div class="lg-pmi"><span class="pcib">${ap ? pcIconImg(ap) + deadX(ap) : ''}</span><div class="lg-pmb"><b>${escapeHtml(m.n || '')}</b>${m.c ? ` <span class="lg-pmtag">${escapeHtml(m.c)}</span>` : ''}${m.t ? `<div>${escapeHtml(m.t).replace(/\n/g, '<br>')}</div>` : ''}${m.img ? `<img class="lg-pmimg" src="${escapeHtml(m.img)}" alt="" onclick="window.open(this.src)">` : ''}</div>${can ? `<button class="lg-rune" title="메모 삭제" aria-label="메모 삭제" onclick="lgPmDel('${id}','${m.id}')"><img src="${IC_RUNE}" alt=""></button>` : ''}</div>`; }).join('');
-      const form = nm ? `<div class="lg-pmf"><textarea id="lg-pmt" rows="2" placeholder="${escapeHtml(nm)}의 한 줄 메모 (이 회차에 붙여요)"></textarea><div class="lg-pmr"><button class="btn btn-secondary" type="button" onclick="lgPmImg()">이미지</button><span id="lg-pmn" style="font-size:.72rem;opacity:.7"></span><button class="btn btn-secondary" type="button" style="margin-left:auto" onclick="lgPmAdd('${id}')">붙이기</button></div></div>` : '<div style="font-size:.76rem;opacity:.65;padding:4px 2px">PC를 고르면 메모를 쓸 수 있어요.</div>';
+      const form = nm ? `<div class="lg-pmf"><textarea id="lg-pmt" rows="1" placeholder="${escapeHtml(nm)}의 한 줄 메모 (이 회차에 붙여요)"></textarea><div class="lg-pmr"><button class="btn btn-secondary" type="button" style="margin-left:auto" onclick="lgPmAdd('${id}')">붙이기</button></div></div>` : '<div style="font-size:.76rem;opacity:.65;padding:4px 2px">PC를 고르면 메모를 쓸 수 있어요.</div>';
       const sz = window.__pmSz ? ` style="width:${window.__pmSz[0]}px;height:${window.__pmSz[1]}px"` : ''; return `<div class="lg-pmw"${sz}><details class="lg-pm"${L.length ? ' open' : ''}><summary>메모 (${L.length})</summary>${items}${form}</details></div>`;
     }
     window.__lgPmImg = '';
@@ -3235,8 +3265,10 @@
       const rows = lgSelRows(e); if (!rows.length) return;
       e.preventDefault(); const old = document.getElementById('lg-cctx'); if (old) old.remove();
       const m = document.createElement('div'); m.id = 'lg-cctx'; m.className = 'lg-deco'; m.style.cssText = 'position:fixed;right:auto;bottom:auto;width:auto;padding:6px;z-index:99999;left:' + Math.min(e.clientX, innerWidth - 170) + 'px;top:' + Math.min(e.clientY, innerHeight - 60) + 'px';
-      m.innerHTML = '<button class="btn btn-secondary">메모 추가 (' + rows.length + '줄)</button>'; document.body.appendChild(m);
-      const idx = rows.map(r => Number(r.dataset.i)); m.querySelector('button').onclick = () => { m.remove(); lgCmtPanel(idx); };
+      const idx = rows.map(r => Number(r.dataset.i)), ed = lgEditable();
+      m.style.display = 'flex'; m.style.flexDirection = 'column'; m.style.gap = '5px';
+      m.innerHTML = '<button class="btn btn-secondary" data-k="m">메모 추가 (' + rows.length + '줄)</button>' + (ed ? (rows.length === 1 ? '<button class="btn btn-secondary" data-k="e">대사 고치기</button>' : '') + '<button class="btn btn-secondary" data-k="d">대사 지우기 (' + rows.length + '줄)</button>' : ''); document.body.appendChild(m);
+      m.querySelectorAll('button').forEach(b => b.onclick = () => { m.remove(); if (b.dataset.k === 'm') lgCmtPanel(idx); else if (b.dataset.k === 'e') lgLineEdit(idx[0]); else lgLineDel(idx); });
       setTimeout(() => document.addEventListener('pointerdown', function f(ev) { if (!ev.target.closest('#lg-cctx')) m.remove(); document.removeEventListener('pointerdown', f, true); }, true), 0);
     });
     function lgCmtPanel(idx) {
@@ -3256,7 +3288,7 @@
     function lgShow(id, hit) {
       LG.cur = id; lgList(); const main = document.getElementById('lg-main'), x = LG.idx.find(a => a.id === id); if (!LG.data[id]) main.innerHTML = '<div class="lg-empty">불러오는 중…</div>';
       lgLoad(id).then(ms => {
-        let prev = null, h = `<div class="lg-h">${escapeHtml(x.label)} — ${escapeHtml(x.title || '')} <small style="font-weight:400;opacity:.6">${escapeHtml(x.date || '')}</small></div>${x.srv ? `<div class="lg-hb"><button class="lg-rune" title="이 로그 삭제" aria-label="이 로그 삭제" onclick="lgDel(${x.id})"><img src="${IC_RUNE}" alt=""></button></div>` : ''}`;
+        let prev = null, h = `<div class="lg-h">${escapeHtml(x.label)} — ${escapeHtml(x.title || '')} <small style="font-weight:400;opacity:.6">${escapeHtml(x.date || '')}</small></div>${x.srv ? `<div class="lg-hb"><button class="lg-rune" title="이 로그 삭제" aria-label="이 로그 삭제" onclick="lgDel(${x.id})"><img src="${IC_RUNE}" alt=""></button>${AUTH_S.gm && !plView() ? `<button class="btn btn-secondary" style="padding:2px 10px;font-size:.78rem;margin-left:8px" title="회차 이름 · 제목 · 날짜 고치기" onclick="lgInfoEdit(${x.id})">정보 수정</button>` : ''}</div>` : ''}`;
         const pmH = lgPmHtml(id);
         const AVm = LG.av[id] || {}, AVn = {}, stat = !((LG.idx.find(a => a.id === id)) || {}).srv, hid = lgNmHide(); Object.keys(AVm).forEach(k => { AVn[nameKey(k)] = AVm[k]; });
         const avu = n => (stat ? LG_TOK[String(n).replace(/\s*\(GM\)\s*$/, '')] : '') || AVm[n] || AVn[nameKey(n)] || lgAvG(n) || '', avh = n => avu(n) ? `<img class="lg-av" loading="lazy" src="${escapeHtml(avu(n))}" alt="" title="${escapeHtml(n)}" ${AVm['@alt:' + n] ? 'style="cursor:pointer" onclick="lgAlt(this)"' : ''} onerror="this.remove()">` : '', nmh = n => (hid && avu(n)) ? '' : escapeHtml(n);
