@@ -1927,6 +1927,47 @@
     .codex-grid.fx .pc-slot[data-dnd="npc"] .pc-card .pp-art,
     .codex-grid.fx .pc-slot[data-dnd="npc"] .pc-card .pc-img { position: relative !important; inset: auto !important; width: 84px !important; height: 84px !important; min-height: 84px !important; flex: none !important; border-radius: 50% !important; overflow: hidden !important; border: 2px solid #334155 !important; background: #f8fafc !important; clip-path: none !important; }
     .codex-grid.fx .pc-slot[data-dnd="npc"] .pc-card :is(.pc-name, .pa-name, .pt-nm, .pp-nm, .ps-nm, .pm-nm, .pa-nm b, .pt-free b) { position: static !important; inset: auto !important; transform: none !important; background: none !important; color: #111111 !important; text-shadow: none !important; font-size: 0.85rem !important; font-weight: 700 !important; line-height: 1.3 !important; text-align: center !important; margin: 0 !important; padding: 0 2px !important; height: auto !important; max-height: none !important; overflow: visible !important; white-space: normal !important; word-break: break-word !important; }
+
+    /* NPC 기본 카드(아직 커스텀 틀/배경/색상을 지정하지 않은 경우): 투명 정사각형 + 아래 이름 */
+    :is(.codex-grid.fx .pc-slot[data-dnd="npc"], .fan-row[data-r="npc"] .fan-c) .pc-card.pcl-classic:not([style*="--pcbg"]):not([style*="--pcb"]):not([style*="--pct"]) {
+      background: transparent !important;
+      background-image: none !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      outline: 0 !important;
+      padding: 6px 4px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 6px !important;
+      overflow: visible !important;
+    }
+    :is(.codex-grid.fx .pc-slot[data-dnd="npc"], .fan-row[data-r="npc"] .fan-c) .pc-card.pcl-classic:not([style*="--pcbg"]):not([style*="--pcb"]):not([style*="--pct"]) .pc-img {
+      width: 100% !important;
+      max-width: 120px !important;
+      aspect-ratio: 1 / 1 !important;
+      height: auto !important;
+      border-radius: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      overflow: hidden !important;
+    }
+    :is(.codex-grid.fx .pc-slot[data-dnd="npc"], .fan-row[data-r="npc"] .fan-c) .pc-card.pcl-classic:not([style*="--pcbg"]):not([style*="--pcb"]):not([style*="--pct"]) .pc-img img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      border-radius: 0 !important;
+    }
+    :is(.codex-grid.fx .pc-slot[data-dnd="npc"], .fan-row[data-r="npc"] .fan-c) .pc-card.pcl-classic:not([style*="--pcbg"]):not([style*="--pcb"]):not([style*="--pct"]) .pc-name {
+      color: var(--text-main, #1e293b) !important;
+      background: none !important;
+      text-shadow: none !important;
+      font-size: 0.85rem !important;
+      font-weight: 700 !important;
+      text-align: center !important;
+      margin-top: 2px !important;
+    }
 </style>
 <link rel="preconnect" href="https://cdn.tailwindcss.com">
 <script>/* 캐릭터 시트가 쓸 라이브러리를 한가할 때 미리 받아 둠 */(function(){function pf(){['https://cdn.tailwindcss.com'].forEach(function(u){var l=document.createElement('link');l.rel='prefetch';l.as='script';l.href=u;document.head.appendChild(l);});}if('requestIdleCallback' in window)window.addEventListener('load',function(){requestIdleCallback(pf,{timeout:4000});});else window.addEventListener('load',function(){setTimeout(pf,2500);});})();</script>
@@ -3741,7 +3782,7 @@
       try { const slot = document.getElementById('land-misc-slot'), nd = document.getElementById('bg-misc'); if (slot && nd) slot.appendChild(nd); } catch (e) {}
     }
     const VM_OPTS = [['simple', '간단히 보기'], ['card', 'NPC 카드로 보기'], ['fan', '부채꼴 펼쳐 보기']];
-    function landVm() { try { const L = (state.boardTex || {}).landing || {}, v = (L.vmPl && lkGet(L.vmPl, landMe())) || L.vm; return VM_OPTS.some(o => o[0] === v) ? v : 'simple'; } catch (e) { return 'simple'; } }
+    function landVm() { try { const L = (state.boardTex || {}).landing || {}, v = (L.vmPl && lkGet(L.vmPl, landMe())) || L.vm; return VM_OPTS.some(o => o[0] === v) ? v : 'card'; } catch (e) { return 'simple'; } }
     function landSetVm(pc, v) { if (landDeny(pc)) return; const L = landCfg(); L.vmPl = L.vmPl || {}; if (pc) { const key = lk(pc); if (v) L.vmPl[key] = v; else { delete L.vmPl[key]; delete L.vmPl[pc]; } } else L.vm = v; persistState(); window.__vm = null; }
     function landApply(canPersist) {
       if (window.__landed) return; const L = (state.boardTex || {}).landing;
@@ -7435,14 +7476,14 @@
       const a = (state.boardTex.npcCards = state.boardTex.npcCards || []);
       let o = a.find(x => x.id === npc.id);
       if (!o) {
-        o = { id: npc.id, cardType: 'classic', extra: String(npc.memo || '').replace(/\s+/g, ' ').slice(0, 90) }; a.push(o);
-        try {
-          const fl = frameList().filter(f => !isHid('fr', f.k)), f = fl[Math.floor(Math.random() * fl.length)];
-          if (f) { o.cardType = 'custom'; o.frame = frUrl(f); o.fBg = f.bg ? 'img/frames/' + f.k + '_bg.webp' : ''; o.frameR = f.r; o.fHole = 1; o.wx = f.x; o.wy = f.y; o.ww = f.w; o.wh = f.h; o.wr = 0; }
-          o.cw = 85 + Math.floor(Math.random() * 31);
-        } catch (e) {}
+        o = { id: npc.id, cardType: 'classic', cw: 100, imgS: 100, imgR: 1, extra: '' };
+        a.push(o);
       }
-      o.name = npc.name || '이름 없음'; if (!o.art) o.img = npc.image || ''; o.st = npc.st || '';
+      if (!o.cardType) o.cardType = 'classic';
+      if (!o.cw) o.cw = 100;
+      o.name = npc.name || '이름 없음';
+      if (!o.art) o.img = npc.image || '';
+      o.st = npc.st || '';
       return o;
     }
     function npcCfgOpen(id) {
