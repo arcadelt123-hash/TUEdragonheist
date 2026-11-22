@@ -1029,6 +1029,15 @@
     /* 설정 모달 */
 
     .modal-box.lg-box { width: min(1100px, 96vw) !important; height: min(86vh, 900px) !important; max-width: none !important; max-height: none !important; padding: 0 !important; display: flex; flex-direction: column; overflow: hidden; font-family: 'Gowun Batang', 'Nanum Myeongjo', serif; }
+    .lg-rune { border: 0; background: transparent; cursor: pointer; padding: 2px 4px; line-height: 0; flex: none; } .lg-rune img { width: 14px; height: auto; display: block; filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); } .lg-rune:hover img { transform: scale(1.15); }
+    .lg-pm { margin: 6px 0 12px; padding: 6px 10px; border: 1px dashed #c9bb98; border-radius: 10px; background: rgba(255,250,235,.55); } .lg-pm summary { cursor: pointer; font-weight: 800; font-size: .82rem; color: #5a3d12; }
+    .lg-pmi { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid rgba(120,90,40,.15); } .lg-pmi .pcib { width: 30px; height: 30px; background: #eadfc3; } .lg-pmb { flex: 1; min-width: 0; font-size: .85rem; word-break: break-word; } .lg-pmimg { display: block; max-width: min(100%, 280px); max-height: 220px; border-radius: 8px; margin-top: 4px; cursor: zoom-in; border: 1px solid #d8cdb4; }
+    .lg-pmf textarea { width: 100%; box-sizing: border-box; margin-top: 6px; padding: 6px 8px; border: 1px solid #c9bb98; border-radius: 8px; background: #fffaf0; font: inherit; font-size: .85rem; resize: vertical; } .lg-pmr { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+    .lg-selbtn { border: 1px solid #c9bb98; background: #fffaf0; border-radius: 999px; padding: 1px 9px; font-size: .72rem; cursor: pointer; float: right; margin-right: 6px; color: #5a3d12; } .lg-selbtn.on { background: #e4d3a8; font-weight: 800; }
+    #lg-main.lg-selmode .lg-m[data-i] { cursor: pointer; } #lg-main.lg-selmode .lg-m[data-i]:hover { background: rgba(228,211,168,.35); } .lg-m.lg-sel { background: rgba(230,178,74,.32) !important; outline: 1px solid rgba(184,137,58,.7); }
+    .lg-m.lg-cmh { box-shadow: inset 3px 0 0 #e6b24a; }
+    .lg-cb { margin: 4px 0 10px 40px; padding: 6px 10px; background: #fff6d8; border: 1px solid #e0c978; border-radius: 10px; font-size: .82rem; position: relative; } .lg-cb .q { font-size: .7rem; opacity: .65; margin-bottom: 2px; } .lg-cb .by { display: flex; align-items: center; gap: 6px; font-weight: 800; } .lg-cb .pcib { width: 20px; height: 20px; } .lg-cb .lg-rune { position: absolute; right: 4px; top: 4px; }
+    .lg-cbar { position: sticky; bottom: -30px; z-index: 4; margin-top: 16px; padding: 8px 10px; background: #fff3c9; border: 1px solid #d6b95a; border-radius: 10px; display: none; gap: 6px; align-items: center; box-shadow: 0 -4px 14px rgba(0,0,0,.15); } #lg-main.lg-selmode .lg-cbar { display: flex; } .lg-cbar textarea { flex: 1; min-width: 0; padding: 5px 8px; border: 1px solid #c9bb98; border-radius: 8px; font: inherit; font-size: .85rem; resize: none; background: #fffdf4; }
     .lg-top { display: flex; gap: 10px; align-items: center; padding: 10px 14px; border-bottom: 1px solid #d8cdb4; background: #f4ecd8; }
     .lg-top b { font-size: 16px; white-space: nowrap; color: #3b2a14; }
     .lg-top input { flex: 1; min-width: 0; padding: 7px 10px; border: 1px solid #c9bb98; border-radius: 8px; background: #fffaf0; font: inherit; font-size: 14px; }
@@ -1787,6 +1796,14 @@
     .arw-pick { display: flex; flex-direction: column; gap: 6px; flex: 1; max-width: 340px; } .arw-pick button { border: 1px solid var(--border-subtle); border-radius: 10px; background: #5a4326; color: #f3e3b4; padding: 6px 10px; cursor: pointer; font-size: .8rem; display: flex; align-items: center; justify-content: center; min-height: 38px; } .arw-pick button img { width: 100% !important; height: 34px !important; max-width: none !important; object-fit: contain; } .arw-pick button.on { border-color: #e6b24a; box-shadow: 0 0 0 3px rgba(230,178,74,.6); }
     .fan-tools { display: flex; gap: 6px; justify-content: center; margin-top: 8px; } .fan-tools button { border: 1.5px solid #8a6a2c; background: rgba(255,248,230,.9); color: #4a3414; border-radius: 999px; padding: 3px 12px; font-size: .78rem; cursor: pointer; font-weight: 700; } .fan-tools button.on { background: #ca8a04; color: #fff; border-color: #ca8a04; } .fan-tools button.del { border-color: #b4372a; color: #b4372a; } .fan-tools button.del:hover { background: #b4372a; color: #fff; }
     .npc-dead { filter: grayscale(1) brightness(.72) !important; } .npc-miss { filter: grayscale(.7) opacity(.6) !important; }
+    .pc-card[style*="--pcts"] :is(.pc-name,.pc-sub,.pc-ex,.pa-name,.pa-nm,.pt-nm,.pt-in,.pt-free,.pp-nm,.pp-in,.ps-nm,.ps-in,.pm-nm,.pm-in) { zoom: var(--pcts); }
+    .pc-card[style*="--pctf"] :is(.pc-name,.pc-sub,.pc-ex,.pa-name,.pa-nm,.pt-nm,.pt-in,.pt-free,.pp-nm,.pp-in,.ps-nm,.ps-in,.pm-nm,.pm-in), .pc-card[style*="--pctf"] :is(.pc-name,.pc-sub,.pc-ex,.pa-name,.pa-nm,.pt-nm,.pt-in,.pt-free,.pp-nm,.pp-in,.ps-nm,.ps-in,.pm-nm,.pm-in) * { font-family: var(--pctf) !important; }
+    .bk-r > .dnd-grip { position: static !important; cursor: grab; padding: 0 6px 0 2px; opacity: .8; user-select: none; touch-action: none; } .bk-r.dnd-ing { opacity: .6; outline: 1px dashed #e6b24a; }
+    .fnt-up { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; font-size: .78rem; } .fnt-up input[type=text] { flex: 1; min-width: 90px; font-size: .8rem; }
+    .fnt-li { display: flex; gap: 6px; align-items: center; font-size: .78rem; padding: 2px 0; }
+    .pc-tb { position: absolute; z-index: 25; transform: translate(-50%, -50%); text-align: center; line-height: 1.25; white-space: nowrap; color: var(--pct, #3b2410); text-shadow: 0 0 3px rgba(255,255,255,.35); pointer-events: none; }
+    #pcc-prev .pc-tb { pointer-events: auto; cursor: move; touch-action: none; outline: 1px dashed rgba(230,178,74,.7); }
+    .tb-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 5px 0; border-bottom: 1px solid rgba(120,90,40,.2); font-size: .76rem; } .tb-row textarea { flex: 1 1 100%; font: inherit; font-size: .82rem; padding: 4px 6px; border-radius: 6px; border: 1px solid #c9bb98; resize: vertical; }
     .dx { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #e11d1d; font: 900 28px/1 sans-serif; font-style: normal; text-shadow: 0 0 3px #fff, 0 0 2px #fff; pointer-events: none; z-index: 3; }
     .cx-pcrow .cx-pcimg, .itm-pcb, .itm-pcchip, .land-tabs button, .iv-tag, .pcib { position: relative; }
     .pcib { display: inline-flex; width: 26px; height: 26px; border-radius: 50%; overflow: hidden; vertical-align: middle; flex: none; }
@@ -2109,6 +2126,7 @@
 
       <div class="folder-mgmt-item">
         <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-main);">전체 배경 이미지 (연결된 PL별로 저장돼요 · '전체' 탭 선택 시)</div>
+        <div id="fnt-box"></div>
         <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><b style="font-size:.78rem;white-space:nowrap">상단 일정 글씨색</b><input type="color" id="calclr" value="#5a3d12" oninput="calClrSet(this.value)" style="width:38px;height:26px;padding:0"><button class="btn btn-secondary" style="font-size:.75rem" onclick="calClrSet('')">기본</button></div>
         <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><b style="font-size:.78rem;white-space:nowrap">로그인 화면</b><select id="lgbg-sel" style="flex:1;font-size:0.8rem" onchange="plLoginBg(this.value?'img/wc/'+this.value+'.webp':'')"><option value="">내 로그인 배경 고르기…</option></select><input type="text" id="lgbg-url" placeholder="https://… 주소" style="flex:1;font-size:0.8rem"><button class="btn btn-secondary" style="font-size:.75rem" onclick="plLoginBg(document.getElementById('lgbg-url').value.trim())">적용</button></div>
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><select id="bg-wc-sel" style="flex:1;font-size:0.8rem" onchange="if(this.value){document.getElementById('bg-url-input').value='img/wc/'+this.value+'.webp';applyDefaultBgUrl();}"><option value="">수채 배경에서 고르기…</option></select></div>
@@ -2473,7 +2491,7 @@
           const pcsOf = id => (state.boardTex.pcs || []).filter(p => p.pl === id), noOwner = (state.boardTex.pcs || []).filter(p => !p.pl || !plsList().some(x => x.id === p.pl));
           h += `<h4>PL 목록 (캐릭터 주인)</h4><div class="dv-pls">${plsList().map(p => `<div class="dv-plr"><input type="text" value="${escapeHtml(p.name || '')}" maxlength="20" onchange="plRename('${p.id}',this.value)"><span class="dv-plpc">${pcsOf(p.id).map(c => escapeHtml(c.name || 'PC')).join(', ') || '<em>연결된 PC 없음</em>'}</span><button class="btn btn-secondary dv-del" onclick="plDel('${p.id}')">삭제</button></div>`).join('') || '<em style="opacity:.6;font-size:.8rem">아직 PL이 없어요.</em>'}</div><button class="btn btn-secondary" style="margin-top:6px;padding:3px 12px" onclick="plAdd()">＋ PL 추가</button><div class="manual-note">PL은 캐릭터(PC)의 주인이에요. 새 기기는 로그인 후 이 목록에서 자기 PL을 골라요. PC 카드는 도감에서 우클릭 → 꾸미기 창의 「주인 PL」에서 PL에 연결해요.${noOwner.length ? ' <br>주인이 없는 PC: ' + noOwner.map(c => escapeHtml(c.name || 'PC')).join(', ') : ''}</div>`;
           h += `<h4>PL별 연결된 기기</h4><div class="dv-map">${pls.map(p => `<div class="dv-pc"><b>${escapeHtml(p.name || 'PL')}</b><span>${(byPc[p.id] || []).map(d => `<i class="${d.me ? 'me' : ''}">${escapeHtml(d.name)}</i>`).join('') || '<em>연결된 기기 없음</em>'}</span></div>`).join('')}${(byPc[''] || []).length ? `<div class="dv-pc"><b>연결 안 됨</b><span>${byPc[''].map(d => `<i>${escapeHtml(d.name)}</i>`).join('')}</span></div>` : ''}</div>`;
-          h += `<h4>기기 목록 (${r.devices.length})</h4><div class="dv-list">${r.devices.map(d => `<div class="dv-row"><div class="dv-n"><b>${escapeHtml(dvLabel(d))}</b> ${d.gm ? '<span class="dv-gm">GM</span>' : ''}${d.me ? ' <small>(이 기기)</small>' : ''}<small>마지막 접속 ${dvT(d.last)} · 등록 ${dvT(d.created)}</small></div><div class="dv-a">${dvPcMulti(d)}${d.me ? '' : `<button class="btn btn-secondary" onclick="devSetGm('${d.id}',${d.gm ? 'false' : 'true'})">${d.gm ? 'GM 해제' : 'GM 권한 주기'}</button><button class="btn btn-secondary dv-del" onclick="devDel('${d.id}')">삭제</button>`}</div></div>`).join('')}</div>`;
+          h += `<h4>기기 목록 (${r.devices.length})</h4><div class="dv-list">${r.devices.map(d => `<div class="dv-row"><div class="dv-n"><b>${escapeHtml(dvLabel(d))}</b> ${d.gm ? '<span class="dv-gm">GM</span>' : ''}${d.me ? ' <small></small>' : ''}<small>마지막 접속 ${dvT(d.last)} · 등록 ${dvT(d.created)}</small></div><div class="dv-a">${dvPcMulti(d)}${d.me ? '' : `<button class="btn btn-secondary" onclick="devSetGm('${d.id}',${d.gm ? 'false' : 'true'})">${d.gm ? 'GM 해제' : 'GM 권한 주기'}</button><button class="btn btn-secondary dv-del" onclick="devDel('${d.id}')">삭제</button>`}</div></div>`).join('')}</div>`;
           h += `<h4>로그인 화면 배경</h4><div class="dv-bg"><select onchange="devSetBg(this.value)"><option value="">기본 (어두운 배경, 글씨만)</option>${Object.keys(LG_WC).map(k => `<option value="img/wc/${k}.webp"${(st.bg || '') === 'img/wc/' + k + '.webp' ? ' selected' : ''}>${escapeHtml(LG_WC[k])}</option>`).join('')}</select><input type="text" id="dv-bgurl" placeholder="또는 이미지 주소(https://…)" value="${/^https:/.test(st.bg || '') ? escapeHtml(st.bg) : ''}"><button class="btn btn-secondary" onclick="devSetBg(document.getElementById('dv-bgurl').value.trim())">적용</button></div><div class="manual-note">이 설정은 로그인 전 화면에도 보여서 모든 기기에 적용돼요. 이미지는 사이트의 img 폴더 그림이나 https 주소만 쓸 수 있어요.</div>`;
           h += `<div style="margin-top:8px"><button class="btn btn-secondary" onclick="devChangePw()">비밀번호 변경</button></div>`;
         } else h += '<div class="manual-note">기기 목록을 불러오지 못했어요.</div>';
@@ -2773,10 +2791,89 @@
     function lgLoad(id) { if (LG.data[id]) return Promise.resolve(LG.data[id]); const x = LG.idx.find(a => a.id === id); return (x.srv ? fetchGet('logGet&id=' + encodeURIComponent(id)) : fetch(x.file).then(r => r.json())).then(j => { LG.av[id] = j.av || {}; return (LG.data[id] = j.msgs || []); }); }
     function lgColor(n) { let h = 0; for (const c of String(n)) h = (h * 31 + c.charCodeAt(0)) % 360; return `hsl(${h},45%,32%)`; }
     function lgLink(t, q) { let e = escapeHtml(t); if (q) { const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/&/g, '&amp;'), 'gi'); e = e.replace(re, m => '<mark>' + m + '</mark>'); } return e.replace(/(https?:\/\/[^\s<"]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>'); }
+    // ---- 회차 로그 PC 메모 ----
+    function lgPmList(id) { const M = (state.boardTex || {}).lgMemos || {}; return Array.isArray(M[id]) ? M[id] : []; }
+    function lgPmHtml(id) {
+      const me = (typeof landMe === 'function') ? landMe() : '', pc = (state.boardTex.pcs || []).find(p => p.id === me), nm = me === 'gm' ? '시금치 (GM)' : (pc ? pc.name : ''), L = lgPmList(id);
+      const items = L.map(m => { const ap = (state.boardTex.pcs || []).find(p => (p.name || '') === m.n), can = me === 'gm' || (m.by && m.by === me); return `<div class="lg-pmi"><span class="pcib">${ap ? pcIconImg(ap) + deadX(ap) : ''}</span><div class="lg-pmb"><b>${escapeHtml(m.n || '')}</b>${m.t ? `<div>${escapeHtml(m.t).replace(/\n/g, '<br>')}</div>` : ''}${m.img ? `<img class="lg-pmimg" src="${escapeHtml(m.img)}" alt="" onclick="window.open(this.src)">` : ''}</div>${can ? `<button class="lg-rune" title="메모 삭제" aria-label="메모 삭제" onclick="lgPmDel('${id}','${m.id}')"><img src="${IC_RUNE}" alt=""></button>` : ''}</div>`; }).join('');
+      const form = nm ? `<div class="lg-pmf"><textarea id="lg-pmt" rows="2" placeholder="${escapeHtml(nm)}의 한 줄 메모 (이 회차에 붙여요)"></textarea><div class="lg-pmr"><button class="btn btn-secondary" type="button" onclick="lgPmImg()">이미지</button><span id="lg-pmn" style="font-size:.72rem;opacity:.7"></span><button class="btn btn-secondary" type="button" style="margin-left:auto" onclick="lgPmAdd('${id}')">붙이기</button></div></div>` : '<div style="font-size:.76rem;opacity:.65;padding:4px 2px">PC를 고르면 메모를 쓸 수 있어요.</div>';
+      return `<details class="lg-pm"${L.length ? ' open' : ''}><summary>메모 (${L.length})</summary>${items}${form}</details>`;
+    }
+    window.__lgPmImg = '';
+    function lgPmImg() { const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; i.onchange = () => { const f = i.files[0]; if (!f) return; const u = URL.createObjectURL(f), im = new Image(); im.onload = () => { const k = Math.min(1, 480 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); window.__lgPmImg = c.toDataURL('image/jpeg', .68); URL.revokeObjectURL(u); const n = document.getElementById('lg-pmn'); if (n) n.textContent = '이미지 첨부됨 ✓'; }; im.src = u; }; i.click(); }
+    function lgPmAdd(id) {
+      const me = landMe(), pc = (state.boardTex.pcs || []).find(p => p.id === me), nm = me === 'gm' ? '시금치 (GM)' : (pc ? pc.name : ''); if (!nm) return;
+      const t = (document.getElementById('lg-pmt') || {}).value || '', img = window.__lgPmImg || ''; if (!t.trim() && !img) { showToast('내용이나 이미지를 넣어 주세요.'); return; }
+      const M = (state.boardTex.lgMemos = state.boardTex.lgMemos || {}); (M[id] = M[id] || []).push({ id: 'pm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), n: nm, by: me, t: t.trim(), img, ts: Date.now() });
+      window.__lgPmImg = ''; persistState(); lgPmRefresh(id);
+    }
+    function lgPmDel(id, mid) { if (!confirm('이 메모를 지울까요?')) return; const M = (state.boardTex.lgMemos || {}); M[id] = (M[id] || []).filter(m => m.id !== mid); persistState(); lgPmRefresh(id); }
+    function lgPmRefresh(id) { const d = document.querySelector('#lg-main .lg-pm'); if (!d) return; const tmp = document.createElement('div'); tmp.innerHTML = lgPmHtml(id); d.replaceWith(tmp.firstElementChild); }
+    // ---- 내 글씨체 (파일 올리기 / 주소) ----
+    const FNT = { db: null, loaded: {} };
+    function fntDb() { return FNT.db || (FNT.db = new Promise((res, rej) => { const r = indexedDB.open('advfonts', 1); r.onupgradeneeded = () => r.result.createObjectStore('f'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); })); }
+    function fntPut(k, buf) { return fntDb().then(db => new Promise((res, rej) => { const t = db.transaction('f', 'readwrite'); t.objectStore('f').put(buf, k); t.oncomplete = res; t.onerror = () => rej(t.error); })); }
+    function fntGet(k) { return fntDb().then(db => new Promise((res, rej) => { const q = db.transaction('f').objectStore('f').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); })); }
+    function fntDel(k) { return fntDb().then(db => { try { db.transaction('f', 'readwrite').objectStore('f').delete(k); } catch (e) {} }).catch(() => {}); }
+    function fntList() { return Array.isArray((state.boardTex || {}).customFonts) ? state.boardTex.customFonts : []; }
+    async function fntRegister() {
+      let added = false;
+      for (const c of fntList()) {
+        const fam = 'cf_' + c.k;
+        if (!MEMO_FONTS.some(f => f.k === fam)) { MEMO_FONTS.push({ k: fam, n: c.n + (c.url ? '' : ' '), f: `'${fam}', 'Noto Serif KR', serif` }); added = true; }
+        if (FNT.loaded[fam]) continue; FNT.loaded[fam] = 1;
+        try { let ff; if (c.url) ff = new FontFace(fam, `url("${String(c.url).replace(/"/g, '%22')}")`); else { const buf = await fntGet(c.k); if (!buf) continue; ff = new FontFace(fam, buf); } await ff.load(); document.fonts.add(ff); added = true; } catch (e) { FNT.loaded[fam] = 0; }
+      }
+      if (added) { try { renderAll(); } catch (e) {} try { pcCfgPrev(); } catch (e) {} }
+    }
+    function fntAddFile() {
+      const i = document.createElement('input'); i.type = 'file'; i.accept = '.ttf,.otf,.woff,.woff2'; i.onchange = async () => {
+        const f = i.files[0]; if (!f) return; if (f.size > 25e6) { showToast('폰트 파일이 너무 커요. (25MB 이하)'); return; }
+        const k = Date.now().toString(36), nm = (prompt('이 글씨체 이름', f.name.replace(/\.[^.]+$/, '')) || '').trim(); if (!nm) return;
+        try { await fntPut(k, await f.arrayBuffer()); (state.boardTex.customFonts = fntList()).push({ k, n: nm }); persistState(); await fntRegister(); fntUiRefresh(); showToast('글씨체를 추가했어요. (이 기기에서만 보여요)'); } catch (e) { showToast('폰트를 저장하지 못했어요.'); }
+      }; i.click();
+    }
+    function fntAddUrl() {
+      const u = (prompt('폰트 파일 주소 (https://….woff2 / .ttf / .otf)\n추가한 글씨체는 모든 PL이 볼 수 있어요.') || '').trim(); if (!u) return; if (!/^https:\/\//.test(u)) { showToast('https 주소만 가능해요.'); return; }
+      const nm = (prompt('이 글씨체 이름', '내 글씨체') || '').trim(); if (!nm) return;
+      (state.boardTex.customFonts = fntList()).push({ k: Date.now().toString(36), n: nm, url: u }); persistState(); fntRegister().then(fntUiRefresh);
+    }
+    function fntRemove(k) { if (!confirm('이 글씨체를 목록에서 지울까요?')) return; state.boardTex.customFonts = fntList().filter(c => c.k !== k); const i = MEMO_FONTS.findIndex(f => f.k === 'cf_' + k); if (i >= 0) MEMO_FONTS.splice(i, 1); fntDel(k); persistState(); fntUiRefresh(); try { renderAll(); } catch (e) {} }
+    function fntUiHtml() { return `<div class="fnt-up"><b>내 글씨체</b><button class="btn btn-secondary" style="font-size:.74rem" onclick="fntAddUrl()">폰트 주소로 추가</button></div>${fntList().map(c => `<div class="fnt-li"><span style="flex:1;font-family:'cf_${c.k}',serif">${escapeHtml(c.n)}${c.url ? '' : ' <small style="opacity:.6"></small>'}</span><button class="lg-rune" onclick="fntRemove('${c.k}')" title="지우기"><img src="${IC_RUNE}" alt=""></button></div>`).join('')}`; }
+    function fntUiRefresh() { const e = document.getElementById('fnt-box'); if (e) e.innerHTML = fntUiHtml(); try { if (typeof tcgRender === 'function' && document.querySelector('#tcg-ov .tbk')) tcgRender(false); } catch (e2) {} try { pcCfgRender(); } catch (e3) {} }
+    setTimeout(fntRegister, 2500); setTimeout(fntRegister, 7000);
+    new MutationObserver(() => { const fb = document.getElementById('fnt-box'); if (fb && !fb.firstChild) fb.innerHTML = fntUiHtml(); const b = document.querySelector('.bk-list2'); if (b && !b._dn) { b._dn = 1; dndInit(b, o => { const d = tcgSpec && tcgSpec.deco; if (!d) return; d.bkOrd = o; tcgSave(); tcgBkRefresh(); }); } }).observe(document.body, { childList: true, subtree: true });
+    // ---- 로그 대사 댓글 (여러 줄 선택) ----
+    function lgCmtList(id) { const M = (state.boardTex || {}).lgCmts || {}; return Array.isArray(M[id]) ? M[id] : []; }
+    function lgCmtMe() { const me = landMe(), pc = (state.boardTex.pcs || []).find(p => p.id === me); return { me, nm: me === 'gm' ? '시금치 (GM)' : (pc ? pc.name : ''), pc }; }
+    function lgCmtApply(id) {
+      const main = document.getElementById('lg-main'); if (!main) return;
+      main.querySelectorAll('.lg-cb').forEach(e => e.remove()); main.querySelectorAll('.lg-cmh').forEach(e => e.classList.remove('lg-cmh'));
+      const rows = [...main.querySelectorAll('.lg-m[data-i]')], U = lgCmtMe();
+      lgCmtList(id).forEach(c => {
+        const idx = (c.idx || []).map(Number), set = new Set(idx); let last = null; rows.forEach(r => { const i = Number(r.dataset.i); if (set.has(i)) { r.classList.add('lg-cmh'); last = r; } });
+        if (!last) return; const ap = (state.boardTex.pcs || []).find(p => (p.name || '') === c.n), can = U.me === 'gm' || (c.by && c.by === U.me);
+        const first = rows.find(r => set.has(Number(r.dataset.i))), q = first ? (first.querySelector('.lg-t') || first).textContent.trim().slice(0, 40) : '';
+        const d = document.createElement('div'); d.className = 'lg-cb'; d.innerHTML = `<div class="q">↳ ${idx.length}줄 · “${escapeHtml(q)}…”</div><div class="by"><span class="pcib">${ap ? pcIconImg(ap) + deadX(ap) : ''}</span>${escapeHtml(c.n || '')}</div><div>${escapeHtml(c.t || '').replace(/\n/g, '<br>')}</div>${can ? `<button class="lg-rune" title="메모 삭제" aria-label="메모 삭제" onclick="lgCmtDel('${id}','${c.id}')"><img src="${IC_RUNE}" alt=""></button>` : ''}`;
+        last.after(d);
+      });
+      if (!main.querySelector('.lg-cbar')) main.insertAdjacentHTML('beforeend', `<div class="lg-cbar"><span id="lg-cn" style="font-size:.78rem;white-space:nowrap">0줄 선택</span><textarea id="lg-ct" rows="1" placeholder="선택한 대사에 메모…"></textarea><button class="btn btn-secondary" onclick="lgCmtAdd()">달기</button><button class="btn btn-secondary" onclick="lgSelToggle(false)">닫기</button></div>`);
+    }
+    function lgSelToggle(on) { const m = document.getElementById('lg-main'); if (!m) return; if (on === undefined) on = !m.classList.contains('lg-selmode'); m.classList.toggle('lg-selmode', !!on); document.querySelectorAll('.lg-selbtn').forEach(b => b.classList.toggle('on', !!on)); if (!on) { m.querySelectorAll('.lg-sel').forEach(e => e.classList.remove('lg-sel')); lgCmtCount(); } }
+    function lgCmtCount() { const n = document.querySelectorAll('#lg-main .lg-m.lg-sel').length, e = document.getElementById('lg-cn'); if (e) e.textContent = n + '줄 선택'; }
+    document.addEventListener('click', e => { const m = document.getElementById('lg-main'); if (!m || !m.classList.contains('lg-selmode')) return; const r = e.target.closest && e.target.closest('#lg-main .lg-m[data-i]'); if (!r) return; if (e.target.closest('a,button,textarea,input')) return; r.classList.toggle('lg-sel'); lgCmtCount(); }, false);
+    function lgCmtAdd() {
+      const U = lgCmtMe(); if (!U.nm) { showToast('PC를 먼저 골라 주세요.'); return; }
+      const rows = [...document.querySelectorAll('#lg-main .lg-m.lg-sel')], t = ((document.getElementById('lg-ct') || {}).value || '').trim(); if (!rows.length) { showToast('메모 달 대사를 눌러서 골라 주세요.'); return; } if (!t) { showToast('메모 내용을 써 주세요.'); return; }
+      const id = LG.cur, M = (state.boardTex.lgCmts = state.boardTex.lgCmts || {}); (M[id] = M[id] || []).push({ id: 'cm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 4), idx: rows.map(r => Number(r.dataset.i)), n: U.nm, by: U.me, t, ts: Date.now() });
+      persistState(); document.getElementById('lg-ct').value = ''; rows.forEach(r => r.classList.remove('lg-sel')); lgCmtApply(id); lgCmtCount();
+    }
+    function lgCmtDel(id, cid) { if (!confirm('이 메모를 지울까요?')) return; const M = state.boardTex.lgCmts || {}; M[id] = (M[id] || []).filter(c => c.id !== cid); persistState(); lgCmtApply(id); }
     function lgShow(id, hit) {
       LG.cur = id; lgList(); const main = document.getElementById('lg-main'), x = LG.idx.find(a => a.id === id); main.innerHTML = '<div class="lg-empty">불러오는 중…</div>';
       lgLoad(id).then(ms => {
-        let prev = null, h = `<div class="lg-h">${escapeHtml(x.label)} — ${escapeHtml(x.title || '')} <small style="font-weight:400;opacity:.6">${escapeHtml(x.date || '')}</small>${x.srv ? `<button class="btn btn-secondary" style="float:right;padding:1px 8px;font-size:.72rem" onclick="lgDel(${x.id})">삭제</button>` : ''}</div>`;
+        let prev = null, h = `<div class="lg-h">${escapeHtml(x.label)} — ${escapeHtml(x.title || '')} <small style="font-weight:400;opacity:.6">${escapeHtml(x.date || '')}</small>${x.srv ? `<button class="lg-selbtn" style="float:right" onclick="lgSelToggle()" title="대사를 여러 줄 골라 메모 달기">메모</button><button class="lg-rune" style="float:right" title="이 로그 삭제" aria-label="이 로그 삭제" onclick="lgDel(${x.id})"><img src="${IC_RUNE}" alt=""></button>` : ''}</div>`;
+        h += lgPmHtml(id);
         const AVm = LG.av[id] || {}, AVn = {}, stat = !((LG.idx.find(a => a.id === id)) || {}).srv, hid = lgNmHide(); Object.keys(AVm).forEach(k => { AVn[nameKey(k)] = AVm[k]; });
         const avu = n => (stat ? LG_TOK[String(n).replace(/\s*\(GM\)\s*$/, '')] : '') || AVm[n] || AVn[nameKey(n)] || '', avh = n => avu(n) ? `<img class="lg-av" loading="lazy" src="${escapeHtml(avu(n))}" alt="" title="${escapeHtml(n)}" ${AVm['@alt:' + n] ? 'style="cursor:pointer" onclick="lgAlt(this)"' : ''} onerror="this.remove()">` : '', nmh = n => (hid && avu(n)) ? '' : escapeHtml(n);
         const hpl = lgPlHide(), plSet = new Set(); if (hpl) { const add = x => { const k = nameKey(x); if (k) plSet.add(k); }; (state.boardTex.tokens || []).forEach(t => String(t.n || '').split(/[,，]/).forEach(add)); (state.boardTex.pcs || []).forEach(p => { add(p.name); add(p.key); }); Object.keys(LG_TOK).forEach(add); }
@@ -2790,6 +2887,7 @@
           else h += `<div class="lg-m${m[3] ? ' gm' : ''}${first ? ' first' : ''}" data-i="${i}"><div class="lg-by" style="color:${lgColor(m[1])}">${first ? avh(m[1]) + nmh(m[1]) : ''}</div><div class="lg-t">${lgLink(m[2], '')}</div></div>`;
         });
         main.innerHTML = h;
+        try { lgCmtApply(id); } catch (e) {}
         if (hit != null) { const el = main.querySelector(`[data-i="${hit}"]`); if (el) { el.scrollIntoView({ block: 'center' }); el.classList.add('flash'); } } else main.scrollTop = 0;
       }).catch(() => { main.innerHTML = '<div class="lg-empty">로그 파일을 불러오지 못했어요. (logs 폴더 확인)</div>'; });
     }
@@ -5726,7 +5824,7 @@
       const rgS = (lab, k, min, max, step, def) => `<label class="pcc-sl"><span>${lab}</span><input type="range" min="${min}" max="${max}" step="${step}" value="${d[k] == null ? def : d[k]}" oninput="tcgSkinSet('${k}',Number(this.value))"></label>`;
       const sk = tcgSkin(sp);
       const sliders = sk ? (d.frame && !d.fHole ? '' : rgS('칸 왼쪽', 'wx', 0, 60, 1, 15) + rgS('칸 위', 'wy', 0, 60, 1, 12) + rgS('칸 너비', 'ww', 20, 100, 1, 70) + rgS('칸 높이', 'wh', 20, 100, 1, 76) + rgS('모서리', 'wr', 0, 50, 1, 0)) + (d.frame ? '' : rgS('카드 비율', 'frameR', 0.5, 1.2, 0.01, 0.7)) + rgS('확대', 'imgZ', 100, 300, 5, 100) + rgS('가로 위치', 'imgX', 0, 100, 5, 50) + rgS('세로 위치', 'imgY', 0, 100, 5, 50) : '<div class="pcc-none">틀이나 배경을 고르면 조절할 수 있어요</div>';
-      const bkAll = sp.bkItems ? tcgBkAll(sp) : [], bkRow = (x, i) => { const cu = /^c_/.test(x[0]) ? (d.bkCustom || []).find(c => 'c_' + c.id === x[0]) : null; return `<div class="bk-r"><label><input type="checkbox" ${bkOn(d, x[0]) ? 'checked' : ''} onchange="tcgBkToggle('${x[0]}')"> ${cu ? '' : escapeHtml(x[1])}</label>${cu ? `<input type="text" class="bk-ti" value="${escapeHtml(cu.t || '')}" oninput="tcgBkCu('${cu.id}','t',this.value)" placeholder="제목">` : ''}<span class="bk-mv"><button type="button" title="위로" onclick="tcgBkMove('${x[0]}',-1)"${i === 0 ? ' disabled' : ''}>▲</button><button type="button" title="아래로" onclick="tcgBkMove('${x[0]}',1)"${i === bkAll.length - 1 ? ' disabled' : ''}>▼</button>${cu ? `<button type="button" title="이 텍스트 박스 삭제" onclick="tcgBkDel('${cu.id}')">✕</button>` : ''}</span>${cu ? `<textarea class="bk-tx" rows="2" oninput="tcgBkCu('${cu.id}','x',this.value)" placeholder="내용">${escapeHtml(cu.x || '')}</textarea>` : ''}</div>`; };
+      const bkAll = sp.bkItems ? tcgBkAll(sp) : [], bkRow = (x, i) => { const cu = /^c_/.test(x[0]) ? (d.bkCustom || []).find(c => 'c_' + c.id === x[0]) : null; return `<div class="bk-r" data-sid="${x[0]}"><span class="dnd-grip" title="끌어서 순서 바꾸기">⠿</span><label><input type="checkbox" ${bkOn(d, x[0]) ? 'checked' : ''} onchange="tcgBkToggle('${x[0]}')"> ${cu ? '' : escapeHtml(x[1])}</label>${cu ? `<input type="text" class="bk-ti" value="${escapeHtml(cu.t || '')}" oninput="tcgBkCu('${cu.id}','t',this.value)" placeholder="제목">` : ''}<span class="bk-mv"><button type="button" title="위로" onclick="tcgBkMove('${x[0]}',-1)"${i === 0 ? ' disabled' : ''}>▲</button><button type="button" title="아래로" onclick="tcgBkMove('${x[0]}',1)"${i === bkAll.length - 1 ? ' disabled' : ''}>▼</button>${cu ? `<button type="button" title="이 텍스트 박스 삭제" onclick="tcgBkDel('${cu.id}')">✕</button>` : ''}</span>${cu ? `<textarea class="bk-tx" rows="2" oninput="tcgBkCu('${cu.id}','x',this.value)" placeholder="내용">${escapeHtml(cu.x || '')}</textarea>` : ''}</div>`; };
       const bkPanel = sp.bkItems ? `<div class="tcg-panel"><b class="pcc-h">뒷면 꾸미기</b><div class="bk-sty"><label>테두리 <input type="color" value="${d.bkBd || '#b8893a'}" oninput="tcgBkSet('bkBd',this.value,true)"></label><label>두께 <input type="range" min="0" max="8" step="1" value="${d.bkBw == null ? 2 : d.bkBw}" oninput="tcgBkSet('bkBw',Number(this.value),true)"></label><label>배경 <input type="color" value="${d.bkBg || '#2a2114'}" oninput="tcgBkSet('bkBg',this.value,true)"></label><label>글자 <input type="color" value="${d.bkTc || '#f1e6c8'}" oninput="tcgBkSet('bkTc',this.value,true)"></label><label>제목 <input type="color" value="${d.bkHc || '#f6d58a'}" oninput="tcgBkSet('bkHc',this.value,true)"></label><label>글씨체 <select onchange="tcgBkSet('bkFont',this.value)"><option value="">기본</option>${MEMO_FONTS.map(f => `<option value="${f.k}"${d.bkFont === f.k ? ' selected' : ''}>${f.n}</option>`).join('')}</select></label>${d.bkBd || d.bkBg || d.bkTc || d.bkHc || d.bkFont || d.bkBw != null ? '<button class="tcg-mini" onclick="tcgBkReset()">뒷면 원래대로</button>' : ''}</div><b class="pcc-h" style="margin-top:8px">뒷면에 보일 정보 · 순서</b><div class="bk-list2">${bkAll.map(bkRow).join('')}</div><button class="tcg-mini" onclick="tcgBkAdd()">＋ 텍스트 박스 추가</button></div>` : '';
       const right = tcgPanel ? `<div class="tcg-r">${sp.card ? '' : panel}${bkPanel}<div class="tcg-panel tcg-skinp"><div class="pcc-top2"><button class="tcg-ib" onclick="tcgUpOpen()" title="이미지 올리기 (틀 · 배경)" aria-label="이미지 올리기"><img src="${IC_UPSPLASH}" alt=""></button><button class="tcg-mini" onclick="tcgTxtFree()" title="미리보기에서 글자를 끌어 원하는 곳에 놓아요">${d.tx != null ? '글자 위치 원래대로' : '✥ 글자 위치'}</button>${sk ? '<button class="tcg-mini" onclick="tcgSkinClear()">틀 · 배경 해제</button>' : ''}</div>
         <div class="pcc-cols pcc-cols3"><div class="pcc-c pcc-c2"><b class="pcc-h">조절</b>${sliders}</div>
@@ -6653,7 +6751,7 @@
       const sh = p.sheet || {};
       return [sh.charClass, sh.charTag].filter(x => x && !/^종족 · 클래스|^Lv\. 1 · 배경/.test(x));
     }
-    function pcCardHtml(p, i, prev) { let h = pcCardHtml0(p, i, prev); if (p && p.off) h = h.replace('class="', 'class="pc-off '); if (p && (p.st === 'dead' || p.st === 'missing')) { h = h.replace('class="', 'class="npc-' + (p.st === 'dead' ? 'dead' : 'miss') + ' '); h = h.replace('>', '><span class="st-bd">' + (p.st === 'dead' ? '†' : '?') + '</span>'); } return h; }
+    function pcCardHtml(p, i, prev) { let h = pcCardHtml0(p, i, prev); if (p && Array.isArray(p.tbs) && p.tbs.length) { const tb = p.tbs.map(b => `<div class="pc-tb" data-tb="${escapeHtml(b.id)}" style="left:${Number(b.x) || 50}%;top:${Number(b.y) || 50}%;font-size:${(Number(b.s) || 100) / 100 * .9}rem;${b.c ? 'color:' + escapeHtml(b.c) + ';' : ''}${b.f ? 'font-family:' + escapeHtml(fontOf(b.f)) + ';' : ''}">${escapeHtml(b.t || '').replace(/\n/g, '<br>')}</div>`).join(''); h = h.replace(/<\/div>\s*$/, tb + '</div>'); } if (p && p.off) h = h.replace('class="', 'class="pc-off '); if (p && (p.st === 'dead' || p.st === 'missing')) { h = h.replace('class="', 'class="npc-' + (p.st === 'dead' ? 'dead' : 'miss') + ' '); h = h.replace('>', '><span class="st-bd">' + (p.st === 'dead' ? '†' : '?') + '</span>'); } return h; }
     function npcStSet(id, st) { const n = state.globalNpcs.find(x => x.id === id); if (!n) return; if (st) n.st = st; else delete n.st; persistState(); try { renderNpcCodex(); } catch (e) {} if (pccNpc && pccId === id) { try { pcCfgRender(); } catch (e) {} } }
     function npcDelFan(id) { const n = state.globalNpcs.find(x => x.id === id); if (!n || !confirm('‘' + (n.name || '이름 없음') + '’ NPC 카드를 삭제할까요?')) return; npcRemoveCore(id); state.boardTex.npcCards = (state.boardTex.npcCards || []).filter(x => x.id !== id); persistState(); if (pccNpc && pccId === id) closePcCfg(); try { renderNpcCodex(); } catch (e) {} }
     function npcToolsHtml(id) { const n = state.globalNpcs.find(x => x.id === id) || {}, st = n.st || '', b = (v, l) => `<button type="button" class="${st === v ? 'on' : ''}" onclick="event.stopPropagation();npcStSet('${id}','${v}')">${l}</button>`; return `<div class="fan-tools">${b('', '생존')}${b('dead', '† 사망')}${b('missing', '? 실종')}<button type="button" class="del" onclick="event.stopPropagation();npcDelFan('${id}')">삭제</button></div>`; }
@@ -6662,7 +6760,7 @@
       const info = p.showInfo ? pcInfoLines(p) : [];
       const click = prev ? '' : ` onclick="openSheet('${escapeHtml(p.id)}')" oncontextmenu="event.preventDefault();pcCfgOpen('${escapeHtml(p.id)}')" title="눌러서 시트 열기 · 우클릭: 카드 꾸미기"`;
       const nm = escapeHtml(p.name || 'PC');
-      const cv = [p.cBorder ? '--pcb:' + p.cBorder : '', p.cText ? '--pct:' + p.cText : '', p.cBg ? '--pcbg:' + p.cBg : ''].filter(Boolean).join(';'), cs = cv ? ` style="${escapeHtml(cv)}"` : '';
+      const cv = [p.cBorder ? '--pcb:' + p.cBorder : '', p.cText ? '--pct:' + p.cText : '', p.cBg ? '--pcbg:' + p.cBg : '', p.cFont ? '--pctf:' + fontOf(p.cFont) : '', (p.cTs && Number(p.cTs) !== 100) ? '--pcts:' + (Number(p.cTs) / 100) : ''].filter(Boolean).join(';'), cs = cv ? ` style="${escapeHtml(cv)}"` : '';
       const exT = p.extra ? escapeHtml(p.extra).replace(/\n/g, '<br>') : '', inf2 = [info.length ? info.map(escapeHtml).join(' · ') : '', exT].filter(Boolean).join('<br>');
       const z = Number(p.imgZ) || 100, y = p.imgY == null ? 50 : Number(p.imgY), xx = p.imgX == null ? 50 : Number(p.imgX);
       const artImg = src ? `<img src="${escapeHtml(src)}" alt="" style="transform:scale(${z / 100});transform-origin:${xx}% ${y}%;object-position:${xx}% ${y}%;" />` : ICONS.npc;
@@ -6795,6 +6893,22 @@
       document.addEventListener('pointermove', mv); document.addEventListener('pointerup', up);
     });
     function pcCfgPrev() { const i = pcIdx(pccId), p = pcList()[i], el = document.getElementById('pcc-prev'); if (p && el) el.innerHTML = pcCardHtml(p, i, true); }
+    // ---- 카드 텍스트 박스 (여러 개, 자유 배치) ----
+    function pcTbList() { const p = pcList()[pcIdx(pccId)]; return p ? (Array.isArray(p.tbs) ? p.tbs : []) : []; }
+    function pcTbSave(arr) { const i = pcIdx(pccId); if (i < 0) return; pcSet(i, 'tbs', arr); }
+    function pcTbAdd() { const a = pcTbList().slice(); a.push({ id: 'tb' + Date.now().toString(36), t: '텍스트', x: 50, y: 50, s: 100 }); pcTbSave(a); pcCfgRender(); }
+    function pcTbDel(id) { pcTbSave(pcTbList().filter(b => b.id !== id)); pcCfgRender(); }
+    function pcTbSet(id, k, v, full) { pcTbSave(pcTbList().map(b => b.id === id ? Object.assign({}, b, { [k]: v }) : b)); if (full) pcCfgRender(); else pcCfgPrev(); }
+    function pcTbHtml() {
+      return `<div class="pcc-memo" style="display:block"><b>텍스트 박스</b> <small style="opacity:.7">(미리보기 카드에서 끌어서 옮겨요)</small>${pcTbList().map(b => `<div class="tb-row"><textarea rows="1" oninput="pcTbSet('${b.id}','t',this.value)">${escapeHtml(b.t || '')}</textarea><label>크기 <input type="range" min="40" max="300" step="5" value="${Number(b.s) || 100}" oninput="pcTbSet('${b.id}','s',Number(this.value))"></label><label>색 <input type="color" value="${b.c || '#3b2410'}" oninput="pcTbSet('${b.id}','c',this.value)"></label><select onchange="pcTbSet('${b.id}','f',this.value,true)"><option value="">기본 글씨체</option>${MEMO_FONTS.map(f => `<option value="${f.k}"${b.f === f.k ? ' selected' : ''}>${f.n}</option>`).join('')}</select><button class="lg-rune" title="이 텍스트 박스 삭제" aria-label="삭제" onclick="pcTbDel('${b.id}')"><img src="${IC_RUNE}" alt=""></button></div>`).join('')}<button class="btn btn-secondary" style="margin-top:6px;font-size:.78rem" onclick="pcTbAdd()">＋ 텍스트 박스 추가</button></div>`;
+    }
+    document.addEventListener('pointerdown', e => {
+      const el = e.target.closest && e.target.closest('#pcc-prev .pc-tb'); if (!el) return; e.preventDefault();
+      const card = el.parentElement, id = el.dataset.tb;
+      const mv = ev => { const r = card.getBoundingClientRect(), x = Math.max(0, Math.min(100, (ev.clientX - r.left) / r.width * 100)), y = Math.max(0, Math.min(100, (ev.clientY - r.top) / r.height * 100)); el.style.left = x.toFixed(1) + '%'; el.style.top = y.toFixed(1) + '%'; el._p = [x, y]; };
+      const up = () => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', up); if (el._p) { const [x, y] = el._p; pcTbSave(pcTbList().map(b => b.id === id ? Object.assign({}, b, { x: +x.toFixed(1), y: +y.toFixed(1) }) : b)); } };
+      document.addEventListener('pointermove', mv); document.addEventListener('pointerup', up);
+    });
     function pcCfgSet(k, v, full) { const i = pcIdx(pccId); if (i < 0) return; pcSet(i, k, v); if (full) pcCfgRender(); else pcCfgPrev(); }
     function pcCfgRender() {
       if (pccVirt && pccId === 'tcgx') { tcgSave(); tcgRender(false); return; }
@@ -6821,6 +6935,8 @@
             <label style="font-size:.8rem;display:flex;gap:6px;align-items:center;"><input type="checkbox" ${p.showInfo ? 'checked' : ''} onchange="pcCfgSet('showInfo',this.checked)"> 기타 정보 표시</label>
             <textarea rows="2" maxlength="90" placeholder="추가 문구" oninput="pcCfgSet('extra',this.value)" style="resize:none;">${escapeHtml(p.extra || '')}</textarea>
             <div class="pcc-colors"><label>테두리 <input type="color" value="${p.cBorder || '#b8893a'}" oninput="pcCfgSet('cBorder',this.value)"></label><label>글자 <input type="color" value="${p.cText || '#3b2410'}" oninput="pcCfgSet('cText',this.value)"></label><label>배경 <input type="color" value="${p.cBg || '#fbf1d9'}" oninput="pcCfgSet('cBg',this.value)"></label><button class="btn btn-secondary" style="padding:2px 8px;font-size:.72rem;" onclick="['cBorder','cText','cBg'].forEach(k=>pcCfgSet(k,'',false));pcCfgRender()">색 초기화</button></div>
+            <div class="pcc-colors" style="margin-top:4px"><label>글씨체 <select onchange="pcCfgSet('cFont',this.value,true)" style="font-size:.78rem"><option value="">기본</option>${MEMO_FONTS.map(f => `<option value="${f.k}"${p.cFont === f.k ? ' selected' : ''}>${f.n}</option>`).join('')}</select></label><label>글씨 크기 <input type="range" min="60" max="220" step="5" value="${Number(p.cTs) || 100}" oninput="pcCfgSet('cTs',Number(this.value));this.nextElementSibling.textContent=this.value+'%'"><span style="font-size:.72rem;min-width:34px">${Number(p.cTs) || 100}%</span></label><button class="btn btn-secondary" style="padding:2px 8px;font-size:.72rem;" onclick="pcCfgSet('cFont','');pcCfgSet('cTs','',true)">글씨 초기화</button></div>
+            ${pcTbHtml()}
             ${memo}${tokBox}</div>
           <div class="pcc-c pcc-c2"><b class="pcc-h">조절</b>${sliders}</div>
           <div class="pcc-c pcc-c3"><b class="pcc-h">틀</b>${frameGrid}</div>
