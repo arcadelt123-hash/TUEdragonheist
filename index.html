@@ -1775,6 +1775,7 @@
     .tcg-skinp .pcc-row { border-top-color: #ca8a0455; color: #f1e6c8; } .tcg-skinp .pcc-row:first-child { border-top: 0; padding-top: 0; } .tcg-skinp .pcc-sl { color: #c9b98a; }
 
     .land-box { border: 1px solid var(--border-subtle); border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; background: rgba(255,255,255,.6); }
+    .manual { font-size: .82rem; line-height: 1.55; color: var(--text-main); padding-top: 6px; } .manual h4 { margin: 10px 0 4px; font-size: .86rem; } .manual table { border-collapse: collapse; width: 100%; } .manual th { text-align: left; white-space: nowrap; vertical-align: top; padding: 4px 10px 4px 0; font-weight: 800; color: #7a5a22; } .manual td { padding: 4px 0; } .manual tr + tr > * { border-top: 1px dashed var(--border-subtle); } .manual ul { margin: 0; padding-left: 18px; } .manual code { background: rgba(0,0,0,.06); padding: 0 4px; border-radius: 4px; } .manual-note { margin-top: 8px; font-size: .74rem; color: var(--text-muted); }
     .land-box > summary { cursor: pointer; font-weight: 800; font-size: .92rem; }
     .land-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-size: .84rem; } .land-row > span { width: 150px; flex: none; display: flex; align-items: center; gap: 6px; font-weight: 700; } .land-row img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; } .land-row select { flex: 1; min-width: 0; }
 
@@ -2094,6 +2095,35 @@
         <div style="display: flex; gap: 8px; margin-top: 10px;">
           <input type="text" id="new-folder-name-input" placeholder="새 폴더 이름..." />
           <button class="btn btn-primary" onclick="addNewFolderFromModal()">+ 폴더 추가</button>
+        </div>
+      </details>
+      <details class="land-box" id="manual-box"><summary>📖 사이트 설명서 (단축키 · 사용법)</summary>
+        <div class="manual">
+          <h4>단축키</h4>
+          <table>
+            <tr><th>ESC</th><td>열려 있는 창·메뉴·카드를 닫아요. 아무것도 안 열려 있으면 <b>상단 메뉴 탭을 숨기거나 다시 불러와요</b>. (숨긴 상태에선 화면 왼쪽 위 모서리의 작은 네모 버튼을 눌러도 돼요)</td></tr>
+            <tr><th>Ctrl + K</th><td>통합 검색 열기 (ESC로 닫기)</td></tr>
+            <tr><th>Ctrl + Z / Ctrl + Y</th><td>실행 취소 / 다시 실행 (Ctrl + Shift + Z도 다시 실행). 지도·보드·타임라인에서 사용해요</td></tr>
+            <tr><th>Shift + R</th><td>퀘스트 우클릭 메뉴가 열려 있을 때 연결선 화살표 방향 전환</td></tr>
+            <tr><th>← → · Enter</th><td>카드 뽑기 줄 / 인물 부채꼴 목록에서 카드 넘기기 · 뽑기. Home / End 는 처음 · 끝, ↑ ↓ 는 PC · NPC 줄 이동</td></tr>
+            <tr><th>↑ ↓ · PageUp/PageDown · 스페이스</th><td>퀘스트 상세 보기에서 위아래로 스크롤</td></tr>
+            <tr><th>Enter / ESC</th><td>이름 입력칸에서 확정 / 취소</td></tr>
+          </table>
+          <h4>마우스 · 터치</h4>
+          <ul>
+            <li><b>인물 카드 우클릭 (모바일은 길게 누르기)</b>: 카드 꾸미기 · 시트 열기 메뉴</li>
+            <li><b>큰 카드(카드 뽑기 화면)</b>: 카드를 누르면 뒤집기, 빈 곳을 누르면 닫기. 빈 곳을 길게 누르면 꾸미기를 물어봐요. 아래 카드 줄은 옆으로 밀어 고르고, 위로 끌면 여러 장을 함께 펼쳐요.</li>
+            <li><b>캐릭터 시트</b>: 목록 글씨를 한 번 눌러 수정 모드로 들어가야 삭제 버튼이 나와요. 상세 페이지 왼쪽 위 두루마리로 시트로 돌아와요.</li>
+            <li><b>지도</b>: 분류에 커서를 올리면 수정 버튼이 나오고, 삭제는 수정 창 안에 있어요. 핀도 이름 옆 깃펜으로 수정·삭제해요.</li>
+            <li><b>꾸미기</b>: 시트 · 로그 화면 · 카드 · 노트에서 텍스처, 배경, 테두리를 고를 수 있고, 내 이미지는 덧붙이기(원본 크기 반복) 또는 꽉 채우기로 적용해요.</li>
+          </ul>
+          <h4>다른 사이트 안내</h4>
+          <ul>
+            <li>이 도구는 사이트마다 따로 저장돼요 (드래곤하이스트 · 판델버 · 평일). 데이터가 서로 섞이지 않아요.</li>
+            <li>새 사이트를 만들 때는 그 사이트용 Apps Script를 새로 배포하고, 배포 주소만 <code>index.html</code>에 바꿔 넣으면 돼요.</li>
+            <li>이미지 폴더(<code>img</code>)는 각 사이트 폴더 안에 같이 올려야 해요.</li>
+          </ul>
+          <div class="manual-note">단축키나 사용법이 바뀌면 이 설명서에도 함께 기록해 둘게요.</div>
         </div>
       </details>
       <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
@@ -2834,7 +2864,7 @@
       const tabs = `<div class="land-tabs"><button class="${t === 'def' ? 'on' : ''}" onclick="landTabSet('def')">공통 기본</button>${pcs.map(p => `<button class="${t === p.id ? 'on' : ''}" onclick="landTabSet('${escapeHtml(p.id)}')"><img src="${escapeHtml(p.img || IC_NPC)}" alt="">${escapeHtml(p.name || 'PL')}${me === p.id ? ' ✓' : ''}</button>`).join('')}</div>`;
       const link = pc ? `<div class="land-row"><span>이 기기</span>${me === pc ? '<b>이 PC로 연결됨 ✓</b> <button class="btn btn-secondary" style="padding:3px 8px" onclick="landSetMe(\'\');presLink2()">연결 해제</button>' : `<button class="btn btn-secondary" style="padding:3px 10px" onclick="landSetMe('${escapeHtml(pc)}');presLink2()">이 기기를 이 PC로 연결</button>`}</div>` : '';
       el.innerHTML = `<div class="land-row" style="margin-top:2px"><span>${meP ? '이 기기: <b>' + escapeHtml(meP.name) + '</b>' : '<b style="color:#b45309">PC 연결 안 됨</b>'}</span><small style="opacity:.65">개인 설정은 연결된 PC 이름으로 저장돼요</small></div>` + myTok + tabs + link
-        + `<div id="land-secs">` + landSecOrder().filter(k => k !== 'tok' || (pc && pc !== 'gm') || (!pc && body.tok)).map(k => `<div class="land-sec" data-sid="${k}"><div class="land-sh">${LAND_SECS.find(x => x[0] === k)[1]}<span class="dnd-grip" title="끌어서 순서 바꾸기">⋮⋮</span></div>${body[k]}</div>`).join('') + `</div>`;
+        + `<div id="land-secs">` + landSecOrder().filter(k => k !== 'tok' || (pc && pc !== 'gm')).map(k => `<div class="land-sec" data-sid="${k}"><div class="land-sh">${LAND_SECS.find(x => x[0] === k)[1]}<span class="dnd-grip" title="끌어서 순서 바꾸기">⋮⋮</span></div>${body[k]}</div>`).join('') + `</div>`;
       const sc = document.getElementById('land-secs'); sc.querySelectorAll('.land-sec').forEach(d => { d.style.position = 'relative'; });
       dndInit(sc, o => prefSet('landSec', o));
     }
@@ -3887,6 +3917,19 @@
       try { if (localStorage.getItem('adv_nav_off') === '1') document.body.classList.add('nav-off'); } catch (e) {}
       const h = document.createElement('button'); h.id = 'nav-handle'; h.type = 'button'; h.onclick = navToggle; h.setAttribute('aria-label', '메뉴 열기'); document.body.appendChild(h); navHandleSync();
       setInterval(navHandleSync, 800);
+    })();
+    // ---- ESC: 아무것도 열려 있지 않으면 상단 메뉴 숨김/보이기 ----
+    (function () {
+      let busy = 0;
+      const OPEN = '.modal-backdrop.open, #tcg-ov, #tcgm-ov, #gs-ov.open, #sheet-ov.open, #map-ov.open, .ctx-menu, #qt-menu, .tcg-ctxp, .board-popup, .bs-pop, #pcup, #patmgr, .npc-style-menu';
+      const anyOpen = () => [...document.querySelectorAll(OPEN)].some(el => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden') || !!state.detailQid || !!state.boardPopup || !!qvId;
+      window.addEventListener('keydown', e => { busy = e.key === 'Escape' ? (anyOpen() ? 1 : 0) : 0; }, true);
+      document.addEventListener('keydown', e => {
+        if (e.key !== 'Escape' || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || busy) return;
+        const t = e.target; if (t && (/INPUT|TEXTAREA|SELECT/.test(t.tagName || '') || t.isContentEditable)) return;
+        if (anyOpen() || document.activeElement && /IFRAME/.test(document.activeElement.tagName || '') && 0) return;
+        e.preventDefault(); navToggle();
+      });
     })();
     function toggleBoardWide() { state.boardTex.wide = !state.boardTex.wide; persistState(); renderAll(); }
     function openBoardPopup() {
