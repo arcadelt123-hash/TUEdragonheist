@@ -2109,7 +2109,7 @@
     <div id="cal-list"></div>
   </div></div>
   <div class="modal-backdrop" id="lg-modal" onclick="if(event.target===this)lgClose()"><div class="modal-box lg-box">
-    <div class="lg-top"><b>세션 로그</b><input id="lg-q" type="search" placeholder="전체 회차 검색 (대사 · 판정 · 이름)" oninput="lgSearchDeb()" autocomplete="off"><button class="btn btn-secondary" id="lg-pl" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgPlToggle()" title="켜짐(강조): PL 발언이 보여요 · 누르면 꺼지면서 PL·PC(등록된 토큰/PL 이름) 발언이 숨겨져요. 시금치와 NPC는 남아요">PL</button><button class="btn btn-secondary" id="lg-nm" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgNmToggle()" title="켜짐(강조): 이름이 보여요 · 누르면 꺼지면서 캐릭터 이미지만 보여요">이름</button><button class="btn btn-secondary" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgUpMenu(event)" title="로그 추가 (텍스트 붙여넣기 또는 파일)" aria-label="로그 추가"><img class="lg-ic" data-ic="feather" alt=""></button><input type="file" id="lg-file" accept=".htm,.html,.txt" multiple style="display:none" onchange="lgUpload(this)"><button class="btn btn-secondary" id="lg-deco-b" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgDecoToggle()" title="로그 화면 꾸미기 (텍스처 · 테두리)" aria-label="로그 화면 꾸미기"><img class="lg-ic" data-ic="brush" alt=""></button><button class="lg-x" onclick="lgClose()" aria-label="닫기">✕</button></div>
+    <div class="lg-top"><b>세션 로그</b><input id="lg-q" type="search" placeholder="전체 회차 검색 (대사 · 판정 · 이름)" oninput="lgSearchDeb()" autocomplete="off"><button class="btn btn-secondary" id="lg-pl" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgPlToggle()" title="켜짐(강조): PL 발언이 보여요 · 누르면 꺼지면서 PL·PC(등록된 토큰/PL 이름) 발언이 숨겨져요. 시금치와 NPC는 남아요">PL</button><button class="btn btn-secondary" id="lg-nm" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgNmToggle()" title="켜짐(강조): 이름이 보여요 · 누르면 꺼지면서 캐릭터 이미지만 보여요">이름</button><button class="btn btn-secondary" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgUpMenu(event)" title="로그 추가 (텍스트 붙여넣기 또는 파일)" aria-label="로그 추가"><img class="lg-ic" data-ic="feather" alt=""></button><input type="file" id="lg-file" accept=".htm,.html,.txt" multiple style="display:none" onchange="lgUpload(this)"><button class="btn btn-secondary" id="lg-deco-b" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgDecoToggle()" title="로그 화면 꾸미기 (텍스처 · 테두리)" aria-label="로그 화면 꾸미기"><img class="lg-ic" data-ic="brush" alt=""></button><button class="btn btn-secondary" id="lg-ref-b" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgRefresh()" title="세션 로그 다시 읽기 및 등장 PC·NPC 갱신" aria-label="세션 로그 새로고침">⟳</button><button class="lg-x" onclick="lgClose()" aria-label="닫기">✕</button></div>
     <div class="lg-deco" id="lg-deco" hidden></div>
     <div class="lg-body"><div class="lg-list" id="lg-list"></div><div class="lg-main" id="lg-main"></div></div>
   </div></div>
@@ -3204,6 +3204,40 @@
     function lgClose() { document.getElementById('lg-modal').classList.remove('open'); }
     function lgList() { document.getElementById('lg-list').innerHTML = LG.idx.map(x => `<button data-id="${x.id}" class="${x.id === LG.cur ? 'on' : ''}" onclick="document.getElementById('lg-q').value='';lgShow(${x.id})"><div class="lg-l1">${escapeHtml(x.label)}</div><div class="lg-l2">${escapeHtml(x.title || '')}</div><div class="lg-l3">${escapeHtml(x.date || '')} · ${x.n}줄</div></button>`).join(''); }
     function lgLoad(id) { if (LG.data[id]) return Promise.resolve(LG.data[id]); const x = LG.idx.find(a => a.id === id); return (x.srv ? fetchGet('logGet&id=' + encodeURIComponent(id)) : fetch(x.file).then(r => r.json())).then(j => { LG.av[id] = j.av || {}; return (LG.data[id] = j.msgs || []); }); }
+    async function lgRefresh() {
+      const btn = document.getElementById('lg-ref-b');
+      if (btn) btn.disabled = true;
+      showToast('세션 로그와 등장 인물을 다시 불러오는 중…');
+      try {
+        const [st, sv] = await Promise.all([
+          fetch('logs/index.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : []).catch(() => []),
+          fetchGet('logIdx').then(j => Array.isArray(j) ? j : []).catch(() => [])
+        ]);
+        const prevId = LG.cur;
+        LG.data = {};
+        LG.av = {};
+        if (st.length || sv.length) {
+          sv.forEach(x => { x.srv = 1; });
+          LG.idx = st.concat(sv).sort((p, q) => String(p.date || '').localeCompare(String(q.date || '')) || p.id - q.id);
+        }
+        lgList();
+        const targetId = (LG.idx || []).some(a => a.id === prevId)
+          ? prevId
+          : ((LG.idx && LG.idx.length) ? LG.idx[LG.idx.length - 1].id : 0);
+        if (targetId) {
+          await lgLoad(targetId);
+          lgShow(targetId);
+        } else {
+          document.getElementById('lg-main').innerHTML = '<div class="lg-empty">저장된 로그가 없어요.</div>';
+        }
+        try { if (state.viewMode === 'npcs' && typeof renderNpcCodex === 'function') renderNpcCodex(); } catch (e) {}
+        showToast('세션 로그와 등장 PC·NPC를 다시 불러왔어요.');
+      } catch (e) {
+        showToast('다시 불러오지 못했어요: ' + (e && e.message ? e.message : e));
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
     function lgColor(n) { let h = 0; for (const c of String(n)) h = (h * 31 + c.charCodeAt(0)) % 360; return `hsl(${h},45%,32%)`; }
     function lgLink(t, q) { let e = escapeHtml(t); if (q) { const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/&/g, '&amp;'), 'gi'); e = e.replace(re, m => '<mark>' + m + '</mark>'); } return e.replace(/(https?:\/\/[^\s<"]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>'); }
     // ---- 회차 로그 PC 메모 ----
