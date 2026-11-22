@@ -1036,7 +1036,7 @@
     .lg-pbox textarea { width: 100%; box-sizing: border-box; height: 260px; resize: vertical; padding: 8px; border: 1px solid #c9bb98; border-radius: 8px; background: #fff; font: inherit; font-size: .88rem; }
     .lg-pbox input[type=text] { flex: 1; min-width: 0; padding: 6px 8px; border: 1px solid #c9bb98; border-radius: 8px; background: #fff; font: inherit; }
     .lg-prow { display: flex; gap: 8px; align-items: center; } .lg-psub { font-size: .78rem; color: #7a6a48; line-height: 1.5; }
-    .lg-pm { resize: both; overflow: auto; min-width: 220px; max-width: 100%; min-height: 40px; box-sizing: border-box; margin: 6px 0 12px; padding: 6px 10px; border: 1px dashed #c9bb98; border-radius: 10px; background: rgba(255,250,235,.55); } .lg-pm summary { cursor: pointer; font-weight: 800; font-size: .82rem; color: #5a3d12; }
+    .lg-pm { color: var(--pm-fg, inherit); resize: both; overflow: auto; min-width: 220px; max-width: 100%; min-height: 40px; box-sizing: border-box; margin: 6px 0 12px; padding: 6px 10px; border: 1px var(--pm-bs, dashed) var(--pm-bc, #c9bb98); border-radius: var(--pm-r, 10px); background: var(--pm-bg, rgba(255,250,235,.55)); } .lg-pm summary { cursor: pointer; font-weight: 800; font-size: .82rem; color: var(--pm-fg, #5a3d12); }
     .lg-pmi { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid rgba(120,90,40,.15); } .lg-pmi .pcib { width: 30px; height: 30px; background: #eadfc3; } .lg-pmb { flex: 1; min-width: 0; font-size: .85rem; word-break: break-word; } .lg-pmimg { display: block; max-width: min(100%, 280px); max-height: 220px; border-radius: 8px; margin-top: 4px; cursor: zoom-in; border: 1px solid #d8cdb4; }
     .lg-pmf textarea { width: 100%; resize: both; max-width: 100%; box-sizing: border-box; margin-top: 6px; padding: 6px 8px; border: 1px solid #c9bb98; border-radius: 8px; background: #fffaf0; font: inherit; font-size: .85rem; resize: both; max-width: 100%; } .lg-pmr { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
     .lg-selbtn { border: 1px solid #c9bb98; background: #fffaf0; border-radius: 999px; padding: 1px 9px; font-size: .72rem; cursor: pointer; float: right; margin-right: 6px; color: #5a3d12; } .lg-selbtn.on { background: #e4d3a8; font-weight: 800; }
@@ -1062,7 +1062,13 @@
     .lg-list button:hover { background: #efe4c9; } .lg-list button.on { background: #e4d3a8; }
     .lg-list .lg-l1 { font-weight: 700; font-size: 14px; } .lg-list .lg-l2 { font-size: 12px; opacity: .75; margin-top: 2px; line-height: 1.35; } .lg-list .lg-l3 { font-size: 11px; opacity: .55; margin-top: 2px; }
     .lg-main { flex: 1; overflow-y: auto; padding: 14px 18px 40px; background: #fffaf0; color: #2d2410; scroll-behavior: auto; }
-    .lg-h { font-size: 18px; font-weight: 700; margin: 0 0 12px; }
+    .lg-h { font-size: 18px; font-weight: 700; margin: 0 0 8px; }
+    .lg-cast { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 12px; font-size: .8rem; color: #3b2a14; } .lg-cast b { margin-right: 4px; font-size: .82rem; }
+    .lg-cl { font-size: .7rem; color: #7a6a48; margin: 0 2px 0 6px; }
+    .lg-cc { display: flex; flex-direction: column; align-items: center; width: 84px; padding: 6px 4px 5px; border: 1px solid #d8cdb4; border-radius: 12px; background: rgba(255,250,235,.75); cursor: pointer; text-align: center; box-shadow: 0 1px 3px rgba(60,40,10,.15); } .lg-cc:hover { background: #ffe9a8; }
+    .lg-cc img { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; background: #eadfc3; } .lg-cc span { margin-top: 4px; font-weight: 700; font-size: .78rem; line-height: 1.2; word-break: keep-all; max-width: 100%; } .lg-cc small { font-size: .66rem; color: #7a6a48; }
+    .lg-cc.pc { border-color: #b8893a; background: rgba(228,211,168,.7); } .lg-cc.def { border-style: dashed; } .lg-cc.def img { opacity: .55; }
+    .lg-hb { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; } .lg-hb .lg-selbtn { float: none; margin: 0; }
     .lg-m { display: flex; gap: 10px; padding: 2px 0; line-height: 1.55; font-size: 14px; }
     .lg-m.first { margin-top: 10px; }
     .lg-by { flex: none; width: 118px; text-align: right; font-weight: 700; font-size: 13px; padding-top: 1px; overflow-wrap: anywhere; }
@@ -2081,7 +2087,7 @@
     <div id="cal-list"></div>
   </div></div>
   <div class="modal-backdrop" id="lg-modal" onclick="if(event.target===this)lgClose()"><div class="modal-box lg-box">
-    <div class="lg-top"><b>세션 로그</b><input id="lg-q" type="search" placeholder="전체 회차 검색 (대사 · 판정 · 이름)" oninput="lgSearchDeb()" autocomplete="off"><button class="btn btn-secondary" id="lg-pl" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgPlToggle()" title="켜짐(강조): PL 발언이 보여요 · 누르면 꺼지면서 PL·PC(등록된 토큰/PL 이름) 발언이 숨겨져요. 시금치와 NPC는 남아요">PL</button><button class="btn btn-secondary" id="lg-nm" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgNmToggle()" title="켜짐(강조): 이름이 보여요 · 누르면 꺼지면서 캐릭터 이미지만 보여요">이름</button><button class="btn btn-secondary" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgPasteOpen()" title="채팅 로그를 복사해서 붙여넣어 바로 저장">붙여넣기</button><button class="btn btn-secondary" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="document.getElementById('lg-file').click()" title="롤20(.htm) / FVTT(.txt) 로그를 올려 저장" aria-label="로그 올리기"><img class="lg-ic" data-ic="feather" alt=""></button><input type="file" id="lg-file" accept=".htm,.html,.txt" multiple style="display:none" onchange="lgUpload(this)"><button class="btn btn-secondary" id="lg-deco-b" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgDecoToggle()" title="로그 화면 꾸미기 (텍스처 · 테두리)" aria-label="로그 화면 꾸미기"><img class="lg-ic" data-ic="brush" alt=""></button><button class="lg-x" onclick="lgClose()" aria-label="닫기">✕</button></div>
+    <div class="lg-top"><b>세션 로그</b><input id="lg-q" type="search" placeholder="전체 회차 검색 (대사 · 판정 · 이름)" oninput="lgSearchDeb()" autocomplete="off"><button class="btn btn-secondary" id="lg-pl" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgPlToggle()" title="켜짐(강조): PL 발언이 보여요 · 누르면 꺼지면서 PL·PC(등록된 토큰/PL 이름) 발언이 숨겨져요. 시금치와 NPC는 남아요">PL</button><button class="btn btn-secondary" id="lg-nm" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgNmToggle()" title="켜짐(강조): 이름이 보여요 · 누르면 꺼지면서 캐릭터 이미지만 보여요">이름</button><button class="btn btn-secondary" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgUpMenu(event)" title="로그 추가 (텍스트 붙여넣기 또는 파일)" aria-label="로그 추가"><img class="lg-ic" data-ic="feather" alt=""></button><input type="file" id="lg-file" accept=".htm,.html,.txt" multiple style="display:none" onchange="lgUpload(this)"><button class="btn btn-secondary" id="lg-deco-b" style="padding:2px 8px;font-size:.78rem;white-space:nowrap" onclick="lgDecoToggle()" title="로그 화면 꾸미기 (텍스처 · 테두리)" aria-label="로그 화면 꾸미기"><img class="lg-ic" data-ic="brush" alt=""></button><button class="lg-x" onclick="lgClose()" aria-label="닫기">✕</button></div>
     <div class="lg-deco" id="lg-deco" hidden></div>
     <div class="lg-body"><div class="lg-list" id="lg-list"></div><div class="lg-main" id="lg-main"></div></div>
   </div></div>
@@ -2885,6 +2891,37 @@
       } catch (e) { alert('로그 저장 실패: ' + (e.message || e) + '\n(앱스크립트 서버 코드를 새 버전으로 다시 배포했는지 확인해주세요)'); }
     }
 
+    function lgAvG(n) {
+      const bt = state.boardTex || {}, k = nameKey(n), g = (bt.lgAv || {})[k]; if (g) return g;
+      const pc = (bt.pcs || []).find(p => nameKey(p.name || '') === k && p.img); if (pc) return pc.img;
+      const np = (state.globalNpcs || []).find(x => nameKey(x.name || '') === k && x.image && !(typeof icoIs === 'function' && icoIs(x.image))); return np ? np.image : '';
+    }
+    function lgCastImg(n) {
+      let el = document.getElementById('lg-paste'); if (!el) { el = document.createElement('div'); el.id = 'lg-paste'; el.className = 'lg-paste'; document.querySelector('#lg-modal .lg-box').appendChild(el); }
+      const cur = lgAvG(n); window.__lgCastN = n;
+      el.innerHTML = `<div class="lg-pbox" style="width:min(440px,94%)"><b>${escapeHtml(n)} 이미지</b><div class="lg-psub">이미지 주소를 넣거나 파일을 올려요. 저장하면 이 인물의 모든 로그에 쓰여요.</div><div style="text-align:center"><img id="lg-cpv" src="${escapeHtml(cur || IC_NPC)}" style="width:96px;height:96px;border-radius:12px;object-fit:cover;background:#eadfc3" alt=""></div>
+      <input id="lg-cu" type="text" placeholder="이미지 주소(URL)" value="${cur && !/^data:/i.test(cur) ? escapeHtml(cur) : ''}" oninput="document.getElementById('lg-cpv').src=this.value||IC_NPC">
+      <div class="lg-prow"><span class="btn btn-secondary" style="cursor:pointer">파일 올리기<input type="file" accept="image/*" hidden onchange="lgCastPick(this)"></span><button class="btn btn-secondary" onclick="lgCastSave('')">이미지 지우기</button></div>
+      <div class="lg-prow"><button class="btn btn-secondary" onclick="lgPasteClose()">닫기</button><span style="flex:1"></span><button class="btn btn-primary" onclick="lgCastSave(document.getElementById('lg-cu').value.trim())">저장</button></div></div>`;
+      el.style.display = 'flex';
+    }
+    function lgCastPick(inp) {
+      const f = inp.files && inp.files[0]; inp.value = ''; if (!f) return; const u = URL.createObjectURL(f), im = new Image();
+      im.onload = () => { const s = Math.min(im.width, im.height), c = document.createElement('canvas'); c.width = c.height = 192; c.getContext('2d').drawImage(im, (im.width - s) / 2, (im.height - s) / 2, s, s, 0, 0, 192, 192); URL.revokeObjectURL(u); const d = c.toDataURL('image/webp', .85); document.getElementById('lg-cpv').src = d; document.getElementById('lg-cu').value = ''; window.__lgCastData = d; };
+      im.src = u;
+    }
+    function lgCastSave(url) {
+      const bt = state.boardTex; bt.lgAv = bt.lgAv || {}; const k = nameKey(window.__lgCastN), v = window.__lgCastData && !url ? window.__lgCastData : url;
+      if (v) bt.lgAv[k] = v; else delete bt.lgAv[k]; window.__lgCastData = null; persistState(); lgPasteClose(); lgKeepShow();
+    }
+    function lgUpMenu(e) {
+      if (e) e.stopPropagation(); let m = document.getElementById('lg-upm');
+      if (m) { m.remove(); return; }
+      m = document.createElement('div'); m.id = 'lg-upm'; m.className = 'lg-deco'; m.style.cssText = 'width:auto;padding:8px;display:flex;flex-direction:column;gap:6px;top:50px;right:60px';
+      m.innerHTML = '<button class="btn btn-secondary" onclick="lgUpMenu();lgPasteOpen()">텍스트 붙여넣기</button><button class="btn btn-secondary" onclick="lgUpMenu();document.getElementById(\'lg-file\').click()">파일 올리기 (.htm / .txt)</button>';
+      document.querySelector('#lg-modal .lg-box').appendChild(m);
+    }
+    document.addEventListener('pointerdown', e => { const m = document.getElementById('lg-upm'); if (m && !e.target.closest('#lg-upm') && !e.target.closest('[onclick^="lgUpMenu"]')) m.remove(); });
     // 마지막 회차 번호 + 1 (예: '16-17회차'가 마지막이면 18)
     function lgNextNo() { let mx = 0; (LG.idx || []).forEach(x => { const m = String(x.label || '').match(/\d+/g); if (m) mx = Math.max(mx, Number(m[m.length - 1]) || 0); }); return mx + 1; }
     // ---- 로그 붙여넣기 ----
@@ -2991,6 +3028,11 @@
       const has = layers.length || d.bg || okBd; box.classList.toggle('lg-dec', !!has);
       if (has) { box.style.backgroundImage = layers.join(','); box.style.backgroundSize = sizes.join(','); box.style.backgroundRepeat = reps.join(','); box.style.backgroundPosition = poss.join(','); box.style.backgroundColor = d.bg || (okBd ? '#f1e6cc' : ''); box.style.backgroundOrigin = 'padding-box'; }
     }
+    function lgPmApply() {
+      const box = document.querySelector('#lg-modal .lg-box'); if (!box) return; const d = lgDecoGet(), S = (k, v) => { if (v === undefined || v === null || v === '') box.style.removeProperty(k); else box.style.setProperty(k, v); };
+      let bg = ''; if (d.pmbg) { const m = /^#([0-9a-f]{6})$/i.exec(d.pmbg); if (m) { const n = parseInt(m[1], 16); bg = 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + ((d.pmo == null ? 55 : d.pmo) / 100) + ')'; } } else if (d.pmo != null) bg = 'rgba(255,248,230,' + d.pmo / 100 + ')';
+      S('--pm-bg', bg); S('--pm-bs', d.pmbs); S('--pm-bc', d.pmbc); S('--pm-r', d.pmr == null || d.pmr === '' ? '' : d.pmr + 'px'); S('--pm-fg', d.pmfg);
+    }
     function lgDecoToggle() { const el = document.getElementById('lg-deco'); if (!el) return; el.hidden = !el.hidden; if (!el.hidden) lgDecoRender(); }
     function lgDecoRender() {
       const el = document.getElementById('lg-deco'); if (!el) return; const d = lgDecoGet();
@@ -3006,9 +3048,15 @@
         ${d.img ? `<label>방식 <select onchange="lgDecoSet('imode',this.value);lgDecoRender()">${opt(d.imode || 'tile', 'tile', '덧붙이기 (원본 크기로 반복)')}${opt(d.imode || 'tile', 'fit', '꽉 채우기 (늘이거나 줄임)')}</select></label>${d.imode === 'fit' ? '' : `<label>이미지 크기 <input type="range" min="20" max="300" value="${d.iz || 100}" oninput="lgDecoSet('iz',+this.value,1)"></label>`}` : ''}
         <h4>테두리</h4><label>종류 <select onchange="lgDecoSet('bd',this.value);lgDecoRender()">${opt(okSel ? d.bd : '', '', '기본')}${frs.filter(f => LG_BD_OK.includes(f.k)).map(f => opt(d.bd || '', 'f:' + f.k, f.n)).join('')}</select></label>
         ${d.bd && d.bd.startsWith('f:') && LG_BD_OK.includes(d.bd.slice(2)) ? `<label>두께 <input type="range" min="20" max="110" value="${d.bw || 48}" oninput="lgDecoSet('bw',+this.value,1)"></label>` : ''}
-        <div style="margin-top:8px"><button class="btn btn-secondary" style="padding:3px 10px;font-size:.78rem" onclick="lgDecoSave({});lgDecoRender()">기본으로 되돌리기</button></div>`;
+        <h4>메모 상자</h4><label>바탕색 <input type="color" value="${d.pmbg || '#fff8e6'}" oninput="lgDecoSet('pmbg',this.value,1)"></label>
+        <label>진하기 <input type="range" min="0" max="100" value="${d.pmo == null ? 55 : d.pmo}" oninput="lgDecoSet('pmo',+this.value,1)"></label>
+        <label>테두리 <select onchange="lgDecoSet('pmbs',this.value)">${opt(d.pmbs || 'dashed', 'dashed', '점선')}${opt(d.pmbs || 'dashed', 'solid', '실선')}${opt(d.pmbs || 'dashed', 'double', '이중선')}${opt(d.pmbs || 'dashed', 'none', '없음')}</select> <input type="color" value="${d.pmbc || '#c9bb98'}" oninput="lgDecoSet('pmbc',this.value,1)"></label>
+        <label>둥글기 <input type="range" min="0" max="30" value="${d.pmr == null ? 10 : d.pmr}" oninput="lgDecoSet('pmr',+this.value,1)"></label>
+        <label>글자색 <input type="color" value="${d.pmfg || '#3b2a14'}" oninput="lgDecoSet('pmfg',this.value,1)"></label>
+        <div style="margin-top:8px"><button class="btn btn-secondary" style="padding:3px 10px;font-size:.78rem" onclick="['pmbg','pmo','pmbs','pmbc','pmr','pmfg'].forEach(k=>lgDecoSet(k,''));lgDecoRender()">메모 상자만 기본으로</button> <button class="btn btn-secondary" style="padding:3px 10px;font-size:.78rem" onclick="lgDecoSave({});lgDecoRender()">전체 기본으로 되돌리기</button></div>`;
     }
     function lgDecoSet(k, v, live) { const d = Object.assign({}, lgDecoGet()); if (v === '' || v == null) delete d[k]; else d[k] = v; if (live) { window.__lgd = d; lgDecoApply(); clearTimeout(window.__lgdT); window.__lgdT = setTimeout(() => lgDecoSave(window.__lgd || d), 600); } else lgDecoSave(d); }
+    { const _a = lgDecoApply; lgDecoApply = function () { const r = _a.apply(this, arguments); try { lgPmApply(); } catch (e) {} return r; }; }
     function lgOpen() { lgNmSync(); try { lgDecoApply(); } catch (e) {} LG.idx = LG.idx || []; document.getElementById('lg-modal').classList.add('open'); lgList(); if (!LG.idx.length) { document.getElementById('lg-main').innerHTML = '<div class="lg-empty">저장된 로그가 없어요. 위의 깃펜 버튼으로 롤20 로그(.htm)를 올려보세요.</div>'; return; } if (!LG.cur) lgShow(LG.idx[LG.idx.length - 1].id); else if (!document.getElementById('lg-q').value) lgShow(LG.cur); }
     function lgClose() { document.getElementById('lg-modal').classList.remove('open'); }
     function lgList() { document.getElementById('lg-list').innerHTML = LG.idx.map(x => `<button data-id="${x.id}" class="${x.id === LG.cur ? 'on' : ''}" onclick="document.getElementById('lg-q').value='';lgShow(${x.id})"><div class="lg-l1">${escapeHtml(x.label)}</div><div class="lg-l2">${escapeHtml(x.title || '')}</div><div class="lg-l3">${escapeHtml(x.date || '')} · ${x.n}줄</div></button>`).join(''); }
@@ -3097,10 +3145,18 @@
     function lgShow(id, hit) {
       LG.cur = id; lgList(); const main = document.getElementById('lg-main'), x = LG.idx.find(a => a.id === id); if (!LG.data[id]) main.innerHTML = '<div class="lg-empty">불러오는 중…</div>';
       lgLoad(id).then(ms => {
-        let prev = null, h = `<div class="lg-h">${escapeHtml(x.label)} — ${escapeHtml(x.title || '')} <small style="font-weight:400;opacity:.6">${escapeHtml(x.date || '')}</small>${x.srv ? `<button class="lg-selbtn" style="float:right" onclick="lgSelToggle()" title="대사를 여러 줄 골라 메모 달기">메모</button><button class="lg-rune" style="float:right" title="이 로그 삭제" aria-label="이 로그 삭제" onclick="lgDel(${x.id})"><img src="${IC_RUNE}" alt=""></button>` : ''}</div>`;
-        h += lgPmHtml(id);
+        let prev = null, h = `<div class="lg-h">${escapeHtml(x.label)} — ${escapeHtml(x.title || '')} <small style="font-weight:400;opacity:.6">${escapeHtml(x.date || '')}</small></div>${x.srv ? `<div class="lg-hb"><button class="lg-selbtn" onclick="lgSelToggle()" title="대사를 여러 줄 골라 메모 달기">메모</button><button class="lg-rune" title="이 로그 삭제" aria-label="이 로그 삭제" onclick="lgDel(${x.id})"><img src="${IC_RUNE}" alt=""></button></div>` : ''}`;
+        const pmH = lgPmHtml(id);
         const AVm = LG.av[id] || {}, AVn = {}, stat = !((LG.idx.find(a => a.id === id)) || {}).srv, hid = lgNmHide(); Object.keys(AVm).forEach(k => { AVn[nameKey(k)] = AVm[k]; });
-        const avu = n => (stat ? LG_TOK[String(n).replace(/\s*\(GM\)\s*$/, '')] : '') || AVm[n] || AVn[nameKey(n)] || '', avh = n => avu(n) ? `<img class="lg-av" loading="lazy" src="${escapeHtml(avu(n))}" alt="" title="${escapeHtml(n)}" ${AVm['@alt:' + n] ? 'style="cursor:pointer" onclick="lgAlt(this)"' : ''} onerror="this.remove()">` : '', nmh = n => (hid && avu(n)) ? '' : escapeHtml(n);
+        const avu = n => (stat ? LG_TOK[String(n).replace(/\s*\(GM\)\s*$/, '')] : '') || AVm[n] || AVn[nameKey(n)] || lgAvG(n) || '', avh = n => avu(n) ? `<img class="lg-av" loading="lazy" src="${escapeHtml(avu(n))}" alt="" title="${escapeHtml(n)}" ${AVm['@alt:' + n] ? 'style="cursor:pointer" onclick="lgAlt(this)"' : ''} onerror="this.remove()">` : '', nmh = n => (hid && avu(n)) ? '' : escapeHtml(n);
+        { // 등장인물 (이 회차에서 말한 PC · NPC)
+          const cnt = {}, order = []; ms.forEach(m => { const n = String(m[1] || '').trim(); if (!n || m[0] === 'd') return; if (!(n in cnt)) { cnt[n] = 0; order.push(n); } cnt[n]++; });
+          const pcN = new Set((state.boardTex.pcs || []).map(p => nameKey(p.name || '')).concat((state.boardTex.pcs || []).map(p => nameKey(p.pl || '')))), gmRe = /\(GM\)\s*$/;
+          const chip = n => { const u = avu(n); return `<div class="lg-cc${pcN.has(nameKey(n)) ? ' pc' : ''}${u ? '' : ' def'}" onclick="lgCastImg(${JSON.stringify(n).replace(/"/g, '&quot;')})" title="${escapeHtml(n)} · ${cnt[n]}줄 · 눌러서 이미지 바꾸기"><img src="${escapeHtml(u || IC_NPC)}" alt="" onerror="this.src=IC_NPC"><span>${escapeHtml(n)}</span><small>${u ? cnt[n] + '줄' : '이미지 추가'}</small></div>`; };
+          const gm = order.filter(n => gmRe.test(n)), pcs = order.filter(n => !gmRe.test(n) && pcN.has(nameKey(n))), npcs = order.filter(n => !gmRe.test(n) && !pcN.has(nameKey(n)));
+          if (order.length) h += `<div class="lg-cast"><b>등장인물</b>${pcs.length ? '<span class="lg-cl">PC</span>' + pcs.map(chip).join('') : ''}${npcs.length ? '<span class="lg-cl">NPC</span>' + npcs.map(chip).join('') : ''}${gm.length ? '<span class="lg-cl">GM</span>' + gm.map(chip).join('') : ''}</div>`;
+        }
+        h += pmH;
         const hpl = lgPlHide(), plSet = new Set(); if (hpl) { const add = x => { const k = nameKey(x); if (k) plSet.add(k); }; (state.boardTex.tokens || []).forEach(t => String(t.n || '').split(/[,，]/).forEach(add)); (state.boardTex.pcs || []).forEach(p => { add(p.name); add(p.key); }); Object.keys(LG_TOK).forEach(add); }
         const isPl = n => plSet.has(nameKey(n)) && !/^시금치/.test(String(n).replace(/\s+/g, ''));
         ms.forEach((m, i) => {
