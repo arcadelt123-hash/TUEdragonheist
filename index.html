@@ -2868,7 +2868,7 @@
       for (const f of files.sort((a, b) => a.name.localeCompare(b.name))) { const r = /\.txt$/i.test(f.name) ? lgParseFvtt(await f.text()) : lgParse(await f.text(), seen, av); msgs = msgs.concat(r.msgs); date = date || r.date; }
       try { tokSeed(); } catch (e) {} lgTokAv(av);
       if (!msgs.length) { alert('대사를 찾지 못했어요. 롤20 채팅 아카이브(.htm) 또는 FVTT 채팅 내보내기(.txt) 파일이 맞는지 확인해주세요.'); return; }
-      const next = (LG.idx || []).reduce((m, x) => Math.max(m, Number(x.id) || 0), 0) + 1;
+      const next = lgNextNo();
       const label = prompt('회차 이름 (예: 19회차)', next + '회차'); if (label === null) return;
       const title = prompt('한 줄 제목 (선택)', '') || '';
       const dt = prompt('날짜 (YYYY-MM-DD)', date || calYmd(new Date())) || date;
@@ -2885,6 +2885,8 @@
       } catch (e) { alert('로그 저장 실패: ' + (e.message || e) + '\n(앱스크립트 서버 코드를 새 버전으로 다시 배포했는지 확인해주세요)'); }
     }
 
+    // 마지막 회차 번호 + 1 (예: '16-17회차'가 마지막이면 18)
+    function lgNextNo() { let mx = 0; (LG.idx || []).forEach(x => { const m = String(x.label || '').match(/\d+/g); if (m) mx = Math.max(mx, Number(m[m.length - 1]) || 0); }); return mx + 1; }
     // ---- 로그 붙여넣기 ----
     function lgKnownNames() {
       const s = new Set(); const bt = state.boardTex || {};
@@ -2918,7 +2920,7 @@
     function lgPasteOpen() {
       let el = document.getElementById('lg-paste');
       if (!el) { el = document.createElement('div'); el.id = 'lg-paste'; el.className = 'lg-paste'; document.querySelector('#lg-modal .lg-box').appendChild(el); }
-      const next = (LG.idx || []).reduce((m, x) => Math.max(m, Number(x.id) || 0), 0) + 1;
+      const next = lgNextNo();
       el.innerHTML = `<div class="lg-pbox"><b>로그 붙여넣기</b><div class="lg-psub">채팅 창에서 복사한 글을 그대로 붙여넣어요. 롤20 복사본, FVTT 복사본(대괄호 시각 형식), "이름: 대사" 형식을 알아봐요. 캐릭터와 NPC 이미지는 이미 올려 둔 토큰과 도감에서 이름으로 찾아 붙여요.</div>
       <textarea id="lg-ptx" placeholder="여기에 붙여넣기" oninput="lgPasteScan()"></textarea>
       <div class="lg-prow"><input id="lg-plb" type="text" value="${next}회차" placeholder="회차 이름"><input id="lg-ptt" type="text" placeholder="한 줄 제목 (선택)"><input id="lg-pdt" type="text" placeholder="날짜 YYYY-MM-DD"></div>
