@@ -2960,8 +2960,15 @@
 
     function lgAvG(n) {
       const bt = state.boardTex || {}, k = nameKey(n), g = (bt.lgAv || {})[k]; if (g) return g;
-      const pc = (bt.pcs || []).find(p => nameKey(p.name || '') === k && p.img); if (pc) return pc.img;
-      const np = (state.globalNpcs || []).find(x => nameKey(x.name || '') === k && x.image && !(typeof icoIs === 'function' && icoIs(x.image))); return np ? np.image : '';
+      const hit = resolveCodexByName(n);
+      if (hit) {
+        if (hit.kind === 'pc' && hit.item.img) return hit.item.img;
+        if (hit.kind === 'npc') {
+          const img = (hit.card && hit.card.img) || hit.item.image || '';
+          if (img && !(typeof icoIs === 'function' && icoIs(img))) return img;
+        }
+      }
+      return '';
     }
     function lgCastState() { let s = {}; try { s = JSON.parse(localStorage.getItem('adv_lg_cast') || '{}'); } catch (e) {} s.pin = s.pin || {}; return s; }
     function lgCastStSave(s) { try { localStorage.setItem('adv_lg_cast', JSON.stringify(s)); } catch (e) {} }
@@ -3523,6 +3530,41 @@
     function plView() { try { return sessionStorage.getItem('adv_plview') || ''; } catch (e) { return ''; } }
     function landMe() { const pv = plView(); if (pv) return pv; let id = ''; try { id = localStorage.getItem('adv_me_pl') || ''; } catch (e) {} const pcs = landPls(); if (id && pcs.some(p => p.id === id)) { const off = x => { const q = pcs.find(p => p.id === x); return !!(q && q.off); }; if (off(id)) { let l = []; try { l = JSON.parse(localStorage.getItem('adv_my_pcs') || '[]'); } catch (e) {} const alt = l.find(x => x !== id && pcs.some(p => p.id === x) && !off(x)); if (alt) return alt; } return id; } return landByName(presName()); }
     const nameKey = x => String(x || '').normalize('NFC').replace(/\s+/g, '').replace(/\(gm\)/i, '').toLowerCase();
+    function aliasList(obj) {
+      if (!obj) return [];
+      if (Array.isArray(obj.aliases)) {
+        return obj.aliases.flatMap(x => String(x || '').split(/[,，/]/).map(s => s.trim()).filter(Boolean));
+      }
+      return String(obj.aliases || obj.alias || '').split(/[,，/]/).map(s => s.trim()).filter(Boolean);
+    }
+    function resolveCodexByName(rawName, kindFilter) {
+      const k = nameKey(rawName);
+      if (!k) return null;
+      const bt = state.boardTex || {};
+      if (kindFilter !== 'npc') {
+        for (const p of (bt.pcs || [])) {
+          if ([p.name].concat(aliasList(p)).some(nm => nameKey(nm) === k)) return { kind: 'pc', item: p };
+        }
+      }
+      if (kindFilter !== 'pc') {
+        for (const n of (state.globalNpcs || [])) {
+          const cardObj = (bt.npcCards || []).find(c => c.id === n.id);
+          if ([n.name].concat(aliasList(n), aliasList(cardObj)).some(nm => nameKey(nm) === k)) return { kind: 'npc', item: n, card: cardObj };
+        }
+      }
+      return null;
+    }
+    function pcCfgSetAliases(raw) {
+      const i = pcIdx(pccId), p = pcList()[i];
+      if (!p) return;
+      const list = String(raw || '').split(/[,，/]/).map(s => s.trim()).filter(Boolean);
+      p.aliases = list;
+      if (pccNpc) {
+        const gn = (state.globalNpcs || []).find(x => x.id === p.id);
+        if (gn) gn.aliases = list.slice();
+      }
+      persistState();
+    }
     function landByName(n) { const k = nameKey(n); if (!k) return ''; const m = landPls().find(p => nameKey(p.key || p.name) === k || nameKey(p.name) === k); return m ? m.id : ''; }
     // 같은 이름 = 같은 사람: 이름을 저장하면 등록된 PL(설정)과 연결하고, 그 사람의 첫 화면 · 보기 방식을 바로 적용
     function presLink(n, applyNow) {
@@ -7438,6 +7480,7 @@
             <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><button class="btn btn-secondary" onclick="pcUpOpen()" title="이미지 올리기" aria-label="이미지 올리기" style="display:inline-flex;align-items:center;padding:4px 10px;"><img src="${IC_WICKER}" alt="" style="height:30px;width:auto;"></button>
               <button class="btn btn-secondary" onclick="pcTxtFree()" title="미리보기에서 글자를 끌어 원하는 곳에 놓아요" style="padding:4px 10px;font-size:.78rem;">${isFree ? '글자 위치 원래대로' : '✥ 글자 위치'}</button><button class="btn btn-secondary" onclick="pccAltTog()" title="본모습 추가 (변장·가면을 벗은 모습)" aria-label="본모습" style="display:inline-flex;align-items:center;padding:4px 8px;"><img src="${IC_MASK}" alt="" style="height:30px;width:auto;"></button></div>
             <input type="text" value="${escapeHtml(p.name || '')}" placeholder="${pccNpc ? 'NPC 이름' : 'PC 이름'}" oninput="pcCfgSet('name',this.value)">
+            <input type="text" value="${escapeHtml(aliasList(p).join(', '))}" placeholder="별칭 (쉼표로 구분, 예: 바를로니카야)" oninput="pcCfgSetAliases(this.value)">
             <div class="pcc-memo" id="pcc-alt" style="display:${window.__altOpen ? 'block' : 'none'}"><b>본모습 <small style="opacity:.7;font-weight:400">(변장·가면을 벗은 모습)</small></b><div style="display:flex;gap:6px;align-items:center">${p.img2 ? `<img src="${escapeHtml(p.img2)}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:8px;border:1px solid #c9bb98">` : ''}<input type="text" value="${p.img2 && !/^data:/.test(p.img2) ? escapeHtml(p.img2) : ''}" placeholder="이미지 주소(https://…)" onchange="pcCfgSet('img2',this.value.trim(),true)" style="flex:1;min-width:0;font-size:.78rem"><button class="btn btn-secondary" style="padding:3px 8px;font-size:.74rem" onclick="pcAlt2File()">올리기</button>${p.img2 ? `<button class="lg-rune" title="지우기" aria-label="지우기" onclick="pcCfgSet('img2','',true)"><img src="${IC_RUNE}" alt=""></button>` : ''}</div><div style="font-size:.72rem;opacity:.65">넣으면 카드에 커서를 올렸을 때 본모습이 나타나요. (터치 화면에서는 카드 오른쪽 위 ⇄ 버튼)</div></div>
             ${pccNpc ? '' : `<div class="pcc-memo" style="display:block"><b>일지 위쪽 아이콘 모양</b><div style="display:flex;gap:10px;align-items:center;"><div id="pcc-ic" style="flex:none"><button class="j-pc on" type="button" ${pcIconSty(p)}>${pcIconImg(p)}</button></div><div style="flex:1;display:flex;flex-direction:column;gap:2px">${[['확대', 'icZ', 60, 300, 5, 100], ['가로 위치', 'icX', 0, 100, 5, 50], ['세로 위치', 'icY', 0, 100, 5, 50]].map(r => `<label class="pcc-sl"><span>${r[0]}</span><input type="range" min="${r[2]}" max="${r[3]}" step="${r[4]}" value="${p[r[1]] == null ? r[5] : p[r[1]]}" oninput="pcIcSet('${r[1]}',Number(this.value))"></label>`).join('')}</div></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.8rem"><select onchange="pcIcSet('icS',this.value);pcCfgRender()"><option value="">둥근 사각형</option><option value="r2"${p.icS === 'r2' ? ' selected' : ''}>많이 둥글게</option><option value="c"${p.icS === 'c' ? ' selected' : ''}>원</option><option value="s"${p.icS === 's' ? ' selected' : ''}>네모</option></select><label>배경색 <input type="color" value="${p.icBg || '#ffffff'}" oninput="pcIcSet('icBg',this.value)"></label><button type="button" class="btn btn-secondary" style="padding:2px 8px;font-size:.74rem" onclick="['icZ','icX','icY','icS','icBg'].forEach(k=>pcCfgSet(k,''));pcCfgRender();try{renderAll()}catch(e){}">원래대로</button></div></div>
             <label style="font-size:.8rem;display:flex;gap:6px;align-items:center;">주인 PL <select onchange="pcCfgSet('pl',this.value);try{landRender()}catch(e){}"><option value="">없음</option>${plsList().map(x => `<option value="${escapeHtml(x.id)}"${p.pl === x.id ? ' selected' : ''}>${escapeHtml(x.name || 'PL')}</option>`).join('')}</select></label>`}
