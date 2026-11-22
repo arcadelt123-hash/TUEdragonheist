@@ -1916,6 +1916,17 @@
     .fl-panel .btn-primary { color: #7a4a00; text-shadow: 0 0 2px rgba(255,214,90,.95), 0 0 7px rgba(255,190,40,.85); }
     .fl-panel .j-pc, .fl-panel .j-pc:hover { background: transparent !important; }
     .fl-panel select, .fl-panel input[type=text] { background: rgba(255,255,255,.55); }
+
+    .codex-grid.fx .pc-slot[data-dnd="npc"] .pc-card,
+    .codex-grid.fx .pc-slot[data-dnd="npc"] .pc-card[class*="pcl-"] { background: transparent !important; background-image: none !important; border: 0 !important; box-shadow: none !important; aspect-ratio: auto !important; padding: 6px 4px !important; display: flex !important; flex-direction: column !important; align-items: center !important; gap: 6px !important; overflow: visible !important; }
+    .codex-grid.fx .pc-slot[data-dnd="npc"] .pc-card .pcf-img,
+    .codex-grid.fx .pc-slot[data-dnd="npc"] .pc-card .pt-fr,
+    .codex-grid.fx .pc-slot[data-dnd="npc"] .pc-card .pp-fr,
+    .codex-grid.fx .pc-slot[data-dnd="npc"] .pc-card .pt-bgl { display: none !important; }
+    .codex-grid.fx .pc-slot[data-dnd="npc"] .pc-card .pt-win,
+    .codex-grid.fx .pc-slot[data-dnd="npc"] .pc-card .pp-art,
+    .codex-grid.fx .pc-slot[data-dnd="npc"] .pc-card .pc-img { position: relative !important; inset: auto !important; width: 84px !important; height: 84px !important; min-height: 84px !important; flex: none !important; border-radius: 50% !important; overflow: hidden !important; border: 2px solid #334155 !important; background: #f8fafc !important; clip-path: none !important; }
+    .codex-grid.fx .pc-slot[data-dnd="npc"] .pc-card :is(.pc-name, .pa-name, .pt-nm, .pp-nm, .ps-nm, .pm-nm, .pa-nm b, .pt-free b) { position: static !important; inset: auto !important; transform: none !important; background: none !important; color: #111111 !important; text-shadow: none !important; font-size: 0.85rem !important; font-weight: 700 !important; line-height: 1.3 !important; text-align: center !important; margin: 0 !important; padding: 0 2px !important; height: auto !important; max-height: none !important; overflow: visible !important; white-space: normal !important; word-break: break-word !important; }
 </style>
 <link rel="preconnect" href="https://cdn.tailwindcss.com">
 <script>/* 캐릭터 시트가 쓸 라이브러리를 한가할 때 미리 받아 둠 */(function(){function pf(){['https://cdn.tailwindcss.com'].forEach(function(u){var l=document.createElement('link');l.rel='prefetch';l.as='script';l.href=u;document.head.appendChild(l);});}if('requestIdleCallback' in window)window.addEventListener('load',function(){requestIdleCallback(pf,{timeout:4000});});else window.addEventListener('load',function(){setTimeout(pf,2500);});})();</script>
@@ -2466,7 +2477,7 @@
         clearTimeout(to);
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.text();
-      }).then(t => { let j; try { j = JSON.parse(t); } catch (e) { throw new Error('JSON 아님: ' + t.slice(0, 120).replace(/\s+/g, ' ')); } if (j && j.status === 'AUTH' && !AUTH_S.off) { try { authGate('login', AUTH_S.tk ? '로그인이 풀렸어요. 다시 입력해 주세요.' : ''); } catch (e) {} throw new Error('로그인이 필요해요'); } return j; }, e => { clearTimeout(to); throw e; });
+      }).then(t => { let j; try { j = JSON.parse(t); } catch (e) { throw new Error('JSON 아님: ' + t.slice(0, 120).replace(/\s+/g, ' ')); } if (j && j.status === 'AUTH' && !AUTH_S.off) { try { if (!AUTH_S.gate && !document.getElementById('auth-ov')) authGate('login', AUTH_S.tk ? '로그인이 풀렸어요. 다시 입력해 주세요.' : ''); } catch (e) {} throw new Error('로그인이 필요해요'); } return j; }, e => { clearTimeout(to); throw e; });
     }
     function fetchGet(q) { return fetchT(execUrl() + '?action=' + q, { redirect: 'follow' }); }
 
@@ -2482,6 +2493,7 @@
       ov.innerHTML = html; return ov;
     }
     function authGate(mode, msg) {
+      const _ex = document.getElementById('auth-ov'); if (AUTH_S.gate && _ex && _ex.querySelector('#au-pw')) { const _er = _ex.querySelector('#au-er'); if (_er && msg) _er.textContent = msg; return _ex; }
       AUTH_S.gate = true; const setup = mode === 'setup';
       const ov = authCover(`<div class="ab"><p class="tt">${setup ? 'GM 기기<br>비밀번호 설정' : '비밀번호 입력'}</p>
         <label>비밀번호</label><input type="password" id="au-pw" placeholder="비밀번호" autocomplete="${setup ? 'new-password' : 'current-password'}">
@@ -2707,7 +2719,7 @@
     }
     (function pcAskWatch() { let n = 0; const iv = setInterval(() => { n++; try { if (localStorage.getItem('adv_pc_ask') || myRaw().length || n > 60) { clearInterval(iv); return; } if (!AUTH_S.gate && AUTH_S.st && AUTH_S.st.valid && state.boardTex && (plsList().length > 0)) { clearInterval(iv); pcAskOpen(); } } catch (e) {} }, 800); })();
     function presencePing() {
-      if (document.hidden) return;
+      if (document.hidden || AUTH_S.gate) return;
       let edv = ''; try { edv = presEditing(); } catch (e) {}
       fetchGet('ping&id=' + encodeURIComponent(PRES.id) + '&name=' + encodeURIComponent(presShown()) + '&color=' + encodeURIComponent(presColor()) + '&ed=' + encodeURIComponent(edv)).then(t => { const j = typeof t === 'string' ? JSON.parse(t) : t; if (j && j.online) presenceRender(j.online); else throw 0; }).catch(() => { presenceRender([{ id: PRES.id, name: presShown() }]); });
     }
