@@ -1036,7 +1036,7 @@
     .lg-pbox textarea { width: 100%; box-sizing: border-box; height: 260px; resize: vertical; padding: 8px; border: 1px solid #c9bb98; border-radius: 8px; background: #fff; font: inherit; font-size: .88rem; }
     .lg-pbox input[type=text] { flex: 1; min-width: 0; padding: 6px 8px; border: 1px solid #c9bb98; border-radius: 8px; background: #fff; font: inherit; }
     .lg-prow { display: flex; gap: 8px; align-items: center; } .lg-psub { font-size: .78rem; color: #7a6a48; line-height: 1.5; }
-    .lg-pm { color: var(--pm-fg, inherit); resize: both; overflow: auto; min-width: 220px; max-width: 100%; min-height: 40px; box-sizing: border-box; margin: 6px 0 12px; padding: 6px 10px; border: 1px var(--pm-bs, dashed) var(--pm-bc, #c9bb98); border-radius: var(--pm-r, 10px); background: var(--pm-bg, rgba(255,250,235,.55)); } .lg-pm summary { cursor: pointer; font-weight: 800; font-size: .82rem; color: var(--pm-fg, #5a3d12); }
+    .lg-pm { color: var(--pm-fg, inherit); resize: both; overflow: auto; min-width: 220px; max-width: 100%; min-height: 40px; box-sizing: border-box; margin: 6px 0 12px; padding: 6px 10px; border: 1px var(--pm-bs, dashed) var(--pm-bc, #c9bb98); border-radius: var(--pm-r, 10px); background: var(--pm-img, none) center / 100% 100% no-repeat, var(--pm-bg, rgba(255,250,235,.55)); } .lg-pm summary { cursor: pointer; font-weight: 800; font-size: .82rem; color: var(--pm-fg, #5a3d12); }
     .lg-pmi { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid rgba(120,90,40,.15); } .lg-pmi .pcib { width: 30px; height: 30px; background: #eadfc3; } .lg-pmb { flex: 1; min-width: 0; font-size: .85rem; word-break: break-word; } .lg-pmimg { display: block; max-width: min(100%, 280px); max-height: 220px; border-radius: 8px; margin-top: 4px; cursor: zoom-in; border: 1px solid #d8cdb4; }
     .lg-pmf textarea { width: 100%; resize: both; max-width: 100%; box-sizing: border-box; margin-top: 6px; padding: 6px 8px; border: 1px solid #c9bb98; border-radius: 8px; background: #fffaf0; font: inherit; font-size: .85rem; resize: both; max-width: 100%; } .lg-pmr { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
     .lg-selbtn { border: 1px solid #c9bb98; background: #fffaf0; border-radius: 999px; padding: 1px 9px; font-size: .72rem; cursor: pointer; float: right; margin-right: 6px; color: #5a3d12; } .lg-selbtn.on { background: #e4d3a8; font-weight: 800; }
@@ -1063,11 +1063,16 @@
     .lg-list .lg-l1 { font-weight: 700; font-size: 14px; } .lg-list .lg-l2 { font-size: 12px; opacity: .75; margin-top: 2px; line-height: 1.35; } .lg-list .lg-l3 { font-size: 11px; opacity: .55; margin-top: 2px; }
     .lg-main { flex: 1; overflow-y: auto; padding: 14px 18px 40px; background: #fffaf0; color: #2d2410; scroll-behavior: auto; }
     .lg-h { font-size: 18px; font-weight: 700; margin: 0 0 8px; }
-    .lg-cast { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 12px; font-size: .8rem; color: #3b2a14; } .lg-cast b { margin-right: 4px; font-size: .82rem; }
-    .lg-cl { font-size: .7rem; color: #7a6a48; margin: 0 2px 0 6px; }
-    .lg-cc { display: flex; flex-direction: column; align-items: center; width: 84px; padding: 6px 4px 5px; border: 1px solid #d8cdb4; border-radius: 12px; background: rgba(255,250,235,.75); cursor: pointer; text-align: center; box-shadow: 0 1px 3px rgba(60,40,10,.15); } .lg-cc:hover { background: #ffe9a8; }
+        .lg-cc { display: flex; flex-direction: column; align-items: center; width: 84px; padding: 6px 4px 5px; border: var(--cc-bw, 1px) var(--cc-bs, solid) var(--cc-bc, #d8cdb4); border-radius: var(--cc-r, 12px); background: var(--cc-bg, rgba(255,250,235,.75)); cursor: pointer; text-align: center; box-shadow: 0 1px 3px rgba(60,40,10,.15); } .lg-cc:hover { background: #ffe9a8; }
     .lg-cc img { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; background: #eadfc3; } .lg-cc span { margin-top: 4px; font-weight: 700; font-size: .78rem; line-height: 1.2; word-break: keep-all; max-width: 100%; } .lg-cc small { font-size: .66rem; color: #7a6a48; }
-    .lg-cc.pc { border-color: #b8893a; background: rgba(228,211,168,.7); } .lg-cc.def { border-style: dashed; } .lg-cc.def img { opacity: .55; }
+    .lg-cc.pc { border-color: var(--cc-pc, #b8893a); background: rgba(228,211,168,.7); } .lg-cc.def { border-style: dashed; } .lg-cc.def img { opacity: .55; }
+    .lg-pmw { resize: both; overflow: hidden; display: flex; min-width: 220px; max-width: 100%; min-height: 56px; box-sizing: border-box; margin: 6px 0 12px; padding-bottom: 18px; }
+    .lg-pmw .lg-pm { flex: 1; min-width: 0; resize: none !important; overflow: auto !important; margin: 0 !important; scrollbar-width: thin; }
+    .lg-pmtag { font-size: .68rem; padding: 0 7px; border: 1px solid #b8893a; border-radius: 999px; background: rgba(228,211,168,.7); color: #5a3d12; font-weight: 700; }
+    .lg-cast { display: flex; flex-direction: column; gap: 0; margin: 0 0 12px; } .lg-castt { font-size: .82rem; margin-bottom: 6px; }
+    .lg-cg { display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px; padding: 8px 0; border-top: 1px solid rgba(120,90,40,.3); }
+    .lg-cgt { align-self: center; font: inherit; font-size: .74rem; padding: 3px 10px; border: 1px solid #c9bb98; border-radius: 999px; background: #fffaf0; cursor: pointer; color: #5a3d12; margin-right: 4px; }
+    .lg-cc.on { outline: 3px solid #e8a000; outline-offset: -1px; background: #fff0b8; }
     .lg-hb { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; } .lg-hb .lg-selbtn { float: none; margin: 0; }
     .lg-m { display: flex; gap: 10px; padding: 2px 0; line-height: 1.55; font-size: 14px; }
     .lg-m.first { margin-top: 10px; }
@@ -2690,6 +2695,7 @@
     const srvMapLoad = (ok, fail) => srvCall('loadMapData', [], () => fetchGet('loadMap'), 8000, ok, fail);
     const srvMapSave = (data, ok, fail) => srvCall('saveMapData', [data], () => fetchPost({ __map: 1, data }), 15000, ok, fail);
 
+
     // ---- 구글 캘린더 연동 (앱스크립트 서버의 calList / __cal 사용) ----
     const CAL = { m: new Date(new Date().getFullYear(), new Date().getMonth(), 1), ev: [], sel: null };
     const calP2 = n => String(n).padStart(2, '0'), calYmd = d => d.getFullYear() + '-' + calP2(d.getMonth() + 1) + '-' + calP2(d.getDate());
@@ -2896,6 +2902,30 @@
       const pc = (bt.pcs || []).find(p => nameKey(p.name || '') === k && p.img); if (pc) return pc.img;
       const np = (state.globalNpcs || []).find(x => nameKey(x.name || '') === k && x.image && !(typeof icoIs === 'function' && icoIs(x.image))); return np ? np.image : '';
     }
+    function lgCastState() { let s = {}; try { s = JSON.parse(localStorage.getItem('adv_lg_cast') || '{}'); } catch (e) {} s.pin = s.pin || {}; return s; }
+    function lgCastStSave(s) { try { localStorage.setItem('adv_lg_cast', JSON.stringify(s)); } catch (e) {} }
+    function lgCastToggle(k) { const s = lgCastState(); s[k] = !s[k]; lgCastStSave(s); lgKeepShow(); }
+    function lgCastPin(n) { const s = lgCastState(), k = nameKey(n); if (s.pin[k]) delete s.pin[k]; else s.pin[k] = 1; lgCastStSave(s); lgKeepShow(); }
+    function lgCastExclude() { const s = new Set(), add = x => { const k = nameKey(x || ''); if (k) s.add(k); }; Object.keys(LG_TOK).forEach(add); (typeof plsList === 'function' ? plsList() : []).forEach(p => { add(p.name); add(p.key); add(p.pl); }); (state.boardTex.pcs || []).forEach(p => add(p.pl)); add('시금치'); add('GM'); return s; }
+    function lgCastCtx(e, n, id) {
+      e.preventDefault(); e.stopPropagation(); const old = document.getElementById('lg-cctx'); if (old) old.remove();
+      const m = document.createElement('div'); m.id = 'lg-cctx'; m.className = 'lg-deco'; m.style.cssText = 'position:fixed;width:auto;padding:6px;display:flex;flex-direction:column;gap:5px;z-index:99999;left:' + Math.min(e.clientX, innerWidth - 190) + 'px;top:' + Math.min(e.clientY, innerHeight - 110) + 'px';
+      m.innerHTML = '<button class="btn btn-secondary" id="lg-cc1">관련 메모 추가</button><button class="btn btn-secondary" id="lg-cc2">이미지 바꾸기</button>';
+      document.body.appendChild(m);
+      m.querySelector('#lg-cc1').onclick = () => { m.remove(); lgCastMemo(n, id); }; m.querySelector('#lg-cc2').onclick = () => { m.remove(); lgCastImg(n); };
+      setTimeout(() => document.addEventListener('pointerdown', function f(ev) { if (!ev.target.closest('#lg-cctx')) { m.remove(); } document.removeEventListener('pointerdown', f, true); }, true), 0);
+    }
+    function lgCastMemo(n, id) {
+      let el = document.getElementById('lg-paste'); if (!el) { el = document.createElement('div'); el.id = 'lg-paste'; el.className = 'lg-paste'; document.querySelector('#lg-modal .lg-box').appendChild(el); }
+      el.innerHTML = `<div class="lg-pbox" style="width:min(460px,94%)"><b>${escapeHtml(n)} 관련 메모</b><div class="lg-psub">이 회차의 메모 상자에 「${escapeHtml(n)}」 표시와 함께 붙어요.</div><textarea id="lg-cmt" style="height:120px" placeholder="메모"></textarea><div class="lg-prow"><button class="btn btn-secondary" onclick="lgPasteClose()">닫기</button><span style="flex:1"></span><button class="btn btn-primary" onclick="lgCastMemoAdd(${JSON.stringify(n).replace(/"/g, '&quot;')},${id})">붙이기</button></div></div>`;
+      el.style.display = 'flex'; setTimeout(() => document.getElementById('lg-cmt').focus(), 30);
+    }
+    function lgCastMemoAdd(n, id) {
+      const t = (document.getElementById('lg-cmt') || {}).value || ''; if (!t.trim()) { showToast('내용을 넣어 주세요.'); return; }
+      const me = landMe(), pc = (state.boardTex.pcs || []).find(p => p.id === me), nm = me === 'gm' ? '시금치 (GM)' : (pc ? pc.name : '메모');
+      const M = (state.boardTex.lgMemos = state.boardTex.lgMemos || {}); (M[id] = M[id] || []).push({ id: 'pm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), n: nm, by: me, t: t.trim(), img: '', c: n, ts: Date.now() });
+      persistState(); lgPasteClose(); lgKeepShow();
+    }
     function lgCastImg(n) {
       let el = document.getElementById('lg-paste'); if (!el) { el = document.createElement('div'); el.id = 'lg-paste'; el.className = 'lg-paste'; document.querySelector('#lg-modal .lg-box').appendChild(el); }
       const cur = lgAvG(n); window.__lgCastN = n;
@@ -3031,7 +3061,8 @@
     function lgPmApply() {
       const box = document.querySelector('#lg-modal .lg-box'); if (!box) return; const d = lgDecoGet(), S = (k, v) => { if (v === undefined || v === null || v === '') box.style.removeProperty(k); else box.style.setProperty(k, v); };
       let bg = ''; if (d.pmbg) { const m = /^#([0-9a-f]{6})$/i.exec(d.pmbg); if (m) { const n = parseInt(m[1], 16); bg = 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + ((d.pmo == null ? 55 : d.pmo) / 100) + ')'; } } else if (d.pmo != null) bg = 'rgba(255,248,230,' + d.pmo / 100 + ')';
-      S('--pm-bg', bg); S('--pm-bs', d.pmbs); S('--pm-bc', d.pmbc); S('--pm-r', d.pmr == null || d.pmr === '' ? '' : d.pmr + 'px'); S('--pm-fg', d.pmfg);
+      let pimg = ''; try { const pp = d.pmpaper && paperByKey(d.pmpaper); if (pp) pimg = 'url("' + String(pp.url).replace(/"/g, '%22') + '")'; } catch (e) {}
+      S('--pm-img', pimg); S('--pm-bg', bg); S('--pm-bs', d.pmbs); S('--pm-bc', d.pmbc); S('--pm-r', d.pmr == null || d.pmr === '' ? '' : d.pmr + 'px'); S('--pm-fg', d.pmfg);
     }
     function lgDecoToggle() { const el = document.getElementById('lg-deco'); if (!el) return; el.hidden = !el.hidden; if (!el.hidden) lgDecoRender(); }
     function lgDecoRender() {
@@ -3048,12 +3079,13 @@
         ${d.img ? `<label>방식 <select onchange="lgDecoSet('imode',this.value);lgDecoRender()">${opt(d.imode || 'tile', 'tile', '덧붙이기 (원본 크기로 반복)')}${opt(d.imode || 'tile', 'fit', '꽉 채우기 (늘이거나 줄임)')}</select></label>${d.imode === 'fit' ? '' : `<label>이미지 크기 <input type="range" min="20" max="300" value="${d.iz || 100}" oninput="lgDecoSet('iz',+this.value,1)"></label>`}` : ''}
         <h4>테두리</h4><label>종류 <select onchange="lgDecoSet('bd',this.value);lgDecoRender()">${opt(okSel ? d.bd : '', '', '기본')}${frs.filter(f => LG_BD_OK.includes(f.k)).map(f => opt(d.bd || '', 'f:' + f.k, f.n)).join('')}</select></label>
         ${d.bd && d.bd.startsWith('f:') && LG_BD_OK.includes(d.bd.slice(2)) ? `<label>두께 <input type="range" min="20" max="110" value="${d.bw || 48}" oninput="lgDecoSet('bw',+this.value,1)"></label>` : ''}
-        <h4>메모 상자</h4><label>바탕색 <input type="color" value="${d.pmbg || '#fff8e6'}" oninput="lgDecoSet('pmbg',this.value,1)"></label>
+        <h4>메모 상자</h4><label>배경 종이 <select onchange="lgDecoSet('pmpaper',this.value)">${opt(d.pmpaper || '', '', '없음')}${(() => { try { return paperCat().map(x => opt(d.pmpaper || '', x.key, x.name)).join(''); } catch (e) { return ''; } })()}</select></label>
+        <label>바탕색 <input type="color" value="${d.pmbg || '#fff8e6'}" oninput="lgDecoSet('pmbg',this.value,1)"></label>
         <label>진하기 <input type="range" min="0" max="100" value="${d.pmo == null ? 55 : d.pmo}" oninput="lgDecoSet('pmo',+this.value,1)"></label>
         <label>테두리 <select onchange="lgDecoSet('pmbs',this.value)">${opt(d.pmbs || 'dashed', 'dashed', '점선')}${opt(d.pmbs || 'dashed', 'solid', '실선')}${opt(d.pmbs || 'dashed', 'double', '이중선')}${opt(d.pmbs || 'dashed', 'none', '없음')}</select> <input type="color" value="${d.pmbc || '#c9bb98'}" oninput="lgDecoSet('pmbc',this.value,1)"></label>
         <label>둥글기 <input type="range" min="0" max="30" value="${d.pmr == null ? 10 : d.pmr}" oninput="lgDecoSet('pmr',+this.value,1)"></label>
         <label>글자색 <input type="color" value="${d.pmfg || '#3b2a14'}" oninput="lgDecoSet('pmfg',this.value,1)"></label>
-        <div style="margin-top:8px"><button class="btn btn-secondary" style="padding:3px 10px;font-size:.78rem" onclick="['pmbg','pmo','pmbs','pmbc','pmr','pmfg'].forEach(k=>lgDecoSet(k,''));lgDecoRender()">메모 상자만 기본으로</button> <button class="btn btn-secondary" style="padding:3px 10px;font-size:.78rem" onclick="lgDecoSave({});lgDecoRender()">전체 기본으로 되돌리기</button></div>`;
+        <div style="margin-top:8px"><button class="btn btn-secondary" style="padding:3px 10px;font-size:.78rem" onclick="['pmbg','pmo','pmbs','pmbc','pmr','pmfg','pmpaper'].forEach(k=>lgDecoSet(k,''));lgDecoRender()">메모 상자만 기본으로</button> <button class="btn btn-secondary" style="padding:3px 10px;font-size:.78rem" onclick="lgDecoSave({});lgDecoRender()">전체 기본으로 되돌리기</button></div>`;
     }
     function lgDecoSet(k, v, live) { const d = Object.assign({}, lgDecoGet()); if (v === '' || v == null) delete d[k]; else d[k] = v; if (live) { window.__lgd = d; lgDecoApply(); clearTimeout(window.__lgdT); window.__lgdT = setTimeout(() => lgDecoSave(window.__lgd || d), 600); } else lgDecoSave(d); }
     { const _a = lgDecoApply; lgDecoApply = function () { const r = _a.apply(this, arguments); try { lgPmApply(); } catch (e) {} return r; }; }
@@ -3067,12 +3099,12 @@
     function lgPmList(id) { const M = (state.boardTex || {}).lgMemos || {}; return Array.isArray(M[id]) ? M[id] : []; }
     function lgPmHtml(id) {
       const me = (typeof landMe === 'function') ? landMe() : '', pc = (state.boardTex.pcs || []).find(p => p.id === me), nm = me === 'gm' ? '시금치 (GM)' : (pc ? pc.name : ''), L = lgPmList(id);
-      const items = L.map(m => { const ap = (state.boardTex.pcs || []).find(p => (p.name || '') === m.n), can = me === 'gm' || (m.by && m.by === me); return `<div class="lg-pmi"><span class="pcib">${ap ? pcIconImg(ap) + deadX(ap) : ''}</span><div class="lg-pmb"><b>${escapeHtml(m.n || '')}</b>${m.t ? `<div>${escapeHtml(m.t).replace(/\n/g, '<br>')}</div>` : ''}${m.img ? `<img class="lg-pmimg" src="${escapeHtml(m.img)}" alt="" onclick="window.open(this.src)">` : ''}</div>${can ? `<button class="lg-rune" title="메모 삭제" aria-label="메모 삭제" onclick="lgPmDel('${id}','${m.id}')"><img src="${IC_RUNE}" alt=""></button>` : ''}</div>`; }).join('');
+      const items = L.map(m => { const ap = (state.boardTex.pcs || []).find(p => (p.name || '') === m.n), can = me === 'gm' || (m.by && m.by === me); return `<div class="lg-pmi"><span class="pcib">${ap ? pcIconImg(ap) + deadX(ap) : ''}</span><div class="lg-pmb"><b>${escapeHtml(m.n || '')}</b>${m.c ? ` <span class="lg-pmtag">${escapeHtml(m.c)}</span>` : ''}${m.t ? `<div>${escapeHtml(m.t).replace(/\n/g, '<br>')}</div>` : ''}${m.img ? `<img class="lg-pmimg" src="${escapeHtml(m.img)}" alt="" onclick="window.open(this.src)">` : ''}</div>${can ? `<button class="lg-rune" title="메모 삭제" aria-label="메모 삭제" onclick="lgPmDel('${id}','${m.id}')"><img src="${IC_RUNE}" alt=""></button>` : ''}</div>`; }).join('');
       const form = nm ? `<div class="lg-pmf"><textarea id="lg-pmt" rows="2" placeholder="${escapeHtml(nm)}의 한 줄 메모 (이 회차에 붙여요)"></textarea><div class="lg-pmr"><button class="btn btn-secondary" type="button" onclick="lgPmImg()">이미지</button><span id="lg-pmn" style="font-size:.72rem;opacity:.7"></span><button class="btn btn-secondary" type="button" style="margin-left:auto" onclick="lgPmAdd('${id}')">붙이기</button></div></div>` : '<div style="font-size:.76rem;opacity:.65;padding:4px 2px">PC를 고르면 메모를 쓸 수 있어요.</div>';
-      const sz = window.__pmSz ? ` style="width:${window.__pmSz[0]}px;height:${window.__pmSz[1]}px"` : ''; return `<details class="lg-pm"${sz}${L.length ? ' open' : ''}><summary>메모 (${L.length})</summary>${items}${form}</details>`;
+      const sz = window.__pmSz ? ` style="width:${window.__pmSz[0]}px;height:${window.__pmSz[1]}px"` : ''; return `<div class="lg-pmw"${sz}><details class="lg-pm"${L.length ? ' open' : ''}><summary>메모 (${L.length})</summary>${items}${form}</details></div>`;
     }
     window.__lgPmImg = '';
-    document.addEventListener('mouseup', e => { const d = document.querySelector('#lg-main .lg-pm'); if (d && d.style.width !== undefined && (d.offsetWidth && d.offsetHeight) && (e.target.closest && e.target.closest('.lg-pm'))) { const w = d.offsetWidth, hh = d.offsetHeight; if (!window.__pmSz || Math.abs(window.__pmSz[0] - w) > 2 || Math.abs(window.__pmSz[1] - hh) > 2) { if (d.style.width || d.style.height) window.__pmSz = [w, hh]; } } });
+    document.addEventListener('mouseup', e => { const d = document.querySelector('#lg-main .lg-pmw'); if (d && (d.offsetWidth && d.offsetHeight) && (e.target.closest && e.target.closest('.lg-pmw'))) { const w = d.offsetWidth, hh = d.offsetHeight; if (!window.__pmSz || Math.abs(window.__pmSz[0] - w) > 2 || Math.abs(window.__pmSz[1] - hh) > 2) { if (d.style.width || d.style.height) window.__pmSz = [w, hh]; } } });
     function lgPmImg() { const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; i.onchange = () => { const f = i.files[0]; if (!f) return; const u = URL.createObjectURL(f), im = new Image(); im.onload = () => { const k = Math.min(1, 480 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); window.__lgPmImg = c.toDataURL('image/jpeg', .68); URL.revokeObjectURL(u); const n = document.getElementById('lg-pmn'); if (n) n.textContent = '이미지 첨부됨 ✓'; }; im.src = u; }; i.click(); }
     function lgPmAdd(id) {
       const me = landMe(), pc = (state.boardTex.pcs || []).find(p => p.id === me), nm = me === 'gm' ? '시금치 (GM)' : (pc ? pc.name : ''); if (!nm) return;
@@ -3081,7 +3113,7 @@
       window.__lgPmImg = ''; persistState(); lgPmRefresh(id);
     }
     function lgPmDel(id, mid) { if (!confirm('이 메모를 지울까요?')) return; const M = (state.boardTex.lgMemos || {}); M[id] = (M[id] || []).filter(m => m.id !== mid); persistState(); lgPmRefresh(id); }
-    function lgPmRefresh(id) { const d = document.querySelector('#lg-main .lg-pm'); if (!d) return; const tmp = document.createElement('div'); tmp.innerHTML = lgPmHtml(id); d.replaceWith(tmp.firstElementChild); }
+    function lgPmRefresh(id) { const d = document.querySelector('#lg-main .lg-pmw'); if (!d) return; const tmp = document.createElement('div'); tmp.innerHTML = lgPmHtml(id); d.replaceWith(tmp.firstElementChild); }
     // ---- 내 글씨체 (파일 올리기 / 주소) ----
     const FNT = { db: null, loaded: {} };
     function fntDb() { return FNT.db || (FNT.db = new Promise((res, rej) => { const r = indexedDB.open('advfonts', 1); r.onupgradeneeded = () => r.result.createObjectStore('f'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); })); }
@@ -3149,12 +3181,16 @@
         const pmH = lgPmHtml(id);
         const AVm = LG.av[id] || {}, AVn = {}, stat = !((LG.idx.find(a => a.id === id)) || {}).srv, hid = lgNmHide(); Object.keys(AVm).forEach(k => { AVn[nameKey(k)] = AVm[k]; });
         const avu = n => (stat ? LG_TOK[String(n).replace(/\s*\(GM\)\s*$/, '')] : '') || AVm[n] || AVn[nameKey(n)] || lgAvG(n) || '', avh = n => avu(n) ? `<img class="lg-av" loading="lazy" src="${escapeHtml(avu(n))}" alt="" title="${escapeHtml(n)}" ${AVm['@alt:' + n] ? 'style="cursor:pointer" onclick="lgAlt(this)"' : ''} onerror="this.remove()">` : '', nmh = n => (hid && avu(n)) ? '' : escapeHtml(n);
-        { // 등장인물 (이 회차에서 말한 PC · NPC)
+        { // 등장인물 (이 회차에서 말한 PC · NPC — GM · PL은 뺌)
           const cnt = {}, order = []; ms.forEach(m => { const n = String(m[1] || '').trim(); if (!n || m[0] === 'd') return; if (!(n in cnt)) { cnt[n] = 0; order.push(n); } cnt[n]++; });
-          const pcN = new Set((state.boardTex.pcs || []).map(p => nameKey(p.name || '')).concat((state.boardTex.pcs || []).map(p => nameKey(p.pl || '')))), gmRe = /\(GM\)\s*$/;
-          const chip = n => { const u = avu(n); return `<div class="lg-cc${pcN.has(nameKey(n)) ? ' pc' : ''}${u ? '' : ' def'}" onclick="lgCastImg(${JSON.stringify(n).replace(/"/g, '&quot;')})" title="${escapeHtml(n)} · ${cnt[n]}줄 · 눌러서 이미지 바꾸기"><img src="${escapeHtml(u || IC_NPC)}" alt="" onerror="this.src=IC_NPC"><span>${escapeHtml(n)}</span><small>${u ? cnt[n] + '줄' : '이미지 추가'}</small></div>`; };
-          const gm = order.filter(n => gmRe.test(n)), pcs = order.filter(n => !gmRe.test(n) && pcN.has(nameKey(n))), npcs = order.filter(n => !gmRe.test(n) && !pcN.has(nameKey(n)));
-          if (order.length) h += `<div class="lg-cast"><b>등장인물</b>${pcs.length ? '<span class="lg-cl">PC</span>' + pcs.map(chip).join('') : ''}${npcs.length ? '<span class="lg-cl">NPC</span>' + npcs.map(chip).join('') : ''}${gm.length ? '<span class="lg-cl">GM</span>' + gm.map(chip).join('') : ''}</div>`;
+          const pcN = new Set((state.boardTex.pcs || []).map(p => nameKey(p.name || ''))), exN = lgCastExclude();
+          const list = order.filter(n => !exN.has(nameKey(n)) && !/\(GM\)\s*$/.test(n));
+          const pcs = list.filter(n => pcN.has(nameKey(n))), npcs = list.filter(n => !pcN.has(nameKey(n)));
+          const cs = lgCastState(), memoCnt = {}; lgPmList(id).forEach(m => { if (m.c) memoCnt[nameKey(m.c)] = (memoCnt[nameKey(m.c)] || 0) + 1; });
+          const card = (n, isPc) => { const u = avu(n), on = !!cs.pin[nameKey(n)], mc = memoCnt[nameKey(n)] || 0; return `<div class="lg-cc${isPc ? ' pc' : ''}${u ? '' : ' def'}${on ? ' on' : ''}" onclick="lgCastPin(${JSON.stringify(n).replace(/"/g, '&quot;')})" oncontextmenu="lgCastCtx(event,${JSON.stringify(n).replace(/"/g, '&quot;')},${id})" title="${escapeHtml(n)} · ${cnt[n]}줄 · 누르면 강조 / 우클릭: 메모 · 이미지"><img src="${escapeHtml(u || IC_NPC)}" alt="" onerror="this.src=IC_NPC"><span>${escapeHtml(n)}</span><small>${mc ? '메모 ' + mc : (u ? cnt[n] + '줄' : '이미지 추가')}</small></div>`; };
+          const grp = (arr, isPc, key) => { if (!arr.length) return ''; const open = !!cs[key], shown = open ? arr : arr.filter(n => cs.pin[nameKey(n)]), hid = arr.length - shown.length;
+            return `<div class="lg-cg"><button class="lg-cgt" onclick="lgCastToggle('${key}')">${open ? '접기' : '펼치기 (' + arr.length + ')'}</button>${shown.map(n => card(n, isPc)).join('')}</div>`; };
+          if (pcs.length || npcs.length) h += `<div class="lg-cast"><b class="lg-castt">등장인물</b>${grp(pcs, true, 'pcOpen')}${grp(npcs, false, 'npcOpen')}</div>`;
         }
         h += pmH;
         const hpl = lgPlHide(), plSet = new Set(); if (hpl) { const add = x => { const k = nameKey(x); if (k) plSet.add(k); }; (state.boardTex.tokens || []).forEach(t => String(t.n || '').split(/[,，]/).forEach(add)); (state.boardTex.pcs || []).forEach(p => { add(p.name); add(p.key); }); Object.keys(LG_TOK).forEach(add); }
