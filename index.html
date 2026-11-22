@@ -6447,7 +6447,37 @@
     }
     function tcgStripCenter() { const el = document.getElementById('tcg-strip'); if (!el) return null; const cs = [...el.querySelectorAll('.ts-c')], mid = el.scrollLeft + el.clientWidth / 2; let bi = 0, bd = 1e9; cs.forEach((c, i) => { const d = Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid); if (d < bd) { bd = d; bi = i; } }); return { el, cs, bi }; }
     function tcgStripGo(dir) { const o = tcgStripCenter(); if (!o) return; const i = Math.max(0, Math.min(o.cs.length - 1, o.bi + dir)), c = o.cs[i]; o.el.scrollTo({ left: c.offsetLeft + c.offsetWidth / 2 - o.el.clientWidth / 2, behavior: 'smooth' }); }
-    document.addEventListener('keydown', e => { if (!document.getElementById('tcg-strip') || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName || '')) return; if (e.key === 'Enter') { const o = tcgStripCenter(); if (o) o.cs[o.bi].click(); } else return; e.preventDefault(); });
+    document.addEventListener('keydown', e => {
+      if (e.ctrlKey || e.metaKey || e.altKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName || '')) return;
+      const ov = document.getElementById('tcg-ov');
+      const strip = document.getElementById('tcg-strip');
+      if (!ov && !strip) return;
+      if (e.key === 'ArrowLeft') {
+        if (strip) tcgStripGo(-1);
+        else return;
+      } else if (e.key === 'ArrowRight') {
+        if (strip) tcgStripGo(1);
+        else return;
+      } else if (e.key === 'ArrowUp') {
+        const o = tcgStripCenter();
+        const target = (o && o.cs && o.cs[o.bi]) || (strip && strip.querySelector('.ts-c'));
+        if (target) {
+          const k = target.dataset.k, id = target.dataset.id;
+          if (k && id && typeof tcgStripAdd === 'function') tcgStripAdd(k, id);
+          else target.click();
+        } else return;
+      } else if (e.key === 'r' || e.key === 'R') {
+        if (ov && typeof tcgFlip === 'function') tcgFlip();
+        else return;
+      } else if (e.key === 'Enter') {
+        const o = tcgStripCenter();
+        if (o && o.cs[o.bi]) o.cs[o.bi].click();
+        else return;
+      } else {
+        return;
+      }
+      e.preventDefault();
+    });
     function tcgStripFan(el) { const half = el.clientWidth / 2 || 1, RX = 573, RY = 573; el.querySelectorAll('.ts-c').forEach(c => { const dp = c.offsetLeft + c.offsetWidth / 2 - el.scrollLeft - half, dq = dp + 45, th = Math.max(-100, Math.min(100, dq / 90 * 9)), rd = th * Math.PI / 180, f = Math.max(0, 1 - Math.abs(dp) / 80), sv = dp / 90, dd = Math.max(-3 - sv, sv - 2, 0), op = Math.max(0, 1 - dd * 2), hid = op <= 0, rot = Math.atan2(RY * Math.sin(rd), RX * Math.cos(rd)) * 180 / Math.PI;
       c.style.setProperty('--r', rot.toFixed(1) + 'deg'); c.style.setProperty('--x', (RX * Math.sin(rd) - dp).toFixed(1) + 'px'); c.style.setProperty('--y', (RY * (1 - Math.cos(rd)) * 0.55 - 86 - f * 30).toFixed(1) + 'px'); c.style.setProperty('--s', (1 + f * .16).toFixed(3));
       c.style.zIndex = Math.round(100 - Math.abs(th) + f * 20); c.style.opacity = op.toFixed(2); c.style.pointerEvents = hid ? 'none' : ''; }); }
@@ -6585,7 +6615,19 @@
         const fin = (flip) => { g.tin.style.transition = ''; void g.tin.offsetWidth; g.tin.style.transform = ''; g.el.classList.toggle('flip', flip); if (g.el.id === 'tcg-flip') tcgFlipped = flip; else if (g.el.dataset.mi != null && tcgMulti[g.el.dataset.mi]) tcgMulti[g.el.dataset.mi].fl = flip; };
         if (g.up) { g.el.style.transition = 'transform .25s, opacity .25s'; g.el.style.transform = ''; g.el.style.opacity = ''; setTimeout(() => { g.el.style.transition = ''; }, 280); g.el.dataset.sw = Date.now(); if (g.dy < -90 && e.type === 'pointerup') { if (g.el.dataset.mi != null) tcgEdit(Number(g.el.dataset.mi)); else tcgEdit(); } return; }
         if (g.moved) { const n = ((g.a % 360) + 360) % 360; fin(n > 90 && n < 270); g.el.dataset.sw = Date.now(); }
-        else if (e.type === 'pointerup' && !g.drag && !e.target.closest('.tbk-s,button,a')) fin(!g.el.classList.contains('flip'));
+        else if (e.type === 'pointerup' && !g.drag && !e.target.closest('.tbk-s,button,a')) {
+          const mi = g.el.dataset.mi != null ? Number(g.el.dataset.mi) : -1;
+          const spObj = mi >= 0 ? tcgMulti[mi] : tcgSpec;
+          const pcId = (spObj && spObj.card && spObj.card.id && !spObj.npc && String(spObj.curKey || '').startsWith('pc:'))
+            ? spObj.card.id
+            : ((spObj && spObj.editLabel === '시트 열기' && spObj.card && spObj.card.id) ? spObj.card.id : '');
+          if (pcId && typeof openSheet === 'function') {
+            if (typeof tcgClose === 'function') tcgClose();
+            openSheet(pcId);
+          } else {
+            fin(!g.el.classList.contains('flip'));
+          }
+        }
       };
       document.addEventListener('pointerup', end, true); document.addEventListener('pointercancel', end, true);
     })();
