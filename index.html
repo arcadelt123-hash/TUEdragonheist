@@ -2311,7 +2311,7 @@
 
 
     // ===== 서버 연결: google.script.run 이 응답 없으면 같은 주소로 직접 요청(fetch)으로 자동 전환 =====
-    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbwlUqA6vWwVLz-XM_Qmng6JVQ1CmfZTxLFQt-06TbuJ10ovRtWBNY9GgbJ1h1_Ynemv/exec';
+    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbwFpbjK4KbFT0GlVSMeP4jNsW1ig8CLQQmKtoASHA42HNjujTuK66R7i3QyaVqm8okH/exec';
     function execUrl() { try { return localStorage.getItem('adventure_exec_url') || EXEC_URL_DEFAULT; } catch (e) { return EXEC_URL_DEFAULT; } }
     function diagShow(msg) { try { console.info('[sync]', msg); } catch (e) {} }
     const AUTH_S = { tk: (() => { try { return localStorage.getItem('adv_dev_tk') || ''; } catch (e) { return ''; } })(), gm: false, off: false, st: null, gate: false, bg: '' };
@@ -2419,7 +2419,7 @@
           h += `<h4>PC · PL별 연결된 기기</h4><div class="dv-map">${pls.map(p => `<div class="dv-pc"><b>${escapeHtml(p.name || 'PL')}</b><span>${(byPc[p.id] || []).map(d => `<i class="${d.me ? 'me' : ''}">${escapeHtml(d.name)}</i>`).join('') || '<em>연결된 기기 없음</em>'}</span></div>`).join('')}${(byPc[''] || []).length ? `<div class="dv-pc"><b>연결 안 됨</b><span>${byPc[''].map(d => `<i>${escapeHtml(d.name)}</i>`).join('')}</span></div>` : ''}</div>`;
           h += `<h4>기기 목록 (${r.devices.length})</h4><div class="dv-list">${r.devices.map(d => `<div class="dv-row"><div class="dv-n"><b>${escapeHtml(d.name)}</b> ${d.gm ? '<span class="dv-gm">GM</span>' : ''}${d.me ? ' <small>(이 기기)</small>' : ''}<small>마지막 접속 ${dvT(d.last)} · 등록 ${dvT(d.created)}</small></div><div class="dv-a">${dvPcSel(d.pc, `devSetPc('${d.id}',this.value)`)}${d.me ? '' : `<button class="btn btn-secondary" onclick="devSetGm('${d.id}',${d.gm ? 'false' : 'true'})">${d.gm ? 'GM 해제' : 'GM 권한 주기'}</button><button class="btn btn-secondary dv-del" onclick="devDel('${d.id}')">삭제</button>`}</div></div>`).join('')}</div>`;
           h += `<h4>로그인 화면 배경</h4><div class="dv-bg"><select onchange="devSetBg(this.value)"><option value="">기본 (어두운 배경, 글씨만)</option>${Object.keys(LG_WC).map(k => `<option value="img/wc/${k}.webp"${(st.bg || '') === 'img/wc/' + k + '.webp' ? ' selected' : ''}>${escapeHtml(LG_WC[k])}</option>`).join('')}</select><input type="text" id="dv-bgurl" placeholder="또는 이미지 주소(https://…)" value="${/^https:/.test(st.bg || '') ? escapeHtml(st.bg) : ''}"><button class="btn btn-secondary" onclick="devSetBg(document.getElementById('dv-bgurl').value.trim())">적용</button></div><div class="manual-note">이 설정은 로그인 전 화면에도 보여서 모든 기기에 적용돼요. 이미지는 사이트의 img 폴더 그림이나 https 주소만 쓸 수 있어요.</div>`;
-          h += `<div style="margin-top:8px"><button class="btn btn-secondary" onclick="devChangePw()">비밀번호 변경 (다른 기기는 다시 로그인)</button></div>`;
+          h += `<div style="margin-top:8px"><button class="btn btn-secondary" onclick="devChangePw()">비밀번호 변경</button></div>`;
         } else h += '<div class="manual-note">기기 목록을 불러오지 못했어요.</div>';
       } else h += '<div class="manual-note">기기 삭제·관리는 GM 기기에서만 할 수 있어요.</div>';
       el.innerHTML = h;
@@ -2433,7 +2433,7 @@
       const a = prompt('새 비밀번호 (6자 이상)'); if (a == null) return; if (a.length < 6) return showToast('6자 이상이어야 해요.');
       const b = prompt('새 비밀번호 확인'); if (b == null) return; if (a !== b) return showToast('확인 값이 달라요.');
       const r = await authPost({ __auth: 'pw', pw: a }).catch(() => null);
-      if (r && r.status === 'OK' && r.tk) { AUTH_S.tk = r.tk; try { localStorage.setItem('adv_dev_tk', r.tk); } catch (e) {} showToast('비밀번호를 바꿨어요. 다른 기기는 다시 로그인해야 해요.'); } else showToast('바꾸지 못했어요.');
+      if (r && r.status === 'OK') { showToast('비밀번호를 바꿨어요. 이미 등록된 기기는 그대로 들어와요.'); } else showToast('바꾸지 못했어요.');
     }
     authBoot();
     // ---- 접속 중인 사람 (Apps Script ping, 시트에 쓰지 않음)
