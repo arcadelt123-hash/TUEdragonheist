@@ -1804,6 +1804,7 @@
     .pc-tb { position: absolute; z-index: 25; transform: translate(-50%, -50%); text-align: center; line-height: 1.25; white-space: nowrap; color: var(--pct, #3b2410); text-shadow: 0 0 3px rgba(255,255,255,.35); pointer-events: none; }
     #pcc-prev .pc-tb { pointer-events: auto; cursor: move; touch-action: none; outline: 1px dashed rgba(230,178,74,.7); }
     .tb-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 5px 0; border-bottom: 1px solid rgba(120,90,40,.2); font-size: .76rem; } .tb-row textarea { flex: 1 1 100%; font: inherit; font-size: .82rem; padding: 4px 6px; border-radius: 6px; border: 1px solid #c9bb98; resize: vertical; }
+    .bk-st { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; flex: 1 1 100%; padding-left: 18px; font-size: .72rem; } .bk-st input[type=range] { width: 90px; } .bk-st select { font-size: .72rem; max-width: 120px; }
     .dx { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #e11d1d; font: 900 28px/1 sans-serif; font-style: normal; text-shadow: 0 0 3px #fff, 0 0 2px #fff; pointer-events: none; z-index: 3; }
     .cx-pcrow .cx-pcimg, .itm-pcb, .itm-pcchip, .land-tabs button, .iv-tag, .pcib { position: relative; }
     .pcib { display: inline-flex; width: 26px; height: 26px; border-radius: 50%; overflow: hidden; vertical-align: middle; flex: none; }
@@ -3436,7 +3437,7 @@
       } finally { IMG.busy = false; }
     }
     // ---- 여러 기기 동기화: 충돌 대신 자동으로 합치기 + 주기적으로 새 내용 받아오기 ----
-    let SYNC_BASE = null, syncDirty = false, syncMergeN = 0;
+    let SYNC_BASE = null, syncDirty = false, syncMergeN = 0, syncConf = false;
     const SYNC_KEYS = ['folders', 'quests', 'globalNpcs', 'timeline', 'boardTex'];
     function syncSnap() { const o = {}; SYNC_KEYS.forEach(k => { o[k] = state[k]; }); return JSON.stringify(o); }
     function syncBaseSet() { try { SYNC_BASE = syncSnap(); } catch (e) { SYNC_BASE = null; } }
@@ -3463,13 +3464,13 @@
           m.forEach(mi => { if (!tm.has(mi.id)) { const bi = bm.get(mi.id); if (!(bi && jeq(mi, bi))) out.push(mi); } });
           return out;
         }
-        return m;
+        syncConf = true; return m;
       }
-      return m;
+      syncConf = true; return m;
     }
     function syncMergeFromServer(retry) {
       if (!SYNC_BASE || syncMergeN >= 3) { syncMergeN = 0; persistState(true); return; }
-      syncMergeN++; setSyncBadge('syncing', '다른 기기 변경과 합치는 중...');
+      syncMergeN++; syncConf = false; setSyncBadge('syncing', '다른 기기 변경과 합치는 중...');
       srvLoad(theirs => {
         try {
           const base = JSON.parse(SYNC_BASE), mine = JSON.parse(syncSnap()), merged = {};
@@ -3478,7 +3479,7 @@
           SYNC_BASE = JSON.stringify(Object.fromEntries(SYNC_KEYS.map(k => [k, theirs[k]])));
           applyLoadedData(merged, false); state.lastUpdated = theirs.lastUpdated;
           syncRender();
-          showToast('다른 기기의 변경과 자동으로 합쳤어요.');
+          if (syncConf) showToast('같은 칸을 동시에 고쳤어요. 이 기기의 내용이 남아요.');
           persistState();
         } catch (e) { console.error(e); syncMergeN = 0; persistState(true); }
       }, () => { syncMergeN = 0; setSyncBadge('error', '합치기 실패 · 잠시 뒤 다시 시도해요'); });
@@ -5824,7 +5825,7 @@
       const rgS = (lab, k, min, max, step, def) => `<label class="pcc-sl"><span>${lab}</span><input type="range" min="${min}" max="${max}" step="${step}" value="${d[k] == null ? def : d[k]}" oninput="tcgSkinSet('${k}',Number(this.value))"></label>`;
       const sk = tcgSkin(sp);
       const sliders = sk ? (d.frame && !d.fHole ? '' : rgS('칸 왼쪽', 'wx', 0, 60, 1, 15) + rgS('칸 위', 'wy', 0, 60, 1, 12) + rgS('칸 너비', 'ww', 20, 100, 1, 70) + rgS('칸 높이', 'wh', 20, 100, 1, 76) + rgS('모서리', 'wr', 0, 50, 1, 0)) + (d.frame ? '' : rgS('카드 비율', 'frameR', 0.5, 1.2, 0.01, 0.7)) + rgS('확대', 'imgZ', 100, 300, 5, 100) + rgS('가로 위치', 'imgX', 0, 100, 5, 50) + rgS('세로 위치', 'imgY', 0, 100, 5, 50) : '<div class="pcc-none">틀이나 배경을 고르면 조절할 수 있어요</div>';
-      const bkAll = sp.bkItems ? tcgBkAll(sp) : [], bkRow = (x, i) => { const cu = /^c_/.test(x[0]) ? (d.bkCustom || []).find(c => 'c_' + c.id === x[0]) : null; return `<div class="bk-r" data-sid="${x[0]}"><span class="dnd-grip" title="끌어서 순서 바꾸기">⠿</span><label><input type="checkbox" ${bkOn(d, x[0]) ? 'checked' : ''} onchange="tcgBkToggle('${x[0]}')"> ${cu ? '' : escapeHtml(x[1])}</label>${cu ? `<input type="text" class="bk-ti" value="${escapeHtml(cu.t || '')}" oninput="tcgBkCu('${cu.id}','t',this.value)" placeholder="제목">` : ''}<span class="bk-mv"><button type="button" title="위로" onclick="tcgBkMove('${x[0]}',-1)"${i === 0 ? ' disabled' : ''}>▲</button><button type="button" title="아래로" onclick="tcgBkMove('${x[0]}',1)"${i === bkAll.length - 1 ? ' disabled' : ''}>▼</button>${cu ? `<button type="button" title="이 텍스트 박스 삭제" onclick="tcgBkDel('${cu.id}')">✕</button>` : ''}</span>${cu ? `<textarea class="bk-tx" rows="2" oninput="tcgBkCu('${cu.id}','x',this.value)" placeholder="내용">${escapeHtml(cu.x || '')}</textarea>` : ''}</div>`; };
+      const bkAll = sp.bkItems ? tcgBkAll(sp) : [], bkRow = (x, i) => { const cu = /^c_/.test(x[0]) ? (d.bkCustom || []).find(c => 'c_' + c.id === x[0]) : null; return `<div class="bk-r" data-sid="${x[0]}"><span class="dnd-grip" title="끌어서 순서 바꾸기">⠿</span><label><input type="checkbox" ${bkOn(d, x[0]) ? 'checked' : ''} onchange="tcgBkToggle('${x[0]}')"> ${cu ? '' : escapeHtml(x[1])}</label>${cu ? `<input type="text" class="bk-ti" value="${escapeHtml(cu.t || '')}" oninput="tcgBkCu('${cu.id}','t',this.value)" placeholder="제목">` : ''}<span class="bk-mv"><button type="button" title="위로" onclick="tcgBkMove('${x[0]}',-1)"${i === 0 ? ' disabled' : ''}>▲</button><button type="button" title="아래로" onclick="tcgBkMove('${x[0]}',1)"${i === bkAll.length - 1 ? ' disabled' : ''}>▼</button>${cu ? `<button type="button" title="이 텍스트 박스 삭제" onclick="tcgBkDel('${cu.id}')">✕</button>` : ''}</span><div class="bk-st"><label>크기 <input type="range" min="60" max="220" step="5" value="${Number(((d.bkSt || {})[x[0]] || {}).s) || 100}" oninput="tcgBkSt('${x[0]}','s',Number(this.value),true)"></label><label>색 <input type="color" value="${((d.bkSt || {})[x[0]] || {}).c || d.bkTc || '#f3e8cd'}" oninput="tcgBkSt('${x[0]}','c',this.value,true)"></label><select onchange="tcgBkSt('${x[0]}','f',this.value)"><option value="">기본 글씨체</option>${MEMO_FONTS.map(f => `<option value="${f.k}"${((d.bkSt || {})[x[0]] || {}).f === f.k ? ' selected' : ''}>${f.n}</option>`).join('')}</select></div>${cu ? `<textarea class="bk-tx" rows="2" oninput="tcgBkCu('${cu.id}','x',this.value)" placeholder="내용">${escapeHtml(cu.x || '')}</textarea>` : ''}</div>`; };
       const bkPanel = sp.bkItems ? `<div class="tcg-panel"><b class="pcc-h">뒷면 꾸미기</b><div class="bk-sty"><label>테두리 <input type="color" value="${d.bkBd || '#b8893a'}" oninput="tcgBkSet('bkBd',this.value,true)"></label><label>두께 <input type="range" min="0" max="8" step="1" value="${d.bkBw == null ? 2 : d.bkBw}" oninput="tcgBkSet('bkBw',Number(this.value),true)"></label><label>배경 <input type="color" value="${d.bkBg || '#2a2114'}" oninput="tcgBkSet('bkBg',this.value,true)"></label><label>글자 <input type="color" value="${d.bkTc || '#f1e6c8'}" oninput="tcgBkSet('bkTc',this.value,true)"></label><label>제목 <input type="color" value="${d.bkHc || '#f6d58a'}" oninput="tcgBkSet('bkHc',this.value,true)"></label><label>글씨체 <select onchange="tcgBkSet('bkFont',this.value)"><option value="">기본</option>${MEMO_FONTS.map(f => `<option value="${f.k}"${d.bkFont === f.k ? ' selected' : ''}>${f.n}</option>`).join('')}</select></label>${d.bkBd || d.bkBg || d.bkTc || d.bkHc || d.bkFont || d.bkBw != null ? '<button class="tcg-mini" onclick="tcgBkReset()">뒷면 원래대로</button>' : ''}</div><b class="pcc-h" style="margin-top:8px">뒷면에 보일 정보 · 순서</b><div class="bk-list2">${bkAll.map(bkRow).join('')}</div><button class="tcg-mini" onclick="tcgBkAdd()">＋ 텍스트 박스 추가</button></div>` : '';
       const right = tcgPanel ? `<div class="tcg-r">${sp.card ? '' : panel}${bkPanel}<div class="tcg-panel tcg-skinp"><div class="pcc-top2"><button class="tcg-ib" onclick="tcgUpOpen()" title="이미지 올리기 (틀 · 배경)" aria-label="이미지 올리기"><img src="${IC_UPSPLASH}" alt=""></button><button class="tcg-mini" onclick="tcgTxtFree()" title="미리보기에서 글자를 끌어 원하는 곳에 놓아요">${d.tx != null ? '글자 위치 원래대로' : '✥ 글자 위치'}</button>${sk ? '<button class="tcg-mini" onclick="tcgSkinClear()">틀 · 배경 해제</button>' : ''}</div>
         <div class="pcc-cols pcc-cols3"><div class="pcc-c pcc-c2"><b class="pcc-h">조절</b>${sliders}</div>
@@ -5921,7 +5922,7 @@
     function tcgBkOrder(keys, d) { const o = (d && d.bkOrd) || [], out = o.filter(k => keys.includes(k)); keys.forEach(k => { if (!out.includes(k)) out.push(k); }); return out; }
     function tcgBk(title, secs, d) {
       d = d || {}; const e = escapeHtml, map = {}; (secs || []).forEach(x => { map[x[0]] = x[1]; }); (d.bkCustom || []).forEach(c => { if (bkOn(d, 'c_' + c.id)) map['c_' + c.id] = `<div class="tbk-t">${e(c.t || '')}</div><div>${e(c.x || '')}</div>`; });
-      const inner = tcgBkOrder(Object.keys(map), d).map(k => map[k] || '').join('');
+      const inner = tcgBkOrder(Object.keys(map), d).map(k => { const o = (d.bkSt || {})[k], h = map[k] || ''; if (!o || !h) return h; const z = Number(o.s) && Number(o.s) !== 100 ? `zoom:${Number(o.s) / 100};` : '', ff = o.f ? `font-family:${fontOf(o.f)};` : '', cc = o.c ? `color:${e(o.c)};` : ''; return (z || ff || cc) ? `<div class="tbk-i" style="${z}${ff}${cc}">${h}</div>` : h; }).join('');
       const f = d.bkFont ? ((MEMO_FONTS.find(x => x.k === d.bkFont) || {}).f || '') : '', st = [d.bkBg ? `background:${d.bkBg}` : '', d.bkBd ? `border-color:${d.bkBd}` : '', d.bkBw != null ? `border-width:${d.bkBw}px` : '', d.bkTc ? `color:${d.bkTc}` : '', f ? `font-family:${f}` : '', d.bkHc ? `--bkt:${d.bkHc}` : ''].filter(Boolean).join(';');
       return `<div class="tbk"${st ? ` style="${st}"` : ''}><div class="tbk-h">${e(title)}</div>${inner || '<div style="opacity:.6;text-align:center;">기록된 내용이 없어요.</div>'}</div>`;
     }
@@ -5955,6 +5956,7 @@
     function tcgBkAdd() { const d = tcgSpec && tcgSpec.deco; if (!d) return; (d.bkCustom = d.bkCustom || []).push({ id: Date.now().toString(36), t: '새 텍스트', x: '' }); tcgSave(); tcgRender(false); }
     function tcgBkDel(id) { const d = tcgSpec && tcgSpec.deco; if (!d) return; d.bkCustom = (d.bkCustom || []).filter(c => c.id !== id); d.bkOrd = (d.bkOrd || []).filter(k => k !== 'c_' + id); tcgSave(); tcgRender(false); }
     function tcgBkCu(id, f, v) { const d = tcgSpec && tcgSpec.deco; if (!d) return; const c = (d.bkCustom || []).find(x => x.id === id); if (!c) return; c[f] = v; tcgSave(); tcgBkRefresh(); }
+    function tcgBkSt(k, f, v, live) { const d = tcgSpec && tcgSpec.deco; if (!d) return; d.bkSt = d.bkSt || {}; const o = d.bkSt[k] = d.bkSt[k] || {}; if (v === '' || v == null) delete o[f]; else o[f] = v; tcgSave(); if (live) tcgBkRefresh(); else tcgRender(false); }
     function tcgBkSet(k, v, live) { const d = tcgSpec && tcgSpec.deco; if (!d) return; if (v === '' || v == null) delete d[k]; else d[k] = v; tcgSave(); if (live) tcgBkRefresh(); else tcgRender(false); }
     function tcgBkToggle(k) { const d = tcgSpec && tcgSpec.deco; if (!d) return; const a = d.bkHide = d.bkHide || [], i = a.indexOf(k); if (i >= 0) a.splice(i, 1); else a.push(k); tcgSave(); tcgRender(false); }
     function tcgBackNpc(n) {
