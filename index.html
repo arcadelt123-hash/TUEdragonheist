@@ -2208,12 +2208,13 @@
         <button class="btn btn-tab" id="tab-board" onclick="setViewMode('board', '')" title="퀘스트 보드" aria-label="퀘스트 보드">
           <img class="ico-img tab-ico" src="" data-ico="bonfire" alt="">
         </button>
-        <button class="btn btn-tab" id="tab-timeline" onclick="setViewMode('timeline', '')" title="타임라인" aria-label="타임라인">
+        <button class="btn btn-tab" id="tab-timeline" style="display:none" onclick="setViewMode('timeline', '')" title="타임라인" aria-label="타임라인">
           <img class="ico-img tab-ico" src="" data-ico="timeline" alt="">
         </button>
         <button class="btn btn-tab" id="tab-journal" onclick="setViewMode('journal', '')" title="기록실 (일지 · 창고 · 단서)" aria-label="기록실">
           <img class="ico-img tab-ico" src="" data-ico="journal" alt="">
         </button>
+        <button class="btn btn-tab" id="tab-shop" onclick="shopTabGo()" title="상점" aria-label="상점"><img class="ico-img tab-ico" src="" alt=""></button>
         <button class="btn btn-tab" id="tab-map" onclick="setViewMode('map', '')" title="지도" aria-label="지도">
           <img class="ico-img tab-ico" src="" data-ico="map" alt="">
         </button>
@@ -5272,12 +5273,13 @@
 
       document.querySelector('.container').classList.toggle('wide', state.viewMode === 'timeline' || state.viewMode === 'board' || state.viewMode === 'journal');
       applyTabOrder();
-      document.getElementById('tab-board').classList.toggle('active', state.viewMode === 'board');
+      document.getElementById('tab-board').classList.toggle('active', state.viewMode === 'board' || state.viewMode === 'timeline');
       document.querySelector('.container').classList.toggle('wide-full', state.viewMode === 'board');
       document.body.classList.toggle('fl-mode', ['board', 'journal', 'timeline'].includes(state.viewMode) && !state.boardPopup);
       document.querySelectorAll('.tab-ico, .top-ico, .gear-img').forEach(im => { if (!im.dataset.ico) return; const u = ({ scrolls: IC_SCROLLS, open: SCROLL_OPEN, closed: SCROLL_CLOSED, human: IC_HUMAN, bonfire: IC_BONFIRE, timeline: IC_TIMELINE, gear: IC_GEAR, feather: IC_FEATHER, needle: IC_NEEDLE, journal: IC_JOURNAL, map: IC_MAP, search: (() => { try { return (SRCH_SVG.match(/src="([^"]+)"/) || [])[1]; } catch (e) { return ''; } })() })[im.dataset.ico]; if (u) im.src = u; });
       document.getElementById('tab-timeline').classList.toggle('active', state.viewMode === 'timeline');
       document.getElementById('tab-journal').classList.toggle('active', state.viewMode === 'journal');
+      btSync();
       topAddBtn.style.display = (state.viewMode === 'journal' || state.viewMode === 'map') ? 'none' : '';
       document.getElementById('tab-map').classList.toggle('active', state.viewMode === 'map');
       try { mapSync(state.viewMode === 'map'); } catch (e) { console.error(e); }
@@ -8262,6 +8264,21 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
     function pcDel(i) { (state.boardTex.pcs || []).splice(i, 1); renderPcList(); persistState(); }
 
     // ---- 상단 메뉴 순서 (드래그 앤 드롭) ----
+    // ---- 타임라인은 퀘스트 보드 탭 안으로 / 상점 바로가기 탭 ----
+    function shopTabGo() { try { shopBack = null; state.jView = 'shop'; setViewMode('journal', ''); } catch (e) {} }
+    function btGo(m) { setViewMode(m, ''); }
+    function btSync() {
+      try {
+        const sh = document.getElementById('tab-shop'); if (sh) { const im = sh.querySelector('img'); if (im && !im.getAttribute('src')) im.src = SHOP_COIN; sh.classList.toggle('active', state.viewMode === 'journal' && state.jView === 'shop'); }
+        const jb = document.getElementById('tab-journal'); if (jb) jb.classList.toggle('active', state.viewMode === 'journal' && state.jView !== 'shop');
+        let p = document.getElementById('bt-sw');
+        if (!p) { p = document.createElement('div'); p.id = 'bt-sw'; p.style.cssText = 'position:fixed;left:10px;bottom:10px;z-index:60;display:none;gap:2px;padding:3px;border-radius:999px;background:rgba(40,28,14,.82);box-shadow:0 2px 8px rgba(0,0,0,.35);font:600 12px sans-serif'; document.body.appendChild(p); }
+        const on = (state.viewMode === 'board' || state.viewMode === 'timeline') && !state.boardPopup;
+        p.style.display = on ? 'flex' : 'none'; if (!on) return;
+        const b = (m, t) => '<button type="button" onclick="btGo(\'' + m + '\')" style="border:0;cursor:pointer;border-radius:999px;padding:4px 12px;color:' + (state.viewMode === m ? '#2b1d0c' : '#eadbb8') + ';background:' + (state.viewMode === m ? '#e9d49a' : 'transparent') + '">' + t + '</button>';
+        const h = b('board', '보드') + b('timeline', '타임라인'); if (p.dataset.k !== h) { p.dataset.k = h; p.innerHTML = h; }
+      } catch (e) {}
+    }
     function applyTabOrder() {
       const grp = document.querySelector('.tab-group'); if (!grp) return;
       const cur = Array.from(grp.querySelectorAll('.btn-tab'));
