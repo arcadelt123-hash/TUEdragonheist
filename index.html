@@ -4684,6 +4684,8 @@
               cacheState();
             }
             setSyncBadge('connected', '동기화됨'); syncMergeN = 0; if (sentSnap) SYNC_BASE = sentSnap; if (!saveAgain) syncDirty = false;
+            // 3차: 서버가 GM만 할 수 있는 변경(삭제·남의 PC·상점 설정)을 되돌렸으면 서버 데이터로 다시 맞춰요
+            if (res && res.adjusted) { try { showToast('지우기·다른 PC·상점 설정은 GM만 바꿀 수 있어서 그 부분은 되돌렸어요.'); } catch (e) {} SYNC_BASE = null; done(); loadFromSheet(); return; }
             done();
           }, err => {
             saveInFlight = 0;
