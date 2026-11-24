@@ -7406,7 +7406,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       const n = tcgMulti.length, rows = n <= 3 ? 1 : 2, cols = Math.ceil(n / rows), k = (e.key || '').toLowerCase(); let hd = true;
       if (k === 'a' || k === 'd') tcgMSel = Math.max(0, Math.min(n - 1, tcgMSel + (k === 'a' ? -1 : 1)));
       else if (k === 'w' || k === 's') { const j = tcgMSel + (k === 'w' ? -cols : cols); if (j >= 0 && j < n) tcgMSel = j; }
-      else if (k === 'e') { if (tcgMulti[tcgMSel] && tcgMulti[tcgMSel].edit) tcgEdit(tcgMSel); return e.preventDefault(); }
+      else if (k === 'e') { if (tcgMulti[tcgMSel] && tcgMulti[tcgMSel].edit) e.stopImmediatePropagation(); tcgEdit(tcgMSel); return e.preventDefault(); }
       else if (k === 'f') { const m = tcgMulti[tcgMSel]; if (m) { m.fl = !m.fl; const el = document.querySelector('.tcg-flip[data-mi="' + tcgMSel + '"]'); if (el) el.classList.toggle('flip', !!m.fl); } }
       else if (e.key === 'ArrowLeft') tcgStripGo(-1);
       else if (e.key === 'ArrowRight') tcgStripGo(1);
@@ -7415,7 +7415,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       if (!hd) return; e.preventDefault(); e.stopImmediatePropagation();
       document.querySelectorAll('.tcg-mc').forEach((c, i) => c.classList.toggle('sel', i === tcgMSel));
     }, true);
-    document.addEventListener('keydown', e => { if (e.key !== 'ArrowUp' || e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || e.defaultPrevented || !document.getElementById('tcg-ov') || tcgPanel || /INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || '') || (e.target && e.target.isContentEditable)) return; const sp = tcgMulti.length > 1 ? tcgMulti[tcgMulti.length - 1] : tcgSpec; if (!sp || !sp.edit) return; e.preventDefault(); tcgEdit(tcgMulti.length > 1 ? tcgMulti.length - 1 : undefined); });
+    document.addEventListener('keydown', e => { if (e.key !== 'ArrowUp' || e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || e.defaultPrevented || !document.getElementById('tcg-ov') || tcgPanel || /INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || '') || (e.target && e.target.isContentEditable)) return; const sp = tcgMulti.length > 1 ? tcgMulti[tcgMulti.length - 1] : tcgSpec; if (!sp || !sp.edit) return; e.preventDefault(); e.stopImmediatePropagation(); tcgEdit(tcgMulti.length > 1 ? tcgMulti.length - 1 : undefined); });
     // ---- 카드 뒷면: 시트/상세 정보 ----
     function tcgBkOrder(keys, d) { const o = (d && d.bkOrd) || [], out = o.filter(k => keys.includes(k)); keys.forEach(k => { if (!out.includes(k)) out.push(k); }); return out; }
     function tcgBk(title, secs, d) {
