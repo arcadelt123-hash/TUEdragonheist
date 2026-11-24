@@ -2228,6 +2228,7 @@
         <button class="btn btn-primary btn-icon-top" id="top-add-btn" onclick="handleTopAddButton()" title="퀘스트 추가" aria-label="퀘스트 추가"><img class="ico-img top-ico" src="" data-ico="feather" alt=""></button>
         
         <button class="btn btn-secondary btn-icon-top" onclick="gsOpen()" title="통합 검색 (Ctrl+K)" aria-label="통합 검색"><img class="ico-img top-ico" id="gs-ico" src="" data-ico="search" alt=""></button>
+        <button class="btn btn-secondary" id="shoplive-btn" onclick="shopLiveOpen()" title="지금 상점에 있는 PC" aria-label="상점 현황" style="display:none;position:relative;padding:2px 8px;font-weight:700;align-items:center">상점<span id="shoplive-n" style="margin-left:4px;min-width:16px;height:16px;border-radius:8px;background:#7a4a14;color:#fff;font-size:11px;line-height:16px;text-align:center;padding:0 3px"></span></button>
         <button class="btn btn-secondary" id="r20-btn" onclick="r20Open()" title="Roll20 연동 (날짜·거래 복사)" aria-label="Roll20 연동" style="display:none;padding:2px 8px;font-weight:700;align-items:center">R20</button>
         <button class="btn btn-secondary" id="qtrash-btn" onclick="qTrashOpen()" title="삭제된 퀘스트 (GM 휴지통)" aria-label="삭제된 퀘스트" style="display:none;position:relative;padding:2px 6px;align-items:center"><img id="qtrash-ico" alt="" style="width:26px;height:26px;object-fit:contain"><span id="qtrash-n" style="position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:8px;background:#7a4a14;color:#fff;font-size:11px;line-height:16px;text-align:center;padding:0 3px"></span></button>
         <button class="btn btn-secondary" id="sellreq-btn" onclick="sellReqGo()" title="판매 요청이 왔어요 — 눌러서 상점으로" aria-label="판매 요청" style="display:none;position:relative;padding:2px 6px;align-items:center"><img id="sellreq-ico" alt="" style="width:26px;height:26px;object-fit:contain"><span id="sellreq-n" style="position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:8px;background:#c0392b;color:#fff;font-size:11px;line-height:16px;text-align:center;padding:0 3px"></span></button>
@@ -5115,6 +5116,43 @@
     }
     (function () { try { const m = String(location.hash || '').match(/^#r20date=(.+)$/); if (!m) return; const key = decodeURIComponent(m[1]); let n = 0; const t = setInterval(() => { if (++n > 40) { clearInterval(t); return; } if (!(AUTH_S.gm && !plView())) return; clearInterval(t); try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} r20ApplyDate(key); }, 500); } catch (e) {} })();
     setInterval(() => { try { const b = document.getElementById('r20-btn'); if (b) b.style.display = (AUTH_S.gm && !plView()) ? 'inline-flex' : 'none'; } catch (e) {} }, 900);
+    // ---- 상점 재고 (Firebase 실시간) / 상점 현황 ----
+    function shopStockPush(sid, iid, stock) { try { if (AUTH_S.gm && !plView() && window.__fbx && __fbx.ok()) __fbx.set('shop/stock/' + sid + '/' + iid, (stock == null || stock === '') ? null : Number(stock)); } catch (e) {} }
+    function shopStockApply(v) {
+      v = v || {}; let ch = false;
+      try { shopsList().forEach(s => (s.items || []).forEach(it => { const n = v[s.id] && v[s.id][it.id]; if (typeof n === 'number' && it.stock != null && it.stock !== '' && Number(it.stock) !== n) { it.stock = n; ch = true; } })); } catch (e) {}
+      if (ch) { try { const a = document.activeElement; if (state.viewMode === 'journal' && state.jView === 'shop' && !(a && /INPUT|TEXTAREA|SELECT/.test(a.tagName))) renderShop(); } catch (e) {} }
+    }
+    let __shopLiveSent = '', __shopLiveT = 0;
+    function shopLivePush() {
+      try {
+        if (!(window.__fbx && __fbx.ok()) || (AUTH_S.gm && !plView())) return;
+        const inShop = state.viewMode === 'journal' && state.jView === 'shop'; let pc = null; try { pc = shopBuyer().pc; } catch (e) {}
+        if (!pc) return; const path = 'shop/live/' + pc.id;
+        if (!inShop) { if (__shopLiveSent) { __fbx.set(path, null); __shopLiveSent = ''; } return; }
+        const sh = shopsList().find(s => s.id === state.shopId) || {}, sel = state.shopSel || {};
+        let item = ''; try { if (sel.w === 's') { const it = (sh.items || []).find(i => i.id === sel.k); item = it ? shopRes(it).name : ''; } else if (sel.w === 'm') { const x = shopData(shopBuyer()).items[sel.k]; item = x ? (x.name || '') : ''; } } catch (e) {}
+        const key = [pc.id, sh.id, item].join('|');
+        if (key === __shopLiveSent && Date.now() - __shopLiveT < 20000) return;
+        if (!__shopLiveSent) __fbx.disc(path);
+        __shopLiveSent = key; __shopLiveT = Date.now();
+        __fbx.set(path, { n: String(pc.name || 'PC').slice(0, 40), s: String(sh.name || '').slice(0, 40), sid: String(sh.id || ''), i: String(item).slice(0, 60), t: Date.now() });
+      } catch (e) {}
+    }
+    window.__shopLive = {};
+    (function () { let n = 0; const t = setInterval(() => { if (window.__fbx) { clearInterval(t); __fbx.watch('shop/stock', shopStockApply); __fbx.watch('shop/live', v => { window.__shopLive = v || {}; }); } else if (++n > 60) clearInterval(t); }, 1000); })();
+    setInterval(shopLivePush, 2000);
+    function shopLiveList() { const now = Date.now(); return Object.keys(window.__shopLive || {}).map(k => Object.assign({ id: k }, window.__shopLive[k])).filter(x => x && now - (x.t || 0) < 60000); }
+    function shopLiveGo(pcId, sid) { try { state.shopPc = pcId; if (sid) state.shopId = sid; state.shopSel = null; setViewMode('journal', ''); jSet('jView', 'shop'); const o = document.getElementById('shoplive-ov'); if (o) o.remove(); } catch (e) {} }
+    function shopLiveOpen() {
+      if (!AUTH_S.gm || plView()) return; const old = document.getElementById('shoplive-ov'); if (old) old.remove();
+      const ov = document.createElement('div'); ov.id = 'shoplive-ov'; ov.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center';
+      const L = shopLiveList(), E = escapeHtml;
+      ov.innerHTML = `<div style="background:#fbf3df;color:#3b2a14;border:2px solid #b8893a;border-radius:12px;padding:14px;width:min(460px,94vw);max-height:80vh;overflow:auto;font:13px sans-serif"><div style="display:flex;align-items:center;gap:8px"><b style="font-size:15px;flex:1">지금 상점에 있는 PC (${L.length})</b><button class="btn btn-secondary" style="padding:3px 10px" onclick="document.getElementById('shoplive-ov').remove()">닫기</button></div>
+        ${L.length ? L.map(x => `<div style="display:flex;gap:6px;align-items:center;border-top:1px dashed #c9b07a;padding:6px 0;margin-top:6px"><span style="flex:1;min-width:0"><b>${E(x.n || 'PC')}</b> · ${E(x.s || '')}${x.i ? `<br><small style="opacity:.75">보고 있는 물건: ${E(x.i)}</small>` : ''}</span><button class="btn btn-secondary" style="padding:3px 10px" onclick="shopLiveGo('${E(x.id)}','${E(x.sid || '')}')">보러 가기</button></div>`).join('') : '<div style="padding:18px;text-align:center;opacity:.6">상점에 있는 PC가 없어요.</div>'}</div>`;
+      document.body.appendChild(ov); ov.addEventListener('pointerdown', e => { if (e.target === ov) ov.remove(); });
+    }
+    setInterval(() => { try { const b = document.getElementById('shoplive-btn'); if (!b) return; const n = (AUTH_S.gm && !plView()) ? shopLiveList().length : 0; b.style.display = n ? 'inline-flex' : 'none'; const nn = document.getElementById('shoplive-n'); if (nn) nn.textContent = n; } catch (e) {} }, 1000);
     function qTrashList() { const b = state.boardTex = state.boardTex || {}; b.qTrash = Array.isArray(b.qTrash) ? b.qTrash : []; return b.qTrash; }
     function questSoftDelete(id) {
       const i = state.quests.findIndex(x => x.id === id); if (i < 0) return; const q = state.quests[i];
@@ -6799,8 +6837,12 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       if (sh.off && !(AUTH_S.gm && !plView())) { showToast('지금은 이 상인이 장사를 하지 않아요.'); return; }
       const o = shopRes(it), n = nOver || Math.max(1, Math.floor(Number((document.getElementById('sq-' + iid) || {}).value) || 1)), inf = it.stock == null || it.stock === '';
       if (!inf && n > (Number(it.stock) || 0)) { showToast('재고가 부족해요.'); return; }
-      const total = o.cp * n, d = shopData(by), nm = shopPay(d.money, total);
-      if (!nm) { showToast('돈이 부족해요. (필요: ' + shopPriceTxt(total) + ')'); return; }
+      const total = o.cp * n, d = shopData(by), nm0 = shopPay(d.money, total);
+      if (!nm0) { showToast('돈이 부족해요. (필요: ' + shopPriceTxt(total) + ')'); return; }
+      if (window.__shopBusy) return;
+      const apply = (newStock) => {
+      const nm = shopPay(d.money, total);
+      if (!nm) { if (newStock != null) { try { __fbx.tx('shop/stock/' + sid + '/' + iid, c => (typeof c === 'number' ? c + n : undefined)); } catch (e) {} } showToast('돈이 부족해요. (필요: ' + shopPriceTxt(total) + ')'); return; }
       if (by.shared) {
         const sm = d.money, before = { gp: sm.gp, sp: sm.sp, cp: sm.cp }; sm.gp = nm.gp; sm.sp = nm.sp; sm.cp = nm.cp; shopFundLog(sm, before, '구매: ' + o.name + (n > 1 ? ' ×' + n : '') + ' (' + (sh.name || '상점') + ')');
         const st = state.boardTex.store.items, cnt = Math.min(n, 20);
@@ -6812,9 +6854,21 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
         const have = d.items.find(x => x.shopItem === it.id && !x.equipped);
         if (have) have.qty = (Number(have.qty) || 0) + n; else d.items.push({ name: o.name, qty: n, note: (o.desc || '').slice(0, 200), equipped: false, img: o.img || '', bag: '', cat: '', rar: o.r || '', w: o.w || 0, shopItem: it.id, ref: it.ref || '' });
       }
-      if (!inf) it.stock = (Number(it.stock) || 0) - n;
+      if (!inf) it.stock = newStock != null ? newStock : (Number(it.stock) || 0) - n;
       persistState(); try { sheetSend(); } catch (e) {}
       showToast(o.name + (n > 1 ? ' ×' + n : '') + ' 구매 완료 (−' + shopPriceTxt(total) + ')'); renderShop();
+      };
+      if (!inf && window.__fbx && __fbx.ok()) {
+        window.__shopBusy = true; let late = false; const path = 'shop/stock/' + sid + '/' + iid;
+        const timer = setTimeout(() => { late = true; window.__shopBusy = false; showToast('연결이 불안정해요. 잠시 후 다시 시도해 주세요.'); }, 7000);
+        __fbx.tx(path, cur => { if (late) return; const base = typeof cur === 'number' ? cur : (Number(it.stock) || 0); if (base < n) return; return base - n; }).then(r => {
+          clearTimeout(timer); if (late) return; window.__shopBusy = false;
+          if (!r.committed) { const sv = r.snapshot && r.snapshot.val(); if (typeof sv === 'number') it.stock = sv; showToast('재고가 부족해요.'); renderShop(); return; }
+          apply(r.snapshot.val());
+        }).catch(() => { clearTimeout(timer); if (late) return; window.__shopBusy = false; showToast('재고를 확인하지 못했어요. 잠시 후 다시 시도해 주세요.'); });
+        return;
+      }
+      apply(null);
     }
     function shopSellApply(by, x, k, n, gain, shName, who) {
       const d = shopData(by), have = Number(x.qty) || 1;
@@ -6938,7 +6992,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
         if (cb) { const n = Math.max(1, Math.floor(Number(ov.querySelector('#sc-st').value) || 1)), ids = Array.from(picked); ov.remove(); if (ids.length) cb(ids, n); return; }
         const st = ov.querySelector('#sc-st').value.trim(); s.items = s.items || [];
         picked.forEach(id => s.items.push({ id: 'si_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), ref: id, stock: st === '' ? null : Math.max(0, Math.floor(Number(st) || 0)) }));
-        ov.remove(); persistState(); renderShop(); if (picked.size) showToast(picked.size + '개를 진열했어요.');
+        ov.remove(); persistState(); try { s.items.slice(-picked.size).forEach(x => shopStockPush(s.id, x.id, x.stock)); } catch (e) {} renderShop(); if (picked.size) showToast(picked.size + '개를 진열했어요.');
       };
       draw();
     }
@@ -6972,7 +7026,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
         if (isRef) o2 = { ...it, stock, cpo: g * 100 + sp * 10 + c };
         else { const nm = v('se-n').trim(); if (!nm) { showToast('상품 이름을 적어 주세요.'); return; } o2 = { id: it.id || ('si_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 4)), name: nm, desc: v('se-d').trim(), img: ov._img, cat: '', gp: g, sp, cp: c, stock }; }
         s.items = s.items || []; const k = s.items.findIndex(x => x.id === o2.id); if (k >= 0) s.items[k] = o2; else s.items.push(o2);
-        ov.remove(); persistState(); renderShop();
+        ov.remove(); persistState(); shopStockPush(s.id, o2.id, o2.stock); renderShop();
       };
     }
     // ===== 아이템 상세 (그때그때 불러오기: shop_data/desc/<첫글자>.json) =====
@@ -11207,7 +11261,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     return Promise.all([import(b + 'firebase-app.js'), import(b + 'firebase-auth.js'), import(b + 'firebase-database.js')]).then(function (a) { return { app: a[0], auth: a[1], db: a[2] }; });
   }
   function setSt(s) { F.st = s; ['fbc-st', 'fb-status'].forEach(function (i) { var e = $(i); if (e) e.textContent = s; }); }
-  function stop() { F.unsub.forEach(function (f) { try { f(); } catch (e) {} }); F.unsub = []; F.on = false; F.msgs = []; render(); }
+  function stop() { XS.forEach(function (x) { if (x.u) { try { x.u(); } catch (e) {} x.u = null; } }); F.unsub.forEach(function (f) { try { f(); } catch (e) {} }); F.unsub = []; F.on = false; F.msgs = []; render(); }
   function start() {
     var raw = ls(KEY); if (raw === '-') raw = ''; else if (!raw) raw = DEFAULT_CFG; if (!raw) { var f = $('fbc-fab'); if (f) f.style.display = 'none'; return Promise.resolve(); }
     try { F.cfg = JSON.parse(raw); } catch (e) { return Promise.resolve(); }
@@ -11217,7 +11271,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       return S.auth.signInAnonymously(au).then(function () { F.db = S.db.getDatabase(app); });
     }).then(function () {
       var S = F.api.db, r = S.query(S.ref(F.db, 'rooms/' + F.room + '/chat'), S.limitToLast(200));
-      F.msgs = []; F.on = true; setSt('연결됨');
+      F.msgs = []; F.on = true; setSt('연결됨'); XS.forEach(xAttach1);
       try { if (typeof PRES !== 'undefined' && PRES.id) { var br = S.push(S.ref(F.db, 'rooms/' + F.room + '/chat')); S.onDisconnect(br).set({ ev: 'bye', pid: PRES.id, n: '', t: '', ts: S.serverTimestamp(), gm: 0 }).catch(function () {}); window.__fbcSend && window.__fbcSend({ ev: 'hi', pid: PRES.id, t: '' }); } } catch (e) {}
       F.unsub.push(S.onChildAdded(r, function (s) { var v = s.val() || {}; v.k = s.key; if (v.ev) { try { window.__sellEv && window.__sellEv(v); } catch (e) {} if (v.ev === 'bye' || v.ev === 'hi' || v.ev === 'sellcancel') return; if (v.ev === 'sell' && !isGM()) return; if (v.ev === 'sellres') { var mn = false; try { mn = myPcs().indexOf(v.pc) >= 0; } catch (e) {} if (!mn) return; } } F.msgs.push(v); F.msgs.sort(function (a, b) { return (a.ts || 0) - (b.ts || 0); }); if (!panOpen() && (v.ts || 0) > seenTs()) { F.unread++; if (v.n !== myName() && Date.now() - (v.ts || 0) < 20000) bub(v); } render(); }));
       F.unsub.push(S.onChildRemoved(r, function (s) { F.msgs = F.msgs.filter(function (m) { return m.k !== s.key; }); if (!F.msgs.length) F.sys = []; render(); }));
@@ -11247,6 +11301,16 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     row.sort(function (a, b) { return (b.on ? 1 : 0) - (a.on ? 1 : 0); });
     el.innerHTML = row.map(function (r) { return '<span' + (r.on ? ' class="on"' : '') + '><i style="background:' + r.col + '"></i>' + esc(r.n) + '</span>'; }).join('');
   }
+  var XS = [];
+  function xPath(p) { return 'rooms/' + F.room + '/' + p; }
+  function xAttach1(x) { var S = F.api && F.api.db; if (!S || !F.on) return; if (x.u) { try { x.u(); } catch (e) {} x.u = null; } x.u = S.onValue(S.ref(F.db, xPath(x.p)), function (s) { try { x.cb(s.val()); } catch (e) {} }, function () {}); }
+  window.__fbx = {
+    ok: function () { return !!(F.on && F.api && F.db); },
+    tx: function (p, fn) { var S = F.api.db; return S.runTransaction(S.ref(F.db, xPath(p)), fn); },
+    set: function (p, v) { if (!this.ok()) return Promise.resolve(false); var S = F.api.db, r = S.ref(F.db, xPath(p)); return (v == null ? S.remove(r) : S.set(r, v)).then(function () { return true; }, function () { return false; }); },
+    disc: function (p) { if (!this.ok()) return; var S = F.api.db; try { S.onDisconnect(S.ref(F.db, xPath(p))).remove().catch(function () {}); } catch (e) {} },
+    watch: function (p, cb) { var x = { p: p, cb: cb, u: null }; XS.push(x); if (F.on && F.api) xAttach1(x); }
+  };
   window.__fbcSend = function (o) { if (!F.on || !F.api) return false; var S = F.api.db; S.push(S.ref(F.db, 'rooms/' + F.room + '/chat'), Object.assign({ n: myName().slice(0, 30), ts: S.serverTimestamp(), gm: isGM() ? 1 : 0, c: myColor() }, o)).catch(function () {}); return true; };
   window.__fbcWho = function (ev) {
     (ev || []).forEach(function (e) { F.sys.push({ sys: 1, ts: Date.now(), n: e[1], k: e[0] }); });
