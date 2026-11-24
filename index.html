@@ -7046,13 +7046,15 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       if (!ok) { done('[구매 거절] ' + q.name); showToast('구매 요청을 거절했어요.'); return; }
       if (!it) { done('[구매 거절] ' + q.name + ' (상점에서 사라졌어요)'); showToast('그 물건이 상점에 없어서 요청을 지웠어요.'); return; }
       if (window.__shopBusy) { showToast('다른 구매를 처리 중이에요. 잠시 후 다시 눌러 주세요.'); return; }
+      const prev = { id: state.shopId, pc: state.shopPc }, back = () => { state.shopId = prev.id; state.shopPc = prev.pc; };
       state.shopId = sh.id; state.shopPc = q.pc; const by = shopBuyer();
-      if (q.pc !== '-' && !(by.pc && by.pc.id === q.pc)) { showToast('요청한 PC를 찾지 못했어요.'); return; }
+      if (q.pc !== '-' && !(by.pc && by.pc.id === q.pc)) { back(); showToast('요청한 PC를 찾지 못했어요.'); return; }
       const total = shopRes(it).cp * q.qty, inf = it.stock == null || it.stock === '';
-      if (!inf && q.qty > (Number(it.stock) || 0)) { showToast('재고가 부족해요. 거절하거나 재고를 늘려 주세요.'); return; }
-      if (!shopPay(shopData(by).money, total)) { showToast(q.pcName + '의 돈이 부족해요. (필요: ' + shopPriceTxt(total) + ')'); return; }
-      if (!confirm(q.pcName + ' 의 ' + q.name + (q.qty > 1 ? ' ×' + q.qty : '') + ' 구매를 ' + shopPriceTxt(total) + ' 에 처리할까요?')) return;
+      if (!inf && q.qty > (Number(it.stock) || 0)) { back(); showToast('재고가 부족해요. 거절하거나 재고를 늘려 주세요.'); return; }
+      if (!shopPay(shopData(by).money, total)) { back(); showToast(q.pcName + '의 돈이 부족해요. (필요: ' + shopPriceTxt(total) + ')'); return; }
+      if (!confirm(q.pcName + ' 의 ' + q.name + (q.qty > 1 ? ' ×' + q.qty : '') + ' 구매를 ' + shopPriceTxt(total) + ' 에 처리할까요?')) { back(); return; }
       shopBuy(sh.id, it.id, q.qty, okb => { if (okb) done('[구매 승인] ' + q.name + (q.qty > 1 ? ' ×' + q.qty : '') + ' (−' + shopPriceTxt(total) + ')'); });
+      back(); try { renderShop(); } catch (e) {}
     }
     function shopNpcImport(id) {
       if (!AUTH_S.gm) return; const old = document.getElementById('shop-npc'); if (old) old.remove();
