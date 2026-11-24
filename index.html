@@ -3143,7 +3143,7 @@
         const b = document.getElementById('sellreq-btn'); if (!b) return;
         const gm = !!(AUTH_S && AUTH_S.gm) && !plView(), ids = new Set((((state.boardTex || {}).sellReq) || []).map(q => q.id)), lv = window.__sellLive || {}; Object.keys(lv).forEach(k => { if (Date.now() - lv[k] > 120000) delete lv[k]; else ids.add(k); }); const n = gm ? ids.size : 0;
         if (n !== __sellN) {
-          if (__sellN >= 0 && n > __sellN) { sellBell(); try { showToast('판매 요청이 왔어요.'); } catch (e) {} try { const a = document.activeElement; if (state.viewMode === 'journal' && state.jView === 'shop' && !(a && /INPUT|TEXTAREA|SELECT/.test(a.tagName))) renderShop(); } catch (e) {} }
+          if (__sellN >= 0 && n > __sellN) { sellBell(); try { showToast('요청이 왔어요.'); } catch (e) {} try { const a = document.activeElement; if (state.viewMode === 'journal' && state.jView === 'shop' && !(a && /INPUT|TEXTAREA|SELECT/.test(a.tagName))) renderShop(); } catch (e) {} }
           __sellN = n;
         }
         b.style.display = n ? 'inline-flex' : 'none'; const nn = document.getElementById('sellreq-n'); if (nn) nn.textContent = n;
@@ -5164,7 +5164,7 @@
       const apply = base => { base = base || { maps: [], pins: [] }; base.realmTime = Object.assign({}, base.realmTime || {}, { year: y, month: mo, day: Math.max(1, Math.min(30, d)), timeSlot: p[3] || (base.realmTime || {}).timeSlot || 'Morning', festival: p[4] || '' }); mapSave(base, true); try { if (mapReady) mapInit(base); } catch (e) {} showToast('인게임 날짜를 Roll20과 맞췄어요.'); };
       srvMapLoad(dd => { const ok = dd && ((dd.maps && dd.maps.length) || (dd.pins && dd.pins.length) || dd.imageData); const loc = mapLocal(); if (ok) apply(dd); else if (loc) apply(loc); else showToast('지도 데이터를 불러오지 못해서 날짜를 바꾸지 못했어요.'); }, () => { const loc = mapLocal(); if (loc) apply(loc); else showToast('지도 데이터를 불러오지 못해서 날짜를 바꾸지 못했어요.'); });
     }
-    (function () { try { const m = String(location.hash || '').match(/^#r20date=(.+)$/); if (!m) return; const key = decodeURIComponent(m[1]); let n = 0; const t = setInterval(() => { if (++n > 40) { clearInterval(t); return; } if (!(AUTH_S.gm && !plView())) return; clearInterval(t); try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} r20ApplyDate(key); }, 500); } catch (e) {} })();
+    (function () { try { const m = String(location.hash || '').match(/^#r20date=(.+)$/); if (!m) return; const key = decodeURIComponent(m[1]); let n = 0; const t = setInterval(() => { if (++n > 360) { clearInterval(t); return; } if (!(AUTH_S.gm && !plView())) return; clearInterval(t); try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} r20ApplyDate(key); }, 500); } catch (e) {} })();
     setInterval(() => { try { const b = document.getElementById('r20-btn'); if (b) b.style.display = (AUTH_S.gm && !plView()) ? 'inline-flex' : 'none'; } catch (e) {} }, 900);
     // ---- 상점 재고 (Firebase 실시간) / 상점 현황 ----
     function shopStockPush(sid, iid, stock) { try { if (AUTH_S.gm && !plView() && window.__fbx && __fbx.ok()) __fbx.set('shop/stock/' + sid + '/' + iid, (stock == null || stock === '') ? null : Number(stock)); } catch (e) {} }
@@ -6859,7 +6859,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       const chip = c => { if (!gmv && c[0] !== 'all' && !cnt[c[0]]) return ''; const ic = c[0] !== 'all' ? shopCicGet(c[0], ed ? (tgt === 'all' ? '' : tgt) : (by.shared || !by.pc ? '' : by.pc.id)) : ''; const on = cat === c[0];
         return `<button class="bg-chip${on ? ' on' : ''}${ic ? ' ic' : ''}${ed && c[0] !== 'all' ? ' ed' : ''}" title="${c[1]}${ed && c[0] !== 'all' ? ' (눌러서 아이콘 이미지 · 주소 넣기)' : ''}" onclick="${ed && c[0] !== 'all' ? `shopCicAsk('${c[0]}')` : `state.shopCat='${c[0]}';renderShop()`}">${ic ? `<img src="${escapeHtml(ic)}" alt="${c[1]}" draggable="false">` : c[1]}</button>`; };
       h += `<div class="bg-bar"><input type="search" id="shop-q" placeholder="검색" value="${escapeHtml(state.shopQ || '')}" oninput="state.shopQ=this.value;shopFilterKeep()"><span class="bg-chips">${SHOP_CATS.map(chip).join('')}${gmv ? `<button class="bg-chip${ed ? ' on' : ''}" onclick="state.shopIcEdit=!state.shopIcEdit;renderShop()" title="분류 아이콘 설정 (GM에게만 보여요)">${ed ? '아이콘 설정 끝' : '분류 아이콘'}</button>${ed ? `<select onchange="state.shopIcTgt=this.value;renderShop()" aria-label="적용 대상" style="padding:3px 6px;border-radius:8px"><option value="all"${tgt === 'all' ? ' selected' : ''}>적용 대상: 기본(모두)</option>${by.pcs.map(p => `<option value="${escapeHtml(p.id)}"${tgt === p.id ? ' selected' : ''}>${escapeHtml(p.name || 'PC')} 전용</option>`).join('')}</select>` : ''}` : ''}</span>
-                ${gm ? `<span style="flex:1"></span><button class="bg-chip" onclick="shopToggle('${sh.id}')" title="비활성 상인은 PC에게 보이지 않고, 물건을 사지도 팔지도 못해요">${sh.off ? '상인 활성화' : '상인 비활성화'}</button><button class="bg-chip" onclick="shopRename('${sh.id}')">상점 이름·설명</button><button class="bg-chip" onclick="shopArt('${sh.id}')">상점 그림</button><button class="bg-chip" onclick="shopNpcImport('${sh.id}')" title="도감의 NPC를 상점으로 불러오기">NPC 불러오기</button><button class="bg-chip" onclick="shopBgDlg('${sh.id}')" title="상점 배경 이미지 (기본 / 상인별)">상점 배경</button><button class="bg-chip" onclick="shopCatPick('${sh.id}')">+ 카탈로그에서 추가</button><button class="bg-chip" onclick="shopItemEdit('${sh.id}','')">+ 직접 만들기</button><button class="bg-chip" onclick="shopDel('${sh.id}')">상점 삭제</button>` : ''}</div>`;
+                ${gm ? `<span style="flex:1"></span><button class="bg-chip" onclick="shopToggle('${sh.id}')" title="비활성 상인은 PC에게 보이지 않고, 물건을 사지도 팔지도 못해요">${sh.off ? '상인 활성화' : '상인 비활성화'}</button><button class="bg-chip" onclick="shopRename('${sh.id}')">상점 이름·설명</button><button class="bg-chip" onclick="shopArt('${sh.id}')">상점 그림</button><button class="bg-chip" onclick="shopNpcImport('${sh.id}')" title="도감의 NPC를 상점으로 불러오기">NPC 불러오기</button><button class="bg-chip" onclick="shopApprToggle('${sh.id}')" title="켜면 PL의 구매가 GM 승인 뒤에 처리돼요">구매 승인제 ${sh.appr ? '켜짐' : '꺼짐'}</button><button class="bg-chip" onclick="shopBgDlg('${sh.id}')" title="상점 배경 이미지 (기본 / 상인별)">상점 배경</button><button class="bg-chip" onclick="shopCatPick('${sh.id}')">+ 카탈로그에서 추가</button><button class="bg-chip" onclick="shopItemEdit('${sh.id}','')">+ 직접 만들기</button><button class="bg-chip" onclick="shopDel('${sh.id}')">상점 삭제</button>` : ''}</div>`;
       const ok = o => (cat === 'all' || o.c === cat) && (!q || o.name.toLowerCase().includes(q));
       const shopRows = (sh.items || []).map(it => ({ it, o: shopRes(it) })).filter(r => ok(r.o));
       const bagRows = d ? d.items.map((x, i) => ({ x, i, o: { name: x.name || '?', img: x.img || '', r: x.rar || '', cp: 0, c: (shopSellRes(x) || {}).c || x.cat || 'gear' } })).filter(r => ok(r.o)) : [];
@@ -6895,6 +6895,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       if (!inf && n > (Number(it.stock) || 0)) { showToast('재고가 부족해요.'); return; }
       const total = o.cp * n, d = shopData(by), nm0 = shopPay(d.money, total);
       if (!nm0) { showToast('돈이 부족해요. (필요: ' + shopPriceTxt(total) + ')'); return; }
+      if (sh.appr && !(AUTH_S.gm && !plView())) { shopBuyReq(sh, it, by, o, n, total); return; }
       if (window.__shopBusy) return;
       const apply = (newStock) => {
       const nm = shopPay(d.money, total);
@@ -6987,11 +6988,12 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
     }
     function shopReqHtml() {
       const b = state.boardTex, L = Array.isArray(b.sellReq) ? b.sellReq : []; if (!L.length || !AUTH_S.gm || plView()) return '';
-      return `<div class="bg-req" style="border:1.5px solid #b99a5b;background:rgba(185,154,91,.12);border-radius:10px;padding:8px 10px;margin:6px 0;font-size:13px"><b>판매 요청 ${L.length}건</b>` + L.map(q => `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><span>${escapeHtml(q.pcName || 'PC')} · ${escapeHtml(q.name)}${q.qty > 1 ? ' ×' + q.qty : ''} <small style="opacity:.7">(${escapeHtml(q.shopName || '')})</small></span><span style="flex:1"></span><label style="display:flex;gap:4px;align-items:center">대금 <input type="number" min="0" step="any" id="sr-p-${q.id}" value="${(q.price / 100).toFixed(2).replace(/\.?0+$/, '')}" style="width:80px"> gp</label><button class="bg-btn" onclick="shopSellApprove('${q.id}')">승인</button><button class="bg-btn" onclick="shopSellReject('${q.id}')">거절</button></div>`).join('') + '</div>';
+      return `<div class="bg-req" style="border:1.5px solid #b99a5b;background:rgba(185,154,91,.12);border-radius:10px;padding:8px 10px;margin:6px 0;font-size:13px"><b>요청 ${L.length}건</b>` + L.map(q => `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><span>${q.kind === 'buy' ? '[구매] ' : '[판매] '}${escapeHtml(q.pcName || 'PC')} · ${escapeHtml(q.name)}${q.qty > 1 ? ' ×' + q.qty : ''} <small style="opacity:.7">(${escapeHtml(q.shopName || '')})</small></span><span style="flex:1"></span>${q.kind === 'buy' ? `<span>${shopPriceTxt(q.price)}</span>` : `<label style="display:flex;gap:4px;align-items:center">대금 <input type="number" min="0" step="any" id="sr-p-${q.id}" value="${(q.price / 100).toFixed(2).replace(/\.?0+$/, '')}" style="width:80px"> gp</label>`}<button class="bg-btn" onclick="shopSellApprove('${q.id}')">승인</button><button class="bg-btn" onclick="shopSellReject('${q.id}')">거절</button></div>`).join('') + '</div>';
     }
     function shopSellDrop(id) { const b = state.boardTex; b.sellReq = (b.sellReq || []).filter(q => q.id !== id); }
     function shopSellApprove(id) {
       if (!AUTH_S.gm || plView()) return; const b = state.boardTex, q = (b.sellReq || []).find(r => r.id === id); if (!q) return;
+      if (q.kind === 'buy') return shopBuyDecide(id, true);
       const gp = parseFloat((document.getElementById('sr-p-' + id) || {}).value), total = isNaN(gp) ? q.price : Math.max(0, Math.round(gp * 100));
       let by, k = -1;
       if (q.pc === '-') { by = { shared: true, pcs: [], pc: null }; const d = shopData(by); k = d.items.findIndex(x => x._sid && x._sid === q.sid); }
@@ -7006,12 +7008,41 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
     }
     function shopSellReject(id) {
       if (!AUTH_S.gm || plView()) return; const b = state.boardTex, q = (b.sellReq || []).find(r => r.id === id); if (!q) return;
+      if (q.kind === 'buy') return shopBuyDecide(id, false);
       if (q.pc !== '-') { const pc = (b.pcs || []).find(p => p.id === q.pc); if (pc) { const d = shopData({ shared: false, pcs: [], pc }), x = d.items.find(i => i.sellPend === id); if (x) delete x.sellPend; } }
       shopSellDrop(id); try { delete (window.__sellLive || {})[id]; window.__fbcSend && window.__fbcSend({ ev: 'sellres', rid: id, pc: q.pc, ok: 0, t: '[판매 거절] ' + q.name }); } catch (e) {}
       persistState(); try { sheetSend(); } catch (e) {} showToast('판매 요청을 거절했어요.'); renderShop();
     }
     function shopToggle(id) { const s = shopsList().find(x => x.id === id); if (!s || !AUTH_S.gm || plView()) return; s.off = !s.off; persistState(); showToast(s.off ? '상인을 비활성화했어요. 나에게만 보여요.' : '상인을 활성화했어요.'); renderShop(); }
         function shopAdd() { const n = prompt('상점 이름', ''); if (n === null || !n.trim()) return; const s = { id: 'sh_' + Date.now().toString(36), name: n.trim(), desc: '', items: [] }; shopsList().push(s); state.shopId = s.id; persistState(); renderShop(); }
+    function shopApprToggle(id) {
+      if (!AUTH_S.gm || plView()) return; const s = shopsList().find(x => x.id === id); if (!s) return;
+      s.appr = !s.appr; persistState(); renderShop(); showToast(s.appr ? '이 상점은 구매를 GM이 승인해야 처리돼요.' : '이 상점은 구매가 바로 처리돼요.');
+    }
+    function shopBuyReq(sh, it, by, o, n, total) {
+      const b = state.boardTex; b.sellReq = Array.isArray(b.sellReq) ? b.sellReq : [];
+      const pid = by.shared ? '-' : by.pc.id;
+      if (b.sellReq.some(r => r.kind === 'buy' && r.pc === pid && r.item === it.id)) { showToast('이미 구매 요청 중이에요.'); return; }
+      const id = 'sr_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+      b.sellReq.push({ id, kind: 'buy', pc: pid, pcName: by.shared ? '공용 가방' : (by.pc.name || 'PC'), shop: sh.id, shopName: sh.name || '', item: it.id, name: o.name, qty: n, price: total, t: Date.now() });
+      try { window.__fbcSend && window.__fbcSend({ ev: 'sell', rid: id, t: '[구매 요청] ' + o.name + (n > 1 ? ' ×' + n : '') + ' · ' + shopPriceTxt(total) + ' (' + (sh.name || '') + ')' }); } catch (e) {}
+      persistState(); showToast('구매 요청을 보냈어요. GM이 확인하면 처리돼요.'); renderShop();
+    }
+    function shopBuyDecide(id, ok) {
+      if (!AUTH_S.gm || plView()) return; const b = state.boardTex, q = (b.sellReq || []).find(r => r.id === id); if (!q) return;
+      const done = msg => { shopSellDrop(id); try { delete (window.__sellLive || {})[id]; window.__fbcSend && window.__fbcSend({ ev: 'sellres', rid: id, pc: q.pc, ok: ok ? 1 : 0, t: msg }); } catch (e) {} persistState(); renderShop(); };
+      const sh = shopsList().find(s => s.id === q.shop), it = sh && (sh.items || []).find(x => x.id === q.item);
+      if (!ok) { done('[구매 거절] ' + q.name); showToast('구매 요청을 거절했어요.'); return; }
+      if (!it) { done('[구매 거절] ' + q.name + ' (상점에서 사라졌어요)'); showToast('그 물건이 상점에 없어서 요청을 지웠어요.'); return; }
+      if (window.__shopBusy) { showToast('다른 구매를 처리 중이에요. 잠시 후 다시 눌러 주세요.'); return; }
+      state.shopId = sh.id; state.shopPc = q.pc; const by = shopBuyer();
+      if (q.pc !== '-' && !(by.pc && by.pc.id === q.pc)) { showToast('요청한 PC를 찾지 못했어요.'); return; }
+      const total = shopRes(it).cp * q.qty, inf = it.stock == null || it.stock === '';
+      if (!inf && q.qty > (Number(it.stock) || 0)) { showToast('재고가 부족해요. 거절하거나 재고를 늘려 주세요.'); return; }
+      if (!shopPay(shopData(by).money, total)) { showToast(q.pcName + '의 돈이 부족해요. (필요: ' + shopPriceTxt(total) + ')'); return; }
+      if (!confirm(q.pcName + ' 의 ' + q.name + (q.qty > 1 ? ' ×' + q.qty : '') + ' 구매를 ' + shopPriceTxt(total) + ' 에 처리할까요?')) return;
+      shopBuy(sh.id, it.id, q.qty); done('[구매 승인] ' + q.name + (q.qty > 1 ? ' ×' + q.qty : '') + ' (−' + shopPriceTxt(total) + ')');
+    }
     function shopNpcImport(id) {
       if (!AUTH_S.gm) return; const old = document.getElementById('shop-npc'); if (old) old.remove();
       const L = (state.globalNpcs || []).filter(n => n && !n.hidden), E = escapeHtml;
@@ -8278,7 +8309,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
         fullPadBottom = pt + pb;
       }
       const tags = (q.tags || []).map(t => '#' + t).join(' ');
-      const meta = [q.folder, q.sessionNum ? q.sessionNum + '회차' : '', q.gameDate].filter(Boolean).join(' · ');
+      const meta = [q.folder, q.sessionNum ? q.sessionNum + '회차' : '', q.gameDate ? (q.gameDateEnd ? q.gameDate + ' ~ ' + q.gameDateEnd : q.gameDate) : ''].filter(Boolean).join(' · ');
       el.innerHTML = `
         <span class="qn-pin"></span>
         <div class="qn-top">
@@ -9592,15 +9623,15 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
     // ---- v6: 퀘스트 게임 내 날짜 고르기 (지도의 포가튼 렐름 달력과 같은 항목) ----
     const QDP_MONTHS = [['Hammer', 'Hammer (Deepwinter)'], ['Alturiak', 'Alturiak (The Claw of Winter)'], ['Ches', 'Ches (The Claw of Sunsets)'], ['Tarsakh', 'Tarsakh (The Claw of Storms)'], ['Mirtul', 'Mirtul (The Melting)'], ['Kythorn', 'Kythorn (The Time of Flowers)'], ['Flamerule', 'Flamerule (Summertide)'], ['Eleasias', 'Eleasias (Highsun)'], ['Eleint', 'Eleint (The Fading)'], ['Marpenoth', 'Marpenoth (Leaffall)'], ['Uktar', 'Uktar (The Rotting)'], ['Nightal', 'Nightal (The Drawing Down)']];
     const QDP_SLOTS = ['새벽', '아침', '정오', '오후', '어스름', '일몰', '저녁', '한밤중', '밤의 끄트머리', '어둠달', '밤'];
-    function qdDatePick(qid) {
-      const q = (state.quests || []).find(x => x.id === qid); if (!q) return; const old = document.getElementById('qd-datepick'); if (old) old.remove();
+    function qdDatePick(qid, fld) {
+      const q = (state.quests || []).find(x => x.id === qid); if (!q) return; const F = fld || 'gameDate'; const old = document.getElementById('qd-datepick'); if (old) old.remove();
       let y = 1492, mo = 'Hammer', d = 1, fe = '', ts = '';
       try { const rt = ((typeof mapData !== 'undefined' && mapData) || mapLocal() || {}).realmTime; if (rt) { y = Number(rt.year) || y; mo = rt.month || mo; d = Number(rt.day) || d; fe = rt.festival || ''; } } catch (e) {}
-      const m = String(q.gameDate || '').match(/(\d+)\s*DR\s*,?\s*([A-Za-z]+)\s+(\d+)(?:\s*\[([^\]]*)\])?(?:\s*·\s*(.+))?/); if (m) { y = Number(m[1]); mo = m[2]; d = Number(m[3]) || 1; fe = m[4] || ''; ts = (m[5] || '').trim(); } else if (q.gameDate) { fe = ''; }
+      const m = String(q[F] || '').match(/(\d+)\s*DR\s*,?\s*([A-Za-z]+)\s+(\d+)(?:\s*\[([^\]]*)\])?(?:\s*·\s*(.+))?/); if (m) { y = Number(m[1]); mo = m[2]; d = Number(m[3]) || 1; fe = m[4] || ''; ts = (m[5] || '').trim(); } else if (q[F]) { fe = ''; }
       const ov = document.createElement('div'); ov.id = 'qd-datepick';
-      ov.innerHTML = `<div class="qdp"><h4>게임 내 날짜 (포가튼 렐름 달력)</h4><label>연도 (Year DR)</label><input type="number" id="qdp-y" value="${y}"><label>월 (Harptos Month)</label><select id="qdp-m">${QDP_MONTHS.map(x => `<option value="${x[0]}"${x[0] === mo ? ' selected' : ''}>${x[1]}</option>`).join('')}</select><label>일 (1 ~ 30)</label><input type="number" id="qdp-d" min="1" max="30" value="${d}"><label>시간대</label><select id="qdp-t"><option value="">(없음)</option>${QDP_SLOTS.map(x => `<option${x === ts ? ' selected' : ''}>${x}</option>`).join('')}</select><label>그 날의 이름 · 축제 (선택)</label><input type="text" id="qdp-f" value="${escapeHtml(fe)}" placeholder="예: 대축제 기간"><div class="qdr"><button type="button" id="qdp-c">지우기</button><button type="button" id="qdp-x">취소</button><button type="button" class="pri" id="qdp-ok">적용</button></div></div>`;
+      ov.innerHTML = `<div class="qdp"><h4>${F === 'gameDateEnd' ? '종료 날짜' : '시작 날짜'} (포가튼 렐름 달력)</h4><label>연도 (Year DR)</label><input type="number" id="qdp-y" value="${y}"><label>월 (Harptos Month)</label><select id="qdp-m">${QDP_MONTHS.map(x => `<option value="${x[0]}"${x[0] === mo ? ' selected' : ''}>${x[1]}</option>`).join('')}</select><label>일 (1 ~ 30)</label><input type="number" id="qdp-d" min="1" max="30" value="${d}"><label>시간대</label><select id="qdp-t"><option value="">(없음)</option>${QDP_SLOTS.map(x => `<option${x === ts ? ' selected' : ''}>${x}</option>`).join('')}</select><label>그 날의 이름 · 축제 (선택)</label><input type="text" id="qdp-f" value="${escapeHtml(fe)}" placeholder="예: 대축제 기간"><div class="qdr"><button type="button" id="qdp-c">지우기</button><button type="button" id="qdp-x">취소</button><button type="button" class="pri" id="qdp-ok">적용</button></div></div>`;
       document.body.appendChild(ov); ov.addEventListener('pointerdown', e => { if (e.target === ov) ov.remove(); });
-      const fin = v => { q.gameDate = v; persistState(); ov.remove(); try { renderQuestDetail(); } catch (e) {} try { renderQuests(); } catch (e) {} };
+      const fin = v => { q[F] = v; persistState(); ov.remove(); try { renderQuestDetail(); } catch (e) {} try { renderQuests(); } catch (e) {} };
       document.getElementById('qdp-x').onclick = () => ov.remove(); document.getElementById('qdp-c').onclick = () => fin('');
       document.getElementById('qdp-ok').onclick = () => { const yy = parseInt(document.getElementById('qdp-y').value) || 1492, dd = Math.max(1, Math.min(30, parseInt(document.getElementById('qdp-d').value) || 1)), f = document.getElementById('qdp-f').value.trim(), t = document.getElementById('qdp-t').value; fin(`${yy} DR, ${document.getElementById('qdp-m').value} ${dd}${f ? ` [${f}]` : ''}${t ? ' · ' + t : ''}`); };
     }
@@ -9951,7 +9982,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       const canDrag = state.sortMode === 'custom';
       const tags = (Array.isArray(q.tags) ? q.tags : []).slice(0, 4).map(t => `<span class="qt-tag">#${escapeHtml(t)}</span>`).join('');
       const npcLine = (Array.isArray(q.npcIds) ? q.npcIds : []).map(npcLike).filter(Boolean).map(n => `<img src="${escapeHtml(n.image || IC_NPC)}" alt="" title="${escapeHtml(n.name || 'NPC')}" draggable="false" onerror="this.src='${IC_NPC}'" />`).join('');
-      const meta = [q.gameDate, (q.sessionNum !== undefined && q.sessionNum !== null && q.sessionNum !== '') ? q.sessionNum + '회차' : '', q.folder].filter(Boolean).join(' · ');
+      const meta = [q.gameDate ? (q.gameDateEnd ? q.gameDate + ' ~ ' + q.gameDateEnd : q.gameDate) : '', (q.sessionNum !== undefined && q.sessionNum !== null && q.sessionNum !== '') ? q.sessionNum + '회차' : '', q.folder].filter(Boolean).join(' · ');
       paperDimsKick();
       const pp = qPaperOf(q), pd = pp.pad, ar = pp.ar, tw = Math.max(0.6, Math.min(1.9, Number(q.tw) || Number(q.tscale) || 1)), th = Math.max(0.6, Math.min(1.9, Number(q.th) || Number(q.tscale) || 1)), W = Math.round(236 * Math.sqrt(Math.min(ar, 2.2)) * tw * (ar > 2.2 ? 1.25 : 1));
       const shp = (!pp.full && q.tshape && NOTE_SHAPE[q.tshape]) ? NOTE_SHAPE[q.tshape] : null, pdd = shp ? shp.pad.map(v => v + 0.02) : pd;
@@ -9996,7 +10027,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
             <div class="quest-header">
               <div class="quest-header-left">
                 ${folderImg ? `<img class="folder-ico-only" src="${escapeHtml(folderImg)}" alt="" title="${escapeHtml(q.folder)}" />` : ''}
-                ${q.gameDate ? `<span class="badge-day">${escapeHtml(q.gameDate)}</span>` : ''}
+                ${q.gameDate ? `<span class="badge-day">${escapeHtml((q.gameDateEnd ? q.gameDate + ' ~ ' + q.gameDateEnd : q.gameDate))}</span>` : ''}
                 <span class="quest-title-display">${escapeHtml(q.title || '제목 없음')}</span>
               </div>
               <div class="quest-header-right"></div>
@@ -10015,8 +10046,10 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
               <div class="field-group" id="qd-logs">${qdLogsHtml(q)}</div>
 
               <div class="field-group">
-                <input type="text" value="${escapeHtml(q.gameDate || '')}" placeholder="게임 내 날짜를 입력하세요 (눌러서 달력 열기)" onclick="qdDatePick('${q.id}')"
+                <input type="text" value="${escapeHtml(q.gameDate || '')}" placeholder="시작 날짜 (눌러서 달력 열기)" onclick="qdDatePick('${q.id}')"
                        oninput="state.quests.find(item => item.id === '${q.id}').gameDate = this.value; persistState();" />
+                <input type="text" style="margin-top:6px" value="${escapeHtml(q.gameDateEnd || '')}" placeholder="종료 날짜 (선택 · 눌러서 달력 열기)" onclick="qdDatePick('${q.id}', 'gameDateEnd')"
+                       oninput="state.quests.find(item => item.id === '${q.id}').gameDateEnd = this.value; persistState();" />
               </div>
 
               <div class="field-group">
@@ -10078,7 +10111,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
     function renderQuestView() {
       const m = document.getElementById('quest-view'), q = qvId && state.quests.find(x => x.id === qvId);
       if (!q) { m.classList.remove('open'); return; }
-      const meta = [q.gameDate, (q.sessionNum !== undefined && q.sessionNum !== null && q.sessionNum !== '') ? q.sessionNum + '회차' : '', q.folder].filter(Boolean).join(' · ');
+      const meta = [q.gameDate ? (q.gameDateEnd ? q.gameDate + ' ~ ' + q.gameDateEnd : q.gameDate) : '', (q.sessionNum !== undefined && q.sessionNum !== null && q.sessionNum !== '') ? q.sessionNum + '회차' : '', q.folder].filter(Boolean).join(' · ');
       const npcs = (Array.isArray(q.npcIds) ? q.npcIds : []).map(npcLike).filter(Boolean).map(n => `<img src="${escapeHtml(n.image || IC_NPC)}" alt="" title="${escapeHtml(n.name || 'NPC')}" onerror="this.src='${IC_NPC}'">`).join('');
       const tags = (Array.isArray(q.tags) ? q.tags : []).map(t => `<span>#${escapeHtml(t)}</span>`).join('');
       const done = q.status === 'completed';
