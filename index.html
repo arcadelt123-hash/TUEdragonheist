@@ -2116,6 +2116,7 @@
     .fan-row .fan-c { position: absolute; left: 50%; top: 24px; width: var(--cw); margin: 0; transform-origin: 50% 90%; transition: transform .18s cubic-bezier(.2,.8,.3,1), opacity .18s; cursor: pointer; filter: drop-shadow(0 8px 14px rgba(0,0,0,.4)); }
     .fan-row .fan-c.sel { filter: drop-shadow(0 12px 22px rgba(0,0,0,.5)); }
     .fan-row .fan-c:hover { filter: drop-shadow(0 12px 20px rgba(0,0,0,.55)) brightness(1.05); }
+    .fan-row .fan-c:hover { z-index: 300 !important; }
     .fan-row .fan-c .pc-card { pointer-events: none; }
     .fan-arr { position: absolute; top: calc(var(--cw) * .62); z-index: 300; border: 0; background: transparent; color: #f97316; font-size: 3rem; line-height: 1; cursor: pointer; text-shadow: 0 2px 6px rgba(0,0,0,.45); padding: 0 6px; display: none; pointer-events: auto; }
     .fan-row.act .fan-arr { display: block; }
@@ -8690,7 +8691,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       const tkP = pccNpc ? [] : tokList().filter(t => t.owner === p.id && t.kind !== 'pl');
       const tokBox = pccNpc ? '' : `<div class="pcc-memo" style="display:block"><b>로그 토큰 (이 PC)</b>${tkP.length ? tkP.map(t => tokRowHtml(t, 'pcc')).join('') : '<div style="font-size:.76rem;opacity:.6;margin-top:4px">등록된 토큰이 없어요.</div>'}<button class="btn btn-secondary" style="margin-top:6px;padding:3px 10px;font-size:.78rem" onclick="tokAdd('${escapeHtml(p.id)}','pc')">＋ 토큰 추가</button><div style="font-size:.7rem;opacity:.65;margin-top:4px">두 번째 칸에 다른 모습(예: 변신 후)을 넣으면 로그에서 토큰을 눌렀을 때 바뀌어요. 이후 올리는 로그부터 적용돼요.</div></div>`;
       const memo = pccNpc ? '' : `<div class="pcc-memo"><b>메모 기본 설정</b><select onchange="pcCfgSet('font',this.value)">${fonts}</select><span><input type="color" title="글자색" value="${p.fc || '#2d2410'}" oninput="pcCfgSet('fc',this.value)"><input type="number" title="크기" min="10" max="48" value="${Number(p.fs) || 16}" oninput="pcCfgSet('fs',Number(this.value))"></span></div>`;
-      box.innerHTML = `<div style="display:flex;align-items:center;gap:8px;"><b style="flex:1"></b>${pccNpc ? `<select onchange="npcStSet('${p.id}',this.value)" style="font-size:.78rem"><option value=""${!p.st ? ' selected' : ''}>생존</option><option value="dead"${p.st === 'dead' ? ' selected' : ''}>† 사망</option><option value="missing"${p.st === 'missing' ? ' selected' : ''}>? 실종</option><option value="gray"${p.st === 'gray' ? ' selected' : ''}>회색조</option><option value="foe"${p.st === 'foe' ? ' selected' : ''}>적대 (빨간 테두리)</option></select><button class="btn btn-danger" style="padding:3px 10px;font-size:.78rem" onclick="npcDelFan('${p.id}')">삭제</button>` : ''}${!pccNpc && AUTH_S.gm && !plView() ? `<button class="btn btn-secondary" style="padding:3px 10px;font-size:.78rem" onclick="pcActiveToggle('${escapeHtml(p.id)}');pcCfgRender()">${p.off ? '활성화하기' : '비활성화하기'}</button>` : ''}${pccNpc ? '' : `<button class="btn btn-danger btn-icon-only" title="PC 삭제 (두 번 눌러 삭제)" aria-label="PC 삭제" onclick="armIcon(this,()=>{const k=pcIdx(pccId);if(k>=0)pcDel(k);closePcCfg();})">${ICONS.del}</button>`}<button class="btn btn-secondary" style="padding:3px 10px;" onclick="closePcCfg()" aria-label="닫기">✕</button></div>
+      box.innerHTML = `<div style="display:flex;align-items:center;gap:8px;"><b style="flex:1"></b>${pccNpc ? `<select onchange="npcStSet('${p.id}',this.value)" style="font-size:.78rem"><option value=""${!p.st ? ' selected' : ''}>생존</option><option value="dead"${p.st === 'dead' ? ' selected' : ''}>† 사망</option><option value="missing"${p.st === 'missing' ? ' selected' : ''}>? 실종</option><option value="gray"${p.st === 'gray' ? ' selected' : ''}>회색조</option><option value="foe"${p.st === 'foe' ? ' selected' : ''}>적대 (빨간 테두리)</option></select><button class="btn btn-danger" style="padding:3px 10px;font-size:.78rem" onclick="npcDelFan('${p.id}')">삭제</button>` : ''}${!pccNpc && AUTH_S.gm && !plView() ? `<button class="btn btn-secondary" style="padding:3px 10px;font-size:.78rem" onclick="pcActiveToggle('${escapeHtml(p.id)}');pcCfgRender()">${p.off ? '활성화하기' : '비활성화하기'}</button>` : ''}${!pccNpc && AUTH_S.gm && !plView() ? `<button class="btn btn-secondary" style="padding:3px 10px;font-size:.78rem" title="이 PC를 NPC로 바꿔요 (시트는 보관돼요)" onclick="pcToNpc('${escapeHtml(p.id)}')">NPC로 변환</button>` : ''}${pccNpc ? '' : `<button class="btn btn-danger btn-icon-only" title="PC 삭제 (두 번 눌러 삭제)" aria-label="PC 삭제" onclick="armIcon(this,()=>{const k=pcIdx(pccId);if(k>=0)pcDel(k);closePcCfg();})">${ICONS.del}</button>`}<button class="btn btn-secondary" style="padding:3px 10px;" onclick="closePcCfg()" aria-label="닫기">✕</button></div>
         <div class="pcc-cols">
           <div class="pcc-c pcc-c1"><div class="pcc-prev" id="pcc-prev"></div>
             <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><button class="btn btn-secondary" onclick="pcUpOpen()" title="이미지 올리기" aria-label="이미지 올리기" style="display:inline-flex;align-items:center;padding:4px 10px;"><img src="${IC_WICKER}" alt="" style="height:30px;width:auto;"></button>
@@ -9243,10 +9244,26 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
     function npcImgClear(id) { const n = state.globalNpcs.find(x => x.id === id); if (n) { n.image = ''; persistState(); npcRefresh(); } }
     function npcRemoveCore(id) { state.globalNpcs = state.globalNpcs.filter(n => n.id !== id); state.quests.forEach(q => { if (q.npcIds) q.npcIds = q.npcIds.filter(x => x !== id); }); }
     function npcDelNow(id) { npcRemoveCore(id); persistState(); closeNpcModal(); }
+    function pcToNpc(id) {
+      if (!AUTH_S.gm || plView()) return; const a = state.boardTex.pcs || [], i = a.findIndex(x => x.id === id); if (i < 0) return; const p = a[i];
+      if (!confirm((p.name || 'PC') + ' 을(를) NPC로 변환할까요?\n\n- PL 연결은 해제돼요.\n- 능력치·소지품 등 시트는 NPC에 보관돼요. 나중에 NPC를 PC로 변환하면 되살아나요.')) return;
+      const nid = 'gnpc_' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36), old = JSON.parse(JSON.stringify(p));
+      const npc = { id: nid, name: p.name || 'NPC', image: p.img || (p.sheet && p.sheet.artUrl) || '', memo: p.extra || '', pcOld: old };
+      state.globalNpcs.unshift(npc);
+      const card = Object.assign({}, old); ['sheet', 'pl', 'aliases', 'off', 'st'].forEach(k => delete card[k]); card.id = nid; card.cardType = card.cardType || 'classic';
+      (state.boardTex.npcCards = state.boardTex.npcCards || []).push(card);
+      state.quests.forEach(q => { if (q.npcIds) q.npcIds = q.npcIds.map(x => x === 'pc:' + id ? nid : x); });
+      (state.boardTex.npcs || []).forEach(c => { if (c.npcId === 'pc:' + id) c.npcId = nid; });
+      try { jBoardData().items.forEach(c => { if (c.pc === id) c.pc = ''; }); } catch (e) {}
+      a.splice(i, 1);
+      try { closePcCfg(); } catch (e) {} try { renderPcList(); } catch (e) {} try { renderNpcCodex(); } catch (e) {}
+      persistState(); try { sheetSend(); } catch (e) {} showToast('NPC로 바꿨어요.');
+    }
     function npcToPc(id) {
       const n = state.globalNpcs.find(x => x.id === id); if (!n) return;
-      const a = state.boardTex.pcs = state.boardTex.pcs || [], pid = 'pc_' + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36);
-      a.push({ id: pid, name: n.name || 'PC ' + (a.length + 1), img: n.image || '', font: 'batang', fc: '#2d2410', fs: 16 });
+      const a = state.boardTex.pcs = state.boardTex.pcs || [], pid = n.pcOld && n.pcOld.id && !a.some(x => x.id === n.pcOld.id) ? n.pcOld.id : 'pc_' + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36);
+      if (n.pcOld) { const r = JSON.parse(JSON.stringify(n.pcOld)); r.id = pid; r.name = n.name || r.name; a.push(r); state.boardTex.npcCards = (state.boardTex.npcCards || []).filter(x => x.id !== id); }
+      else a.push({ id: pid, name: n.name || 'PC ' + (a.length + 1), img: n.image || '', font: 'batang', fc: '#2d2410', fs: 16 });
       state.quests.forEach(q => { if (q.npcIds) q.npcIds = q.npcIds.map(x => x === id ? 'pc:' + pid : x); });
       (state.boardTex.npcs || []).forEach(c => { if (c.npcId === id) c.npcId = 'pc:' + pid; });
       npcRemoveCore(id); persistState(); closeNpcModal(); showToast('PC로 바꿨어요.');
