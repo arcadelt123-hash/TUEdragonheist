@@ -1097,6 +1097,7 @@
     .bg-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid #6b5a3a; padding-bottom: 9px; margin-bottom: 9px; }
     .bg-who select { background: #0a090c; color: #e8d9a8; border: 1px solid #6b5a3a; border-radius: 8px; padding: 4px 8px; font-weight: 700; }
     .bg-shops { flex: 1; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+    .bg-sdrop.sd-over, .bg-bdrop.sd-over { outline: 2px dashed #b99a5b; outline-offset: 4px; border-radius: 10px; background: rgba(185,154,91,.12); } .bg-slot[draggable=true] { cursor: grab; }
     .bg-tab { border: 1px solid #6b5a3a; background: #16131a; color: #b99a5b; border-radius: 8px; padding: 4px 12px; cursor: pointer; font-weight: 700; letter-spacing: .06em; }
     .bg-tab.on { background: #b99a5b; color: #1a1308; } .bg-tab.ghost { opacity: .75; }
     .bg-coins .cn { display: inline-flex; align-items: center; gap: 4px; } .bg-coins .cn img, .bg-price .cn img { width: 16px; height: 16px; object-fit: contain; } .bg-price .cn { display: inline-flex; align-items: center; gap: 3px; margin-right: 6px; }
@@ -3010,7 +3011,7 @@
       try { if (!ne.disabled) localStorage.setItem('adv_pres_name', n); localStorage.setItem('adv_pres_color', c); } catch (e) {}
       document.getElementById('pres-edit').remove(); if (!ne.disabled) presLink(n, true); presencePing();
     }
-    function presDedupe(list) { const seen = new Map(), out = []; (list || []).forEach(u => { const k = nameKey(u.name); if (!k) { out.push(u); return; } if (!seen.has(k)) { seen.set(k, out.length); out.push(Object.assign({}, u)); } else if (u.id === PRES.id) out[seen.get(k)] = Object.assign({}, u); }); return out; }
+    function presDedupe(list) { const seen = new Map(), out = [], gone = window.__presGone || {}; (list || []).forEach(u => { if (gone[u.id] && Date.now() - gone[u.id] < 60000 && u.id !== PRES.id) return; const k = nameKey(u.name); if (!k) { out.push(u); return; } if (!seen.has(k)) { seen.set(k, out.length); out.push(Object.assign({}, u)); } else if (u.id === PRES.id) out[seen.get(k)] = Object.assign({}, u); }); return out; }
     const PRES_ROOT = '[data-mid],[data-nid],[data-qid],[data-pcid],[data-did],[data-sid],[data-lane],[id]';
     function presFieldKey(el) {
       try { if (!el || !isTyp(el) || el.type === 'password' || el.closest('#auth-ov,#pres-float')) return ''; if (el.id) return '#' + el.id;
@@ -3060,6 +3061,8 @@
     window.__sellEv = function (v) {
       if (!v || Date.now() - (v.ts || 0) > 45000) return;
       const seen = window.__sellSeen = window.__sellSeen || {}; if (seen[v.k]) return; seen[v.k] = 1;
+      if (v.ev === 'bye' && v.pid && v.pid !== PRES.id) { (window.__presGone = window.__presGone || {})[v.pid] = Date.now(); try { const l = window.__presList || []; presenceRender(l); presenceRender(l); } catch (e) {} }
+      if (v.ev === 'hi' && v.pid) { try { delete (window.__presGone || {})[v.pid]; } catch (e) {} }
       const gm = !!(AUTH_S && AUTH_S.gm) && !plView();
       if (v.ev === 'sell' && gm) { window.__sellLive[v.rid] = Date.now(); [4000, 10000].forEach(ms => setTimeout(() => { try { syncMergeFromServer(); } catch (e) {} }, ms)); }
       if (v.ev === 'sellres') { delete window.__sellLive[v.rid]; let mine = false; try { mine = myPcs().includes(v.pc); } catch (e) {} if (mine) { try { showToast(v.t || '판매가 처리됐어요.'); } catch (e) {} [2500, 7000].forEach(ms => setTimeout(() => { try { syncMergeFromServer(); } catch (e) {} }, ms)); } }
@@ -6585,7 +6588,7 @@
     }
     function shopSlot(o, qty, w, out, key) {
       const sel = state.shopSel && state.shopSel.w === w && state.shopSel.k === key, rc = SHOP_RC[o.r] || '#3a3342';
-      return `<button class="bg-slot${out ? ' out' : ''}${sel ? ' sel' : ''}" style="border-color:${rc}" onclick="shopPick('${w}','${key}')" title="${escapeHtml(o.name)} · ${shopPriceTxt(o.cp)}">${o.img ? `<img src="${escapeHtml(o.img)}" alt="" loading="lazy" draggable="false" onerror="this.remove()">` : ''}<span class="ph">${escapeHtml([...(o.name || '?')][0])}</span>${qty > 1 ? `<span class="q">${qty}</span>` : ''}</button>`;
+      return `<button class="bg-slot${out ? ' out' : ''}${sel ? ' sel' : ''}" style="border-color:${rc}"${w === 'm' ? ` draggable="true" ondragstart="shopDrag(event,'${key}')" ondragend="shopDragEnd()"` : ''}${w === 's' && !out ? ` draggable="true" ondragstart="shopDragBuy(event,'${key}')" ondragend="shopDragEnd()"` : ''} onclick="shopPick('${w}','${key}')" title="${escapeHtml(o.name)} · ${shopPriceTxt(o.cp)}">${o.img ? `<img src="${escapeHtml(o.img)}" alt="" loading="lazy" draggable="false" onerror="this.remove()">` : ''}<span class="ph">${escapeHtml([...(o.name || '?')][0])}</span>${qty > 1 ? `<span class="q">${qty}</span>` : ''}</button>`;
     }
     function shopPick(w, k) { state.shopSel = { w, k }; renderShop(); }
     function shopSellRes(x) {
@@ -6632,8 +6635,8 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       const own = `<div class="bg-own"><div class="bg-art" ${by.shared ? '' : pcIconSty(by.pc)} title="${escapeHtml(ownNm)}">${ownArt}</div><div class="bg-eq">${eq.length ? eq.map(r => `<button class="bg-mini" title="${escapeHtml(r.x.name || '')}" onclick="shopPick('m','${r.i}')">${r.x.img ? `<img src="${escapeHtml(r.x.img)}" alt="" draggable="false" onerror="this.remove()">` : `<span>${escapeHtml([...(r.x.name || '?')][0])}</span>`}</button>`).join('') : `<span class="bg-dim">${by.shared ? ownNm : '장비 중인 물건이 없어요'}</span>`}</div></div>`;
       const sArt = shopArtSrc(sh), shHead = `<div class="bg-own"><div class="bg-art" title="${escapeHtml(sh.name || '')}">${sArt ? `<img src="${escapeHtml(sArt)}" alt="" draggable="false">` : `<img src="${SHOP_COIN}" alt="" style="object-fit:contain">`}</div><div class="bg-eq"><b>${escapeHtml(sh.name || '')}</b>${sh.desc ? `<span class="bg-dim">${escapeHtml(sh.desc)}</span>` : ''}</div></div>`;
       const charOn = false;
-      h += `<div class="bg-cols${charOn ? ' wc' : ''}">${charOn ? shopCharHtml(by, d) : ''}<div>${charOn ? '' : own}<div class="bg-h">${by.shared ? '공용 가방' : '내 가방'}</div><div class="bg-grid">` + (bagRows.length ? bagRows.map(r => shopSlot({ ...r.o, cp: (shopSellRes(r.x) || { cp: 0 }).cp }, Number(r.x.qty) || 1, 'm', false, r.i)).join('') : '<span class="bg-dim">비어 있어요</span>') + '</div></div>';
-      h += `<div>${shHead}<div class="bg-h">상품</div><div class="bg-grid">` + (shopRows.length ? shopRows.map(r => { const inf = r.it.stock == null || r.it.stock === ''; return shopSlot(r.o, inf ? 1 : Number(r.it.stock) || 0, 's', !inf && !(Number(r.it.stock) > 0), r.it.id); }).join('') : `<span class="bg-dim">${gm ? '"+ 카탈로그에서 추가"로 물건을 진열하세요.' : '진열된 물건이 없어요.'}</span>`) + '</div></div></div>';
+      h += `<div class="bg-cols${charOn ? ' wc' : ''}">${charOn ? shopCharHtml(by, d) : ''}<div class="bg-bdrop" ondragover="shopBOver(event,this)" ondragleave="this.classList.remove('sd-over')" ondrop="shopBDrop(event,this)">${charOn ? '' : own}<div class="bg-h">${by.shared ? '공용 가방' : '내 가방'}</div><div class="bg-grid">` + (bagRows.length ? bagRows.map(r => shopSlot({ ...r.o, cp: (shopSellRes(r.x) || { cp: 0 }).cp }, Number(r.x.qty) || 1, 'm', false, r.i)).join('') : '<span class="bg-dim">비어 있어요</span>') + '</div></div>';
+      h += `<div class="bg-sdrop" ondragover="shopDragOver(event,this)" ondragleave="this.classList.remove('sd-over')" ondrop="shopDrop(event,this)">${shHead}<div class="bg-h">상품</div><div class="bg-grid">` + (shopRows.length ? shopRows.map(r => { const inf = r.it.stock == null || r.it.stock === ''; return shopSlot(r.o, inf ? 1 : Number(r.it.stock) || 0, 's', !inf && !(Number(r.it.stock) > 0), r.it.id); }).join('') : `<span class="bg-dim">${gm ? '"+ 카탈로그에서 추가"로 물건을 진열하세요.' : '진열된 물건이 없어요.'}</span>`) + '</div></div></div>';
       // detail
       const S = state.shopSel; let dt = '<div class="bg-dim">칸을 누르면 설명과 가격이 나와요.</div>';
       if (S) {
@@ -6652,10 +6655,10 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       area.innerHTML = h;
     }
         function shopFilterKeep() { const v = (document.getElementById('shop-q') || {}).value, p = (document.getElementById('shop-q') || {}).selectionStart; renderShop(); const e = document.getElementById('shop-q'); if (e) { e.focus(); try { e.setSelectionRange(p, p); } catch (x) {} } }
-    function shopBuy(sid, iid) {
+    function shopBuy(sid, iid, nOver) {
       const sh = shopsList().find(s => s.id === sid), it = sh && (sh.items || []).find(x => x.id === iid), by = shopBuyer(); if (!it || !by) return;
       if (sh.off && !(AUTH_S.gm && !plView())) { showToast('지금은 이 상인이 장사를 하지 않아요.'); return; }
-      const o = shopRes(it), n = Math.max(1, Math.floor(Number((document.getElementById('sq-' + iid) || {}).value) || 1)), inf = it.stock == null || it.stock === '';
+      const o = shopRes(it), n = nOver || Math.max(1, Math.floor(Number((document.getElementById('sq-' + iid) || {}).value) || 1)), inf = it.stock == null || it.stock === '';
       if (!inf && n > (Number(it.stock) || 0)) { showToast('재고가 부족해요.'); return; }
       const total = o.cp * n, d = shopData(by), nm = shopPay(d.money, total);
       if (!nm) { showToast('돈이 부족해요. (필요: ' + shopPriceTxt(total) + ')'); return; }
@@ -6686,11 +6689,28 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
         if (n >= have) d.items.splice(k, 1); else { x.qty = have - n; delete x.sellPend; }
       }
     }
-    function shopSell(k) {
+    let __shopDragS = null;
+    function shopDragBuy(e, k) { __shopDragS = k; try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', 'shopbuy:' + k); } catch (_) {} }
+    function shopBOver(e, z) { if (__shopDragS == null) return; e.preventDefault(); try { e.dataTransfer.dropEffect = 'move'; } catch (_) {} z.classList.add('sd-over'); }
+    function shopBDrop(e, z) {
+      if (__shopDragS == null) return; e.preventDefault(); z.classList.remove('sd-over'); const k = __shopDragS; __shopDragS = null;
+      const sh = shopsList().find(s => s.id === state.shopId), it = sh && (sh.items || []).find(x => x.id === k); if (!it) return;
+      const inf = it.stock == null || it.stock === '', st = Number(it.stock) || 0; let n = 1;
+      if (inf || st > 1) { const a = prompt('몇 개를 살까요?', '1'); if (a === null) return; n = Math.max(1, Math.floor(Number(a) || 1)); }
+      shopBuy(sh.id, k, n);
+    }
+    let __shopDragK = null;
+    function shopDrag(e, k) { __shopDragK = Number(k); try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', 'shopitem:' + k); } catch (_) {} }
+    function shopDragEnd() { __shopDragK = null; __shopDragS = null; document.querySelectorAll('.sd-over').forEach(z => z.classList.remove('sd-over')); }
+    function shopDragOver(e, z) { if (__shopDragK == null) return; e.preventDefault(); try { e.dataTransfer.dropEffect = 'move'; } catch (_) {} z.classList.add('sd-over'); }
+    function shopDrop(e, z) { if (__shopDragK == null) return; e.preventDefault(); z.classList.remove('sd-over'); const k = __shopDragK; __shopDragK = null; shopSell(k, true); }
+    function shopSell(k, ask) {
       const by = shopBuyer(); if (!by) return; const d = shopData(by), x = d.items[k]; if (!x) return;
+      if (x.equipped) { showToast('장착 중인 물건은 팔 수 없어요.'); return; }
       const sh = shopsList().find(s => s.id === state.shopId); if (!sh || sh.off) { showToast('이 상인은 지금 물건을 사지 않아요.'); return; }
-      const r = shopSellRes(x); if (!r) return; const half = Math.floor(r.cp / 2), have = Number(x.qty) || 1;
-      const n = Math.min(have, Math.max(1, Math.floor(Number((document.getElementById('sell-q') || {}).value) || 1))), gain = half * n;
+      const r = shopSellRes(x); if (!r || Math.floor(r.cp / 2) <= 0) { showToast('이 물건은 팔 수 없어요. (가격 정보 없음)'); return; } const half = Math.floor(r.cp / 2), have = Number(x.qty) || 1;
+      let n0 = Number((document.getElementById('sell-q') || {}).value) || 1; if (ask) { n0 = 1; if (have > 1) { const a = prompt('몇 개를 팔까요? (보유 ' + have + ')', String(have)); if (a === null) return; n0 = Number(a) || 1; } }
+      const n = Math.min(have, Math.max(1, Math.floor(n0))), gain = half * n;
       const b = state.boardTex; b.sellReq = Array.isArray(b.sellReq) ? b.sellReq : [];
       if (x.sellPend || (by.shared && b.sellReq.some(q => q.sid && q.sid === x._sid))) { showToast('이미 판매 요청 중이에요.'); return; }
       if (AUTH_S.gm && !plView()) {
@@ -11022,7 +11042,8 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     }).then(function () {
       var S = F.api.db, r = S.query(S.ref(F.db, 'rooms/' + F.room + '/chat'), S.limitToLast(200));
       F.msgs = []; F.on = true; setSt('연결됨');
-      F.unsub.push(S.onChildAdded(r, function (s) { var v = s.val() || {}; v.k = s.key; if (v.ev) { try { window.__sellEv && window.__sellEv(v); } catch (e) {} if (v.ev === 'sell' && !isGM()) return; } F.msgs.push(v); F.msgs.sort(function (a, b) { return (a.ts || 0) - (b.ts || 0); }); if (!panOpen() && (v.ts || 0) > seenTs()) { F.unread++; if (v.n !== myName() && Date.now() - (v.ts || 0) < 20000) bub(v); } render(); }));
+      try { if (typeof PRES !== 'undefined' && PRES.id) { var br = S.push(S.ref(F.db, 'rooms/' + F.room + '/chat')); S.onDisconnect(br).set({ ev: 'bye', pid: PRES.id, n: '', t: '', ts: S.serverTimestamp(), gm: 0 }).catch(function () {}); window.__fbcSend && window.__fbcSend({ ev: 'hi', pid: PRES.id, t: '' }); } } catch (e) {}
+      F.unsub.push(S.onChildAdded(r, function (s) { var v = s.val() || {}; v.k = s.key; if (v.ev) { try { window.__sellEv && window.__sellEv(v); } catch (e) {} if (v.ev === 'bye' || v.ev === 'hi') return; if (v.ev === 'sell' && !isGM()) return; } F.msgs.push(v); F.msgs.sort(function (a, b) { return (a.ts || 0) - (b.ts || 0); }); if (!panOpen() && (v.ts || 0) > seenTs()) { F.unread++; if (v.n !== myName() && Date.now() - (v.ts || 0) < 20000) bub(v); } render(); }));
       F.unsub.push(S.onChildRemoved(r, function (s) { F.msgs = F.msgs.filter(function (m) { return m.k !== s.key; }); if (!F.msgs.length) F.sys = []; render(); }));
     }).catch(function (e) { F.on = false; setSt('연결 실패: ' + (e && (e.code || e.message) || e)); });
   }
