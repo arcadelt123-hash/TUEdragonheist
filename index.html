@@ -11487,6 +11487,14 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     return '손님';
   }
   function isGM() { try { return !!(AUTH_S.gm && !(typeof plView === 'function' && plView())); } catch (e) { return false; } }
+  // 2차 수정: 로그인한 기기의 토큰으로 Apps Script에서 Firebase 출입증을 받아요 (실패하면 null)
+  function fbTok() {
+    try {
+      var tk = (typeof AUTH_S !== 'undefined' && AUTH_S.tk) || ''; if (!tk || typeof execUrl !== 'function') return Promise.resolve(null);
+      var u = execUrl(); return fetch(u + (u.indexOf('?') >= 0 ? '&' : '?') + 'action=fbtok&tk=' + encodeURIComponent(tk))
+        .then(function (r) { return r.json(); }).then(function (o) { return o && o.status === 'OK' && o.token ? o : null; }).catch(function () { return null; });
+    } catch (e) { return Promise.resolve(null); }
+  }
   function loadSdk() {
     if (window.__fbLoad) return window.__fbLoad();
     var v = '10.12.2', b = 'https://www.gstatic.com/firebasejs/' + v + '/';
@@ -11499,12 +11507,28 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     try { F.cfg = JSON.parse(raw); } catch (e) { return Promise.resolve(); }
     $('fbc-fab').style.display = 'block'; setSt('연결 중…'); F.room = roomId();
     return loadSdk().then(function (S) {
-      F.api = S; var app = S.app.initializeApp(F.cfg, 'chat'); var au = S.auth.getAuth(app);
-      return S.auth.signInAnonymously(au).then(function () { F.db = S.db.getDatabase(app); });
+      // 2차 수정: 사이트(방)마다 따로, 브라우저에 로그인 상태를 남기지 않고(같은 주소의 다른 사이트와 섞이지 않게) 접속해요
+      F.api = S; var app = S.app.getApps().find(function (a) { return a.name === 'chat_' + F.room; }) || S.app.initializeApp(F.cfg, 'chat_' + F.room);
+      var au; try { au = S.auth.initializeAuth(app, { persistence: S.auth.inMemoryPersistence }); } catch (e) { au = S.auth.getAuth(app); }
+      // 로그인한 기기만 서버(Apps Script)에서 Firebase 출입증을 받아 들어가요. 출입증을 못 받으면 예전처럼 익명으로 시도해요.
+      return fbTok().then(function (t) {
+        if (t && t.room) F.room = t.room;
+        return t ? S.auth.signInWithCustomToken(au, t.token) : S.auth.signInAnonymously(au);
+      }).then(function (cred) { F.uid = (cred && cred.user && cred.user.uid) || ''; F.db = S.db.getDatabase(app); });
     }).then(function () {
       var S = F.api.db, r = S.query(S.ref(F.db, 'rooms/' + F.room + '/chat'), S.limitToLast(200));
       F.msgs = []; F.on = true; setSt('연결됨'); XS.forEach(xAttach1);
-      try { if (typeof PRES !== 'undefined' && PRES.id) { var br = S.push(S.ref(F.db, 'rooms/' + F.room + '/chat')); S.onDisconnect(br).set({ ev: 'bye', pid: PRES.id, n: '', t: '', ts: S.serverTimestamp(), gm: 0 }).catch(function () {}); window.__fbcSend && window.__fbcSend({ ev: 'hi', pid: PRES.id, t: '' }); } } catch (e) {}
+      // 접속 표시: 채팅 목록에 섞지 않고 rooms/<방>/pres 에 따로 기록 (창을 닫으면 자동으로 지워져요)
+      try { if (typeof PRES !== 'undefined' && PRES.id) {
+        var pk = (F.uid ? F.uid + '_' : 'anon_') + PRES.id, pr = S.ref(F.db, 'rooms/' + F.room + '/pres/' + pk);
+        S.onDisconnect(pr).remove().catch(function () {}); S.set(pr, { pid: PRES.id, ts: S.serverTimestamp() }).catch(function () {});
+        F.unsub.push(S.onValue(S.ref(F.db, 'rooms/' + F.room + '/pres'), function (s) {
+          var cur = {}; s.forEach(function (c) { var v = c.val() || {}; if (v.pid) cur[v.pid] = 1; });
+          var prev = F.presPrev; F.presPrev = cur; if (!prev || !window.__sellEv) return; var now = Date.now();
+          Object.keys(prev).forEach(function (p) { if (!cur[p] && p !== PRES.id) try { window.__sellEv({ ev: 'bye', pid: p, ts: now, k: 'pb_' + p + '_' + now }); } catch (e) {} });
+          Object.keys(cur).forEach(function (p) { if (!prev[p]) try { window.__sellEv({ ev: 'hi', pid: p, ts: now, k: 'ph_' + p + '_' + now }); } catch (e) {} });
+        }, function () {}));
+      } } catch (e) {}
       F.unsub.push(S.onChildAdded(r, function (s) { var v = s.val() || {}; v.k = s.key; if (v.ev) { try { window.__sellEv && window.__sellEv(v); } catch (e) {} if (v.ev === 'bye' || v.ev === 'hi' || v.ev === 'sellcancel' || v.ev === 'gmcast' || v.ev === 'trade') return; if (v.ev === 'sell' && !isGM()) return; if (v.ev === 'sellres') { var mn = false; try { mn = myPcs().indexOf(v.pc) >= 0; } catch (e) {} if (!mn) return; } } F.msgs.push(v); F.msgs.sort(function (a, b) { return (a.ts || 0) - (b.ts || 0); }); if (!panOpen() && (v.ts || 0) > seenTs()) { F.unread++; if (v.n !== myName() && Date.now() - (v.ts || 0) < 20000) bub(v); } render(); }));
       F.unsub.push(S.onChildRemoved(r, function (s) { F.msgs = F.msgs.filter(function (m) { return m.k !== s.key; }); if (!F.msgs.length) F.sys = []; render(); }));
     }).catch(function (e) { F.on = false; setSt('연결 실패: ' + (e && (e.code || e.message) || e)); });
@@ -11569,10 +11593,8 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     render();
   }
   function gmSecret(ask) { var s = ls('adv_fb_gmsec'); if (!s && ask) { s = prompt('GM 비밀 문자열을 넣어 주세요 (Firebase 규칙에 적어 둔 값).\n규칙을 아직 안 바꿨다면 비워 두고 확인을 누르세요.'); if (s) ls('adv_fb_gmsec', s.trim()); } return (s || '').trim(); }
-  function withUnlock(fn) {
-    var S = F.api.db, ur = S.ref(F.db, 'rooms/' + F.room + '/unlock'), sec = gmSecret(true), pre = sec ? S.set(ur, sec).catch(function () {}) : Promise.resolve();
-    return pre.then(fn).then(function (r) { if (sec) S.remove(ur).catch(function () {}); return r; }, function (e) { if (sec) S.remove(ur).catch(function () {}); if (e && /PERMISSION/i.test(e.code || e.message || '')) ls('adv_fb_gmsec', null); throw e; });
-  }
+  // 2차 수정: 지우기 권한은 이제 GM 출입증으로 확인해요 (비밀 문자열 입력 필요 없음)
+  function withUnlock(fn) { return Promise.resolve().then(fn); }
   function dlTxt(rows, name) { try { var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rows.join('\n')], { type: 'text/plain' })); a.download = name; a.click(); } catch (e) {} }
   function trimOld() {
     if (!isGM() || !F.on) return; var KEEP = 300, S = F.api.db, cr = S.ref(F.db, 'rooms/' + F.room + '/chat');
