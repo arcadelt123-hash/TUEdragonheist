@@ -5129,16 +5129,18 @@
     function shopLivePush() {
       try {
         if (!(window.__fbx && __fbx.ok()) || (AUTH_S.gm && !plView())) return;
-        const inShop = state.viewMode === 'journal' && state.jView === 'shop'; let pc = null; try { pc = shopBuyer().pc; } catch (e) {}
-        if (!pc) { let nm = ''; try { nm = presName(); } catch (e) {} pc = { id: 'u_' + PRES.id, name: (String(nm || '').trim() || '접속자') + ' (공용 가방)' }; } const path = 'shop/live/' + pc.id;
+        const inShop = state.viewMode === 'journal' && state.jView === 'shop'; let pc = null, by0 = null; try { by0 = shopBuyer(); pc = by0.pc; } catch (e) {}
+        let plN = ''; try { plN = presName(); } catch (e) {} if (!plN && pc) { try { plN = dvPlName(pc.pc) || ''; } catch (e) {} }
+        let mine = ''; try { mine = (by0 ? by0.pcs : []).map(p => p.name).filter(Boolean).join(', '); } catch (e) {}
+        const path = 'shop/live/u_' + PRES.id;
         if (!inShop) { if (__shopLiveSent) { __fbx.set(path, null); __shopLiveSent = ''; } return; }
         const sh = shopsList().find(s => s.id === state.shopId) || {}, sel = state.shopSel || {};
         let item = ''; try { if (sel.w === 's') { const it = (sh.items || []).find(i => i.id === sel.k); item = it ? shopRes(it).name : ''; } else if (sel.w === 'm') { const x = shopData(shopBuyer()).items[sel.k]; item = x ? (x.name || '') : ''; } } catch (e) {}
-        const key = [pc.id, sh.id, item].join('|');
+        const key = [pc ? pc.id : '-', sh.id, item, plN].join('|');
         if (key === __shopLiveSent && Date.now() - __shopLiveT < 20000) return;
         if (!__shopLiveSent) __fbx.disc(path);
         __shopLiveSent = key; __shopLiveT = Date.now();
-        __fbx.set(path, { n: String(pc.name || 'PC').slice(0, 40), s: String(sh.name || '').slice(0, 40), sid: String(sh.id || ''), i: String(item).slice(0, 60), t: Date.now() });
+        __fbx.set(path, { n: String(plN || '접속자').slice(0, 40), w: pc ? 'pc' : 'shared', pc: String(pc ? (pc.name || 'PC') : mine).slice(0, 60), pid: pc ? String(pc.id) : '', s: String(sh.name || '').slice(0, 40), sid: String(sh.id || ''), i: String(item).slice(0, 60), t: Date.now() });
       } catch (e) {}
     }
     window.__shopLive = {};
@@ -5150,8 +5152,8 @@
       if (!AUTH_S.gm || plView()) return; const old = document.getElementById('shoplive-ov'); if (old) old.remove();
       const ov = document.createElement('div'); ov.id = 'shoplive-ov'; ov.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center';
       const L = shopLiveList(), E = escapeHtml;
-      ov.innerHTML = `<div style="background:#fbf3df;color:#3b2a14;border:2px solid #b8893a;border-radius:12px;padding:14px;width:min(460px,94vw);max-height:80vh;overflow:auto;font:13px sans-serif"><div style="display:flex;align-items:center;gap:8px"><b style="font-size:15px;flex:1">지금 상점에 있는 PC (${L.length})</b><button class="btn btn-secondary" style="padding:3px 10px" onclick="document.getElementById('shoplive-ov').remove()">닫기</button></div>
-        ${L.length ? L.map(x => `<div style="display:flex;gap:6px;align-items:center;border-top:1px dashed #c9b07a;padding:6px 0;margin-top:6px"><span style="flex:1;min-width:0"><b>${E(x.n || 'PC')}</b> · ${E(x.s || '')}${x.i ? `<br><small style="opacity:.75">보고 있는 물건: ${E(x.i)}</small>` : ''}</span><button class="btn btn-secondary" style="padding:3px 10px" onclick="shopLiveGo('${E(x.id)}','${E(x.sid || '')}')">보러 가기</button></div>`).join('') : '<div style="padding:18px;text-align:center;opacity:.6">상점에 있는 PC가 없어요.</div>'}</div>`;
+      ov.innerHTML = `<div style="background:#fbf3df;color:#3b2a14;border:2px solid #b8893a;border-radius:12px;padding:14px;width:min(460px,94vw);max-height:80vh;overflow:auto;font:13px sans-serif"><div style="display:flex;align-items:center;gap:8px"><b style="font-size:15px;flex:1">지금 상점에 있는 PL (${L.length})</b><button class="btn btn-secondary" style="padding:3px 10px" onclick="document.getElementById('shoplive-ov').remove()">닫기</button></div>
+        ${L.length ? L.map(x => `<div style="display:flex;gap:6px;align-items:center;border-top:1px dashed #c9b07a;padding:6px 0;margin-top:6px"><span style="flex:1;min-width:0"><b>${E(x.n || 'PL')}</b> · ${E(x.s || '')}<br><small>${x.w === 'shared' ? '<b>공용 가방</b>으로 접속' + (x.pc ? ' (연결된 PC: ' + E(x.pc) + ')' : '') : '<b>' + E(x.pc || 'PC') + '</b> 탭으로 접속'}</small>${x.i ? `<br><small style="opacity:.75">보고 있는 물건: ${E(x.i)}</small>` : ''}</span><button class="btn btn-secondary" style="padding:3px 10px" onclick="shopLiveGo('${E(x.pid || '')}','${E(x.sid || '')}')">보러 가기</button></div>`).join('') : '<div style="padding:18px;text-align:center;opacity:.6">상점에 있는 PC가 없어요.</div>'}</div>`;
       document.body.appendChild(ov); ov.addEventListener('pointerdown', e => { if (e.target === ov) ov.remove(); });
     }
     setInterval(() => { try { const b = document.getElementById('shoplive-btn'); if (!b) return; const gm = AUTH_S.gm && !plView(), n = gm ? shopLiveList().length : 0; b.style.display = gm ? 'inline-flex' : 'none'; const nn = document.getElementById('shoplive-n'); if (nn) { nn.textContent = n; nn.style.background = n ? '#b3261e' : '#7a4a14'; } } catch (e) {} }, 1000);
