@@ -4131,7 +4131,10 @@
               if (prev && prev.length > 400) {
                 localStorage.setItem('adventure_cache_prebackup', prev);
                 const loc = JSON.parse(prev);
-                if (loc && ((loc.boardTex && !(data && data.boardTex)) || ((loc.quests || []).length > ((data && data.quests) || []).length))) keepLocal = loc;
+                // 2차 보완(데이터 보호): 예전에는 '이 기기에 퀘스트가 더 많으면' 서버를 통째로 덮어썼어요 (오래된 기기가 최신 데이터를 지우던 진짜 원인).
+                // 이제는 서버가 완전히 비어 있을 때만(새 시트 등) 이 기기 데이터를 올려요.
+                const srvEmpty = !(data && (data.boardTex || (data.quests || []).length || (data.globalNpcs || []).length));
+                if (loc && srvEmpty && (loc.boardTex || (loc.quests || []).length)) keepLocal = loc;
               }
             } catch (e) {}
             const kb = Math.round(JSON.stringify(data || {}).length / 1024), sec = ((Date.now() - t0) / 1000).toFixed(1);
