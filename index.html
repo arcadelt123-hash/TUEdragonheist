@@ -2214,7 +2214,7 @@
         <button class="btn btn-tab" id="tab-timeline" style="display:none" onclick="setViewMode('timeline', '')" title="타임라인" aria-label="타임라인">
           <img class="ico-img tab-ico" src="" data-ico="timeline" alt="">
         </button>
-        <button class="btn btn-tab" id="tab-journal" onclick="setViewMode('journal', '')" title="기록실 (일지 · 창고 · 단서)" aria-label="기록실">
+        <button class="btn btn-tab" id="tab-journal" onclick="journalTabGo()" title="기록실 (일지 · 창고 · 단서)" aria-label="기록실">
           <img class="ico-img tab-ico" src="" data-ico="journal" alt="">
         </button>
         <button class="btn btn-tab" id="tab-shop" onclick="shopTabGo()" title="상점" aria-label="상점"><img class="ico-img tab-ico" src="" alt=""></button>
@@ -5186,7 +5186,7 @@
       srvMapLoad(dd => { const ok = dd && ((dd.maps && dd.maps.length) || (dd.pins && dd.pins.length) || dd.imageData); const loc = mapLocal(); if (ok) apply(dd); else if (loc) apply(loc); else showToast('지도 데이터를 불러오지 못해서 날짜를 바꾸지 못했어요.'); }, () => { const loc = mapLocal(); if (loc) apply(loc); else showToast('지도 데이터를 불러오지 못해서 날짜를 바꾸지 못했어요.'); });
     }
     (function () { try { const m = String(location.hash || '').match(/^#r20date=(.+)$/); if (!m) return; const key = decodeURIComponent(m[1]); let n = 0; const t = setInterval(() => { if (++n > 360) { clearInterval(t); return; } if (!(AUTH_S.gm && !plView())) return; clearInterval(t); try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} r20ApplyDate(key); }, 500); } catch (e) {} })();
-    setInterval(() => { try { const b = document.getElementById('r20-btn'); if (b) b.style.display = (AUTH_S.gm && !plView()) ? 'inline-flex' : 'none'; } catch (e) {} }, 900);
+    setInterval(() => { try { const b = document.getElementById('r20-btn'); if (b) b.style.display = (AUTH_S.gm && !plView() && !document.documentElement.hasAttribute('data-r20jh-auto')) ? 'inline-flex' : 'none'; } catch (e) {} }, 900);   // 도우미 확장이 자동 반영 중이면 숨김
     // ---- 상점 재고 (Firebase 실시간) / 상점 현황 ----
     function shopStockPush(sid, iid, stock) { try { if (AUTH_S.gm && !plView() && window.__fbx && __fbx.ok()) __fbx.set('shop/stock/' + sid + '/' + iid, (stock == null || stock === '') ? null : Number(stock)); } catch (e) {} }
     function shopStockApply(v) {
@@ -6880,7 +6880,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       const chip = c => { if (!gmv && c[0] !== 'all' && !cnt[c[0]]) return ''; const ic = c[0] !== 'all' ? shopCicGet(c[0], ed ? (tgt === 'all' ? '' : tgt) : (by.shared || !by.pc ? '' : by.pc.id)) : ''; const on = cat === c[0];
         return `<button class="bg-chip${on ? ' on' : ''}${ic ? ' ic' : ''}${ed && c[0] !== 'all' ? ' ed' : ''}" title="${c[1]}${ed && c[0] !== 'all' ? ' (눌러서 아이콘 이미지 · 주소 넣기)' : ''}" onclick="${ed && c[0] !== 'all' ? `shopCicAsk('${c[0]}')` : `state.shopCat='${c[0]}';renderShop()`}">${ic ? `<img src="${escapeHtml(ic)}" alt="${c[1]}" draggable="false">` : c[1]}</button>`; };
       h += `<div class="bg-bar"><input type="search" id="shop-q" placeholder="검색" value="${escapeHtml(state.shopQ || '')}" oninput="state.shopQ=this.value;shopFilterKeep()"><span class="bg-chips">${SHOP_CATS.map(chip).join('')}${gmv ? `<button class="bg-chip${ed ? ' on' : ''}" onclick="state.shopIcEdit=!state.shopIcEdit;renderShop()" title="분류 아이콘 설정 (GM에게만 보여요)">${ed ? '아이콘 설정 끝' : '분류 아이콘'}</button>${ed ? `<select onchange="state.shopIcTgt=this.value;renderShop()" aria-label="적용 대상" style="padding:3px 6px;border-radius:8px"><option value="all"${tgt === 'all' ? ' selected' : ''}>적용 대상: 기본(모두)</option>${by.pcs.map(p => `<option value="${escapeHtml(p.id)}"${tgt === p.id ? ' selected' : ''}>${escapeHtml(p.name || 'PC')} 전용</option>`).join('')}</select>` : ''}` : ''}</span>
-                ${gm ? `<span class="bg-gmtools" style="margin-left:auto;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:inherit;row-gap:6px;column-gap:6px"><button class="bg-chip" onclick="shopToggle('${sh.id}')" title="비활성 상인은 PC에게 보이지 않고, 물건을 사지도 팔지도 못해요">${sh.off ? '상인 활성화' : '상인 비활성화'}</button><button class="bg-chip" onclick="shopRename('${sh.id}')">상점 이름·설명</button><button class="bg-chip" onclick="shopArt('${sh.id}')">상점 그림</button><button class="bg-chip" onclick="shopNpcImport('${sh.id}')" title="도감의 NPC를 상점으로 불러오기">NPC 불러오기</button><button class="bg-chip" onclick="shopApprToggle('${sh.id}')" title="켜면 PL의 구매가 GM 승인 뒤에 처리돼요">구매 승인제 ${sh.appr ? '켜짐' : '꺼짐'}</button><button class="bg-chip" onclick="shopBgDlg('${sh.id}')" title="상점 배경 이미지 (기본 / 상인별)">상점 배경</button><button class="bg-chip" onclick="shopCatPick('${sh.id}')">+ 카탈로그에서 추가</button><button class="bg-chip" onclick="shopItemEdit('${sh.id}','')">+ 직접 만들기</button><button class="bg-chip" onclick="shopDel('${sh.id}')">상점 삭제</button></span>` : ''}</div>`;
+                ${gm ? `<span class="bg-gmtools" style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px;max-width:100%"><span style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px"><button class="bg-chip" onclick="shopToggle('${sh.id}')" title="비활성 상인은 PC에게 보이지 않고, 물건을 사지도 팔지도 못해요">${sh.off ? '상인 활성화' : '상인 비활성화'}</button><button class="bg-chip" onclick="shopRename('${sh.id}')">상점 이름·설명</button><button class="bg-chip" onclick="shopArt('${sh.id}')">상점 그림</button><button class="bg-chip" onclick="shopNpcImport('${sh.id}')" title="도감의 NPC를 상점으로 불러오기">NPC 불러오기</button><button class="bg-chip" onclick="shopApprToggle('${sh.id}')" title="켜면 PL의 구매가 GM 승인 뒤에 처리돼요">구매 승인제 ${sh.appr ? '켜짐' : '꺼짐'}</button></span><span style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px"><button class="bg-chip" onclick="shopBgDlg('${sh.id}')" title="상점 배경 이미지 (기본 / 상인별)">상점 배경</button><button class="bg-chip" onclick="shopCatPick('${sh.id}')">+ 카탈로그에서 추가</button><button class="bg-chip" onclick="shopItemEdit('${sh.id}','')">+ 직접 만들기</button><button class="bg-chip" onclick="shopDel('${sh.id}')">상점 삭제</button></span></span>` : ''}</div>`;
       const ok = o => (cat === 'all' || o.c === cat) && (!q || o.name.toLowerCase().includes(q));
       const shopRows = (sh.items || []).map(it => ({ it, o: shopRes(it) })).filter(r => ok(r.o));
       const bagRows = d ? d.items.map((x, i) => ({ x, i, o: { name: x.name || '?', img: x.img || '', r: x.rar || '', cp: 0, c: (shopSellRes(x) || {}).c || x.cat || 'gear' } })).filter(r => ok(r.o)) : [];
@@ -7211,7 +7211,9 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
         fetch('shop_data/desc/' + k + '.json').then(r => { if (!r.ok) throw 0; return r.json(); }).then(j => { ITD_C[k] = j; go(j); }).catch(() => go({}));
       });
     }
-    function jSet(k, v) { if (k === 'jView' && v !== 'shop') shopBack = null; state[k] = v; renderJournal(); }
+    function jSet(k, v) { if (k === 'jView' && v !== 'shop') { shopBack = null; state.jLast = v; } state[k] = v; renderJournal(); }
+    // 기록실 탭: 상점에 있다가 눌러도 기록실(마지막으로 보던 일지·창고·단서)로 가요
+    function journalTabGo() { try { if (state.jView === 'shop' || !state.jView) state.jView = state.jLast || 'pc'; setViewMode('journal', ''); } catch (e) {} }
     function jQuestName(id) { const q = state.quests.find(x => x.id === id); return q ? (q.title || '제목 없음') : ''; }
     function jStoreFilters() {
       return `<div class="j-pcs" style="gap:6px;align-items:center;width:100%;"><button class="cat-chip${!state.jStoreCat ? ' on' : ''}" onclick="jSet('jStoreCat','')">All Items</button>${ITEM_CATS.map(x => `<button class="cat-chip${state.jStoreCat === x[0] ? ' on' : ''}" onclick="jSet('jStoreCat','${x[0]}')"><i style="background:${x[2]}"></i>${x[1]}</button>`).join('')}
@@ -7247,7 +7249,8 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       let memoIc = IC_FEATHER; try { memoIc = NOTE_MEMO[Object.keys(NOTE_MEMO)[0]].url; } catch (e) {}
       const TIC = { pc: IC_BK_OPEN, items: IC_K_ITEM, clues: memoIc, shop: SHOP_COIN }, jop = (() => { try { const v = localStorage.getItem('adv_jop'); return v === null ? 100 : Number(v); } catch (e) { return 100; } })();
       const tab = (k, t) => `<button type="button" class="btn j-tabic${V === k ? ' on' : ''}" title="${t}" aria-label="${t}" onclick="jSet('jView','${k}')"><img src="${TIC[k]}" alt=""></button>`;
-      let h = `<div class="j-tabs" style="align-items:center">${tab('pc', '일지')}${tab('items', '창고')}${tab('clues', '단서')}${tab('shop', '상점')}</div>`;
+      let h = `<div class="j-tabs" style="align-items:center">${tab('pc', '일지')}${tab('items', '창고')}${tab('clues', '단서')}</div>`;
+      if (V === 'shop') return '';   // 상점은 기록실과 따로 (위쪽 상점 탭) — 기록실 하위 탭을 보여 주지 않아요
       if (V === 'pc') {
         const pcs = (state.boardTex.pcs || []).filter(p => !p.off); if ((state.jPc == null || !pcs.some(p => p.id === state.jPc)) && pcs.length) state.jPc = pcs[0].id;
         h += `<div class="j-pcs">${pcs.map(p => `<button class="j-pc${p.id === state.jPc ? ' on' : ''}" ${jdr(p.id)} title="${escapeHtml(p.name || '')}" ${pcIconSty(p)} onclick="jSet('jPc','${p.id}')">${pcIconImg(p)}</button>`).join('')}
@@ -7264,6 +7267,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
     }
     function renderJournal() {
       if (state.jView === 'recap') state.jView = 'pc';
+      if (state.jView !== 'shop') state.jLast = state.jView;
       mbLinkFrom = null;
       if (state.jView === 'pc') {
         if (state.boardTex.active !== 'main') { switchBoard('main'); return; }
