@@ -9466,11 +9466,42 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
     function npcEditOpen(id) { npcEditId = id; state.npcInfoOpen = state.npcInfoOpen || {}; state.npcInfoOpen[id] = true; renderNpcModal(); document.getElementById('npc-modal').classList.add('open'); }
     function closeNpcModal() { npcEditId = null; document.getElementById('npc-modal').classList.remove('open'); if (state.viewMode === 'npcs') renderNpcCodex(); try { mapLibRefresh(); } catch (e) {} }
     function npcRefresh() { if (npcEditId) renderNpcModal(); if (state.viewMode === 'npcs') renderNpcCodex(); }
+    // ---- Roll20 토큰 ↔ NPC 도감 ----
+    function npcR20Copy(id) {
+      const n = (state.globalNpcs || []).find(x => x.id === id); if (!n) return;
+      const txt = '!토큰적용 ' + encodeURIComponent(JSON.stringify({ n: n.name || '', m: n.memo || '' }));
+      const done = () => showToast('복사했어요. Roll20에서 토큰을 선택하고 채팅에 붙여넣어 Enter를 누르세요.');
+      const fb = () => { const t = document.createElement('textarea'); t.value = txt; t.style.cssText = 'position:fixed;left:-999px'; document.body.appendChild(t); t.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e) {} t.remove(); if (ok) done(); else prompt('복사해서 Roll20 채팅에 붙여넣으세요', txt); };
+      try { navigator.clipboard.writeText(txt).then(done, fb); } catch (e) { fb(); }
+    }
+    function r20NpcImport(raw) {
+      let L; try { L = JSON.parse(raw); } catch (e) { return; } if (!Array.isArray(L) || !L.length) return;
+      if (!confirm('Roll20 토큰 ' + L.length + '개를 NPC 도감에 추가할까요?\n\n' + L.map(x => x.n).join(', '))) return;
+      state.globalNpcs = state.globalNpcs || []; let add = 0, upd = 0;
+      L.forEach(x => { const nm = String(x.n || '').slice(0, 60); if (!nm) return; const img = /^https?:\/\//.test(x.i || '') ? x.i : '';
+        const ex = state.globalNpcs.find(n => (n.name || '') === nm);
+        if (ex) { if (!ex.image && img) { ex.image = img; upd++; } return; }
+        state.globalNpcs.unshift({ id: 'gnpc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name: nm, image: img, memo: String(x.m || '').slice(0, 300) }); add++; });
+      persistState(); try { if (state.viewMode === 'npcs') renderNpcCodex(); } catch (e) {} showToast('NPC ' + add + '명 추가' + (upd ? ', 그림 ' + upd + '개 채움' : '') + '했어요.');
+    }
+    (function () { try { const m = String(location.hash || '').match(/^#r20npc=(.+)$/); if (!m) return; const raw = decodeURIComponent(m[1]); let n = 0; const t = setInterval(() => { if (++n > 360) { clearInterval(t); return; } if (!(AUTH_S.gm && !plView())) return; clearInterval(t); try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} r20NpcImport(raw); }, 500); } catch (e) {} })();
+    function r20SheetImport(raw) {
+      let L; try { L = JSON.parse(raw); } catch (e) { return; } if (!Array.isArray(L) || !L.length) return;
+      const sq = x => String(x || '').replace(/\s+/g, '').toLowerCase(), pcs = (state.boardTex.pcs || []).filter(p => p && !p.off);
+      const plan = [], miss = [];
+      L.forEach(x => { const p = pcs.find(c => sq(c.name) === sq(x.n)); if (!p) { miss.push(x.n); return; } const d = shopDetail(p), m = d.money; const nw = { gp: Number(x.gp) || 0, sp: Number(x.sp) || 0, cp: Number(x.cp) || 0 };
+        if (m.gp !== nw.gp || m.sp !== nw.sp || m.cp !== nw.cp) plan.push({ p, d, nw, t: (p.name || '') + ': ' + m.gp + 'gp ' + m.sp + 'sp ' + m.cp + 'cp → ' + nw.gp + 'gp ' + nw.sp + 'sp ' + nw.cp + 'cp' }); });
+      if (!plan.length) { showToast('저널 소지금이 Roll20과 이미 같아요.' + (miss.length ? ' (저널에 없는 PC: ' + miss.join(', ') + ')' : '')); return; }
+      if (!confirm('저널 소지금을 Roll20 시트 값으로 바꿀까요?\n\n' + plan.map(x => x.t).join('\n') + (miss.length ? '\n\n저널에서 못 찾은 PC: ' + miss.join(', ') : ''))) return;
+      plan.forEach(x => { x.d.money = x.nw; x.d.ledger.unshift({ d: __gameDate(), s: 0, text: 'Roll20 시트 소지금으로 맞춤' }); x.d.ledger = x.d.ledger.slice(0, 100); });
+      persistState(); try { sheetSend(); } catch (e) {} try { renderAll(); } catch (e) {} showToast(plan.length + '명의 소지금을 Roll20과 맞췄어요.');
+    }
+    (function () { try { const m = String(location.hash || '').match(/^#r20sheet=(.+)$/); if (!m) return; const raw = decodeURIComponent(m[1]); let n = 0; const t = setInterval(() => { if (++n > 360) { clearInterval(t); return; } if (!(AUTH_S.gm && !plView())) return; clearInterval(t); try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} r20SheetImport(raw); }, 500); } catch (e) {} })();
     function renderNpcModal() {
       const n = state.globalNpcs.find(x => x.id === npcEditId), box = document.getElementById('npc-md-box'); if (!n) { closeNpcModal(); return; }
       box.innerHTML = `<div class="npc-md-top"><div class="npc-md-av">${n.image ? `<img src="${escapeHtml(n.image)}" alt="">` : ICONS.npc}</div>
           <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;"><input type="text" aria-label="이름" value="${escapeHtml(n.name || '')}" oninput="updateGlobalNpcField('${n.id}','name',this.value)" style="font-weight:800;font-size:1.05rem;padding:6px 8px;">
-          <div style="display:flex;gap:6px;"><button class="btn-mini" onclick="npcPickImg('${n.id}')">사진 올리기</button>${n.image ? `<button class="btn-mini" onclick="npcImgClear('${n.id}')">사진 지우기</button>` : ''}</div></div></div>
+          <div style="display:flex;gap:6px;"><button class="btn-mini" onclick="npcPickImg('${n.id}')">사진 올리기</button>${n.image ? `<button class="btn-mini" onclick="npcImgClear('${n.id}')">사진 지우기</button>` : ''}${AUTH_S.gm && !plView() ? `<button class="btn-mini" onclick="npcR20Copy('${n.id}')" title="Roll20에서 토큰을 선택하고 붙여넣으면 이름·메모가 들어가요">R20 토큰에 적용</button>` : ''}</div></div></div>
         <textarea rows="4" placeholder="소속, 성향, 관계 등 메모..." style="width:100%;margin-top:10px;" oninput="updateGlobalNpcField('${n.id}','memo',this.value)">${escapeHtml(n.memo || '')}</textarea>
         <div style="margin-top:8px;">${npcStatHtml(n)}</div>
         ${npcItemsHtml(n)}
