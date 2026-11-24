@@ -9522,6 +9522,68 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       persistState(); try { sheetSend(); } catch (e) {} try { renderAll(); } catch (e) {} showToast(plan.length + '명의 소지금을 Roll20과 맞췄어요.');
     }
     (function () { try { const m = String(location.hash || '').match(/^#r20sheet=(.+)$/); if (!m) return; const raw = decodeURIComponent(m[1]); let n = 0; const t = setInterval(() => { if (++n > 360) { clearInterval(t); return; } if (!(AUTH_S.gm && !plView())) return; clearInterval(t); try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} r20SheetImport(raw); }, 500); } catch (e) {} })();
+    // ===== Roll20 → 저널 (확장 프로그램 0.4 / ParchmentCards 1.7) =====
+    //  ① 가방: Roll20에서 쓴 소모품·탄약, GM이 준 전리품(돈 포함)을 PC 가방에 반영. '#r20bag=…' 링크를 누르거나 확장이 자동으로 보내요.
+    //  ② 세션 로그: 확장이 !세션시작 ~ !세션정리 사이 Roll20 채팅을 모아 오면 세션 로그로 저장해요.
+    function r20Ready() { return !!(AUTH_S.gm && !plView() && state.boardTex && Array.isArray(state.boardTex.pcs) && !document.getElementById('auth-ov')); }
+    function r20Wait(fn) { let n = 0; const t = setInterval(() => { if (++n > 360) { clearInterval(t); showToast('Roll20 연동: GM으로 로그인한 화면에서만 반영돼요.'); return; } if (!r20Ready()) return; clearInterval(t); try { fn(); } catch (e) { console.error(e); } }, 500); }
+    function r20BagApply(raw) {
+      let o; try { o = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch (e) { showToast('가방 반영 내용을 읽지 못했어요.'); return; }
+      if (!o || !Array.isArray(o.ev) || !o.ev.length) return;
+      const bt = state.boardTex; bt.r20bagDone = Array.isArray(bt.r20bagDone) ? bt.r20bagDone : [];
+      if (o.id && bt.r20bagDone.indexOf(o.id) >= 0) { showToast('이미 가방에 반영한 내용이에요.'); return; }
+      const K = s => String(s || '').replace(/\s+/g, '').toLowerCase(), N = s => (typeof scNorm === 'function' ? scNorm(s) : K(s));
+      shopCatLoad(() => {
+        const rep = [], miss = [];
+        const findPc = nm => { const k = K(nm), L = (bt.pcs || []).filter(p => p && !p.off); return L.find(p => K(p.name) === k) || L.find(p => { const a = K(p.name); return a.length >= 2 && k.length >= 2 && (a.indexOf(k) === 0 || k.indexOf(a) === 0); }); };
+        const catOf = nm => { const k = N(nm); return (SHOP_CAT || []).find(c => N(c.n) === k || N(koN(c)) === k) || null; };
+        o.ev.forEach(e => {
+          const n = Math.trunc(Number(e.n) || 0), why = String(e.why || 'Roll20').slice(0, 20), pc = findPc(e.pc);
+          if (!n) return; if (!pc) { miss.push(String(e.pc || '?')); return; }
+          const d = shopDetail(pc), item = String(e.item || '').trim().slice(0, 80);
+          const mm = item.match(/^(\d+)\s*(gp|sp|cp)$/i);
+          if (mm) {   // 돈: '50 gp' — 저널 소지금이 바뀌면 원래 있던 상점 반영이 Roll20 시트 금화도 맞춰 줘요
+            const k = mm[2].toLowerCase(), v = Number(mm[1]) * (n < 0 ? -1 : 1) * Math.abs(n);
+            d.money[k] = Math.max(0, (Number(d.money[k]) || 0) + v);
+            d.ledger.unshift({ d: __gameDate(), s: v > 0 ? 1 : -1, text: (v > 0 ? '+' : '−') + Math.abs(v) + ' ' + k + ' · ' + why });
+            d.ledger = d.ledger.slice(0, 100); rep.push((pc.name || 'PC') + ' ' + (v > 0 ? '+' : '−') + Math.abs(v) + ' ' + k); return;
+          }
+          const k = N(item), c = catOf(item);
+          const same = x => N(x.name) === k || (x.ref && SHOP_CMAP[x.ref] && (N(SHOP_CMAP[x.ref].n) === k || N(koN(SHOP_CMAP[x.ref])) === k)) || (c && x.ref === c.id);
+          const have = d.items.filter(same), it = have.find(x => !x.equipped) || have[0];
+          if (n < 0) {
+            if (!it) { miss.push((pc.name || 'PC') + '의 ' + item); return; }
+            it.qty = (Number(it.qty) || 1) + n; if (it.qty <= 0) d.items.splice(d.items.indexOf(it), 1);
+          } else if (it && !it.equipped) it.qty = (Number(it.qty) || 0) + n;
+          else d.items.push({ name: c ? (koN(c) || c.n) : item, qty: n, note: '', equipped: false, img: c ? (c.img || c.alt || '') : '', bag: '', cat: '', rar: c ? (c.r || '') : '', w: c ? (c.w || 0) : 0, shopItem: '', ref: c ? c.id : '' });
+          const shown = it ? it.name : (c ? (koN(c) || c.n) : item);
+          d.ledger.unshift({ d: __gameDate(), s: 0, text: why + ': ' + shown + ' ' + (n > 0 ? '+' : '−') + Math.abs(n) });
+          d.ledger = d.ledger.slice(0, 100); rep.push((pc.name || 'PC') + ' ' + shown + ' ' + (n > 0 ? '+' : '−') + Math.abs(n));
+        });
+        if (o.id) { bt.r20bagDone.push(o.id); bt.r20bagDone = bt.r20bagDone.slice(-200); }
+        if (rep.length) { persistState(); try { renderAll(); } catch (e) {} try { renderShop(); } catch (e) {} }
+        showToast((rep.length ? 'Roll20 → 가방: ' + rep.join(', ') : '가방에 바뀐 게 없어요') + (miss.length ? ' · 못 찾음: ' + miss.join(', ') : ''));
+      });
+    }
+    async function r20LogImport(d) {
+      const html = String(d && d.html || ''); if (!html) { showToast('가져온 채팅이 없어요.'); return; }
+      try { if (!LG.idx) await lgProbe(); } catch (e) {} LG.idx = LG.idx || [];
+      const av = {}, r = lgParse(html, new Set(), av);
+      if (!r.msgs.length) { alert('Roll20 채팅에서 대사를 찾지 못했어요.'); return; }
+      try { tokSeed(); } catch (e) {} try { lgTokAv(av); } catch (e) {}
+      const label = prompt('Roll20 채팅 ' + r.msgs.length + '줄을 세션 로그로 저장해요.\n회차 이름 (예: 19회차)', (d.label || '') || lgNextNo() + '회차'); if (label === null) return;
+      const title = prompt('한 줄 제목 (선택)', d.title || '') || '';
+      const dt = prompt('날짜 (YYYY-MM-DD)', d.date || calYmd(new Date())) || calYmd(new Date());
+      try { lgOpen(); } catch (e) {}
+      return lgSaveLog(r.msgs, av, label, title, dt, dt);
+    }
+    window.addEventListener('message', e => {
+      if (e.source !== window) return; const d = e.data; if (!d || d.src !== 'r20jh-ext') return;
+      if (d.type === 'bag' && d.data) r20Wait(() => r20BagApply(d.data));
+      if (d.type === 'log') r20Wait(() => r20LogImport(d));
+    });
+    (function () { try { const m = String(location.hash || '').match(/^#r20bag=(.+)$/); if (!m) return; const raw = decodeURIComponent(m[1]);
+      r20Wait(() => { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} r20BagApply(raw); }); } catch (e) {} })();
     // Roll20 !상점열기 링크: ...#shop=잡화점&pc=Tulian  → 로그인 뒤 그 PC로 그 상점을 바로 열어요
     (function () { try { const m = String(location.hash || '').match(/^#shop=([^&]*)&pc=(.*)$/); if (!m) return; const sn = decodeURIComponent(m[1]), pn = decodeURIComponent(m[2]); let n = 0;
       const t = setInterval(() => { if (++n > 360) { clearInterval(t); return; } if (document.getElementById('auth-ov') || !((state.boardTex || {}).pcs || []).length) return; clearInterval(t);
