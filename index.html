@@ -3129,6 +3129,7 @@
       if (v.ev === 'hi' && v.pid) { try { delete (window.__presGone || {})[v.pid]; } catch (e) {} }
       const gm = !!(AUTH_S && AUTH_S.gm) && !plView();
       if (v.ev === 'gmcast') { if (!gm) window.gmCastShow(v); return; }
+      if (v.ev === 'trade') { if (gm) [3500, 9000].forEach(ms => setTimeout(() => { try { syncMergeFromServer(); } catch (e) {} setTimeout(r20Pub, 1500); }, ms)); return; }
       if (v.ev === 'sell' && gm) { window.__sellLive[v.rid] = Date.now(); [4000, 10000].forEach(ms => setTimeout(() => { try { syncMergeFromServer(); } catch (e) {} }, ms)); }
       if (v.ev === 'sellcancel' && gm) {
         delete window.__sellLive[v.rid];
@@ -5131,12 +5132,20 @@
     // ---- Roll20 (ParchmentCards Mod) 연동: 날짜·상점 거래 복사 / Roll20 날짜 받기 ----
     function r20Rt() { try { const rt = ((typeof mapData !== 'undefined' && mapData && mapData.realmTime) ? mapData : (mapLocal() || {})).realmTime; if (rt && rt.month) return { year: Number(rt.year) || 1492, month: String(rt.month), day: Number(rt.day) || 1, timeSlot: String(rt.timeSlot || ''), festival: String(rt.festival || '') }; } catch (e) {} return null; }
     function r20DateCmd() { const r = r20Rt(); if (!r) return ''; return '!시간 동기 ' + [r.year, r.month, r.day, r.timeSlot || 'Morning', r.festival].join('|'); }
-    function r20ShopCmd() {
+    // ---- 확장 연동: 거래가 바뀌면 !상점반영 명령을 확장에게 넘겨요 (확장의 '자동 반영'이 켜져 있을 때만 Roll20에 입력돼요) ----
+    let __r20Last = null;
+    function r20Pub() {
+      try { if (!(AUTH_S.gm && !plView()) || !(state.boardTex || {}).pcs) return; const hc = r20ShopCmd(15, true); let h = 5381; for (let i = 0; i < hc.length; i++) h = ((h << 5) + h + hc.charCodeAt(i)) | 0;
+        if (__r20Last === null) { __r20Last = h; return; } if (h === __r20Last) return; __r20Last = h; window.postMessage({ src: 'r20jh-journal', cmd: r20ShopCmd(15) }, '*'); } catch (e) {}
+    }
+    setInterval(r20Pub, 10000);
+    function r20ShopCmd(lim, forHash) {
       const pcs = (state.boardTex.pcs || []).filter(p => p && !p.off && p.sheet).map(p => {
         const d = (p.sheet && p.sheet.detail) || {}, m = d.money || {};
-        return { n: p.name || '', gp: Number(m.gp) || 0, sp: Number(m.sp) || 0, cp: Number(m.cp) || 0, L: (d.ledger || []).filter(e => /·\s*(구매|판매)\s*:/.test(e.text || '')).slice(0, 40).map(e => String(e.d || '').replace(/\|/g, '/') + '|' + e.text) };
+        return { n: p.name || '', gp: Number(m.gp) || 0, sp: Number(m.sp) || 0, cp: Number(m.cp) || 0, L: (d.ledger || []).filter(e => /·\s*(구매|판매)\s*:/.test(e.text || '')).slice(0, lim || 40).map(e => String(e.d || '').replace(/\|/g, '/') + '|' + e.text) };
       });
-      const o = { pcs }, r = r20Rt(); if (r) o.date = r;
+      const o = { pcs }, r = forHash ? null : r20Rt(); if (r) o.date = r;
+      if (!forHash) try { const E = {}; shopsList().forEach(sh => (sh.items || []).forEach(it => { const b = it.ref && SHOP_CMAP[it.ref]; if (b && b.n) { const k = shopRes(it).name; if (k && k !== b.n) E[k] = b.n; } })); if (Object.keys(E).length) o.E = E; } catch (e) {}
       return '!상점반영 ' + encodeURIComponent(JSON.stringify(o));
     }
     function r20Copy(kind) {
@@ -6888,18 +6897,19 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       area.innerHTML = h;
     }
         function shopFilterKeep() { const v = (document.getElementById('shop-q') || {}).value, p = (document.getElementById('shop-q') || {}).selectionStart; renderShop(); const e = document.getElementById('shop-q'); if (e) { e.focus(); try { e.setSelectionRange(p, p); } catch (x) {} } }
-    function shopBuy(sid, iid, nOver) {
-      const sh = shopsList().find(s => s.id === sid), it = sh && (sh.items || []).find(x => x.id === iid), by = shopBuyer(); if (!it || !by) return;
-      if (sh.off && !(AUTH_S.gm && !plView())) { showToast('지금은 이 상인이 장사를 하지 않아요.'); return; }
+    function shopBuy(sid, iid, nOver, done) {
+      const fin = ok => { try { done && done(ok); } catch (e) {} };
+      const sh = shopsList().find(s => s.id === sid), it = sh && (sh.items || []).find(x => x.id === iid), by = shopBuyer(); if (!it || !by) { fin(false); return; }
+      if (sh.off && !(AUTH_S.gm && !plView())) { showToast('지금은 이 상인이 장사를 하지 않아요.'); fin(false); return; }
       const o = shopRes(it), n = nOver || Math.max(1, Math.floor(Number((document.getElementById('sq-' + iid) || {}).value) || 1)), inf = it.stock == null || it.stock === '';
-      if (!inf && n > (Number(it.stock) || 0)) { showToast('재고가 부족해요.'); return; }
+      if (!inf && n > (Number(it.stock) || 0)) { showToast('재고가 부족해요.'); fin(false); return; }
       const total = o.cp * n, d = shopData(by), nm0 = shopPay(d.money, total);
-      if (!nm0) { showToast('돈이 부족해요. (필요: ' + shopPriceTxt(total) + ')'); return; }
-      if (sh.appr && !(AUTH_S.gm && !plView())) { shopBuyReq(sh, it, by, o, n, total); return; }
-      if (window.__shopBusy) return;
+      if (!nm0) { showToast('돈이 부족해요. (필요: ' + shopPriceTxt(total) + ')'); fin(false); return; }
+      if (sh.appr && !(AUTH_S.gm && !plView())) { shopBuyReq(sh, it, by, o, n, total); fin(false); return; }
+      if (window.__shopBusy) { fin(false); return; }
       const apply = (newStock) => {
       const nm = shopPay(d.money, total);
-      if (!nm) { if (newStock != null) { try { __fbx.tx('shop/stock/' + sid + '/' + iid, c => (typeof c === 'number' ? c + n : undefined)); } catch (e) {} } showToast('돈이 부족해요. (필요: ' + shopPriceTxt(total) + ')'); return; }
+      if (!nm) { if (newStock != null) { try { __fbx.tx('shop/stock/' + sid + '/' + iid, c => (typeof c === 'number' ? c + n : undefined)); } catch (e) {} } showToast('돈이 부족해요. (필요: ' + shopPriceTxt(total) + ')'); fin(false); return; }
       if (by.shared) {
         const sm = d.money, before = { gp: sm.gp, sp: sm.sp, cp: sm.cp }; sm.gp = nm.gp; sm.sp = nm.sp; sm.cp = nm.cp; shopFundLog(sm, before, '구매: ' + o.name + (n > 1 ? ' ×' + n : '') + ' (' + (sh.name || '상점') + ')');
         const st = state.boardTex.store.items, cnt = Math.min(n, 20);
@@ -6913,16 +6923,17 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       }
       if (!inf) it.stock = newStock != null ? newStock : (Number(it.stock) || 0) - n;
       persistState(); try { sheetSend(); } catch (e) {}
-      showToast(o.name + (n > 1 ? ' ×' + n : '') + ' 구매 완료 (−' + shopPriceTxt(total) + ')'); renderShop();
+      try { if (!(AUTH_S.gm && !plView())) window.__fbcSend && window.__fbcSend({ ev: 'trade', t: '' }); } catch (e) {}
+      showToast(o.name + (n > 1 ? ' ×' + n : '') + ' 구매 완료 (−' + shopPriceTxt(total) + ')'); renderShop(); fin(true);
       };
       if (!inf && window.__fbx && __fbx.ok()) {
         window.__shopBusy = true; let late = false; const path = 'shop/stock/' + sid + '/' + iid;
-        const timer = setTimeout(() => { late = true; window.__shopBusy = false; showToast('연결이 불안정해요. 잠시 후 다시 시도해 주세요.'); }, 7000);
+        const timer = setTimeout(() => { late = true; window.__shopBusy = false; showToast('연결이 불안정해요. 잠시 후 다시 시도해 주세요.'); fin(false); }, 7000);
         __fbx.tx(path, cur => { if (late) return; const base = typeof cur === 'number' ? cur : (Number(it.stock) || 0); if (base < n) return; return base - n; }).then(r => {
           clearTimeout(timer); if (late) return; window.__shopBusy = false;
-          if (!r.committed) { const sv = r.snapshot && r.snapshot.val(); if (typeof sv === 'number') it.stock = sv; showToast('재고가 부족해요.'); renderShop(); return; }
+          if (!r.committed) { const sv = r.snapshot && r.snapshot.val(); if (typeof sv === 'number') it.stock = sv; showToast('재고가 부족해요.'); renderShop(); fin(false); return; }
           apply(r.snapshot.val());
-        }).catch(() => { clearTimeout(timer); if (late) return; window.__shopBusy = false; showToast('재고를 확인하지 못했어요. 잠시 후 다시 시도해 주세요.'); });
+        }).catch(() => { clearTimeout(timer); if (late) return; window.__shopBusy = false; showToast('재고를 확인하지 못했어요. 잠시 후 다시 시도해 주세요.'); fin(false); });
         return;
       }
       apply(null);
@@ -7041,7 +7052,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       if (!inf && q.qty > (Number(it.stock) || 0)) { showToast('재고가 부족해요. 거절하거나 재고를 늘려 주세요.'); return; }
       if (!shopPay(shopData(by).money, total)) { showToast(q.pcName + '의 돈이 부족해요. (필요: ' + shopPriceTxt(total) + ')'); return; }
       if (!confirm(q.pcName + ' 의 ' + q.name + (q.qty > 1 ? ' ×' + q.qty : '') + ' 구매를 ' + shopPriceTxt(total) + ' 에 처리할까요?')) return;
-      shopBuy(sh.id, it.id, q.qty); done('[구매 승인] ' + q.name + (q.qty > 1 ? ' ×' + q.qty : '') + ' (−' + shopPriceTxt(total) + ')');
+      shopBuy(sh.id, it.id, q.qty, okb => { if (okb) done('[구매 승인] ' + q.name + (q.qty > 1 ? ' ×' + q.qty : '') + ' (−' + shopPriceTxt(total) + ')'); });
     }
     function shopNpcImport(id) {
       if (!AUTH_S.gm) return; const old = document.getElementById('shop-npc'); if (old) old.remove();
@@ -11489,7 +11500,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       var S = F.api.db, r = S.query(S.ref(F.db, 'rooms/' + F.room + '/chat'), S.limitToLast(200));
       F.msgs = []; F.on = true; setSt('연결됨'); XS.forEach(xAttach1);
       try { if (typeof PRES !== 'undefined' && PRES.id) { var br = S.push(S.ref(F.db, 'rooms/' + F.room + '/chat')); S.onDisconnect(br).set({ ev: 'bye', pid: PRES.id, n: '', t: '', ts: S.serverTimestamp(), gm: 0 }).catch(function () {}); window.__fbcSend && window.__fbcSend({ ev: 'hi', pid: PRES.id, t: '' }); } } catch (e) {}
-      F.unsub.push(S.onChildAdded(r, function (s) { var v = s.val() || {}; v.k = s.key; if (v.ev) { try { window.__sellEv && window.__sellEv(v); } catch (e) {} if (v.ev === 'bye' || v.ev === 'hi' || v.ev === 'sellcancel' || v.ev === 'gmcast') return; if (v.ev === 'sell' && !isGM()) return; if (v.ev === 'sellres') { var mn = false; try { mn = myPcs().indexOf(v.pc) >= 0; } catch (e) {} if (!mn) return; } } F.msgs.push(v); F.msgs.sort(function (a, b) { return (a.ts || 0) - (b.ts || 0); }); if (!panOpen() && (v.ts || 0) > seenTs()) { F.unread++; if (v.n !== myName() && Date.now() - (v.ts || 0) < 20000) bub(v); } render(); }));
+      F.unsub.push(S.onChildAdded(r, function (s) { var v = s.val() || {}; v.k = s.key; if (v.ev) { try { window.__sellEv && window.__sellEv(v); } catch (e) {} if (v.ev === 'bye' || v.ev === 'hi' || v.ev === 'sellcancel' || v.ev === 'gmcast' || v.ev === 'trade') return; if (v.ev === 'sell' && !isGM()) return; if (v.ev === 'sellres') { var mn = false; try { mn = myPcs().indexOf(v.pc) >= 0; } catch (e) {} if (!mn) return; } } F.msgs.push(v); F.msgs.sort(function (a, b) { return (a.ts || 0) - (b.ts || 0); }); if (!panOpen() && (v.ts || 0) > seenTs()) { F.unread++; if (v.n !== myName() && Date.now() - (v.ts || 0) < 20000) bub(v); } render(); }));
       F.unsub.push(S.onChildRemoved(r, function (s) { F.msgs = F.msgs.filter(function (m) { return m.k !== s.key; }); if (!F.msgs.length) F.sys = []; render(); }));
     }).catch(function (e) { F.on = false; setSt('연결 실패: ' + (e && (e.code || e.message) || e)); });
   }
