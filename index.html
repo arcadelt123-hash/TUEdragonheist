@@ -546,8 +546,8 @@
     .ts-c.used { filter: grayscale(.7) brightness(.6); } .ts-c.cur { transform: translateY(calc(var(--y) - 12px)) rotate(var(--r)); filter: drop-shadow(0 0 8px #f6d58a); z-index: 4; }
     #tcg-ov.has-strip .tcg-bar, #tcg-ov .tcg-wrap:not(.wide) .tcg-bar { display: none; }
     .tcg-l { position: relative; } .tcg-sb { display: block; margin: -2px auto 0; border: 0 !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; cursor: pointer; filter: drop-shadow(0 3px 6px rgba(0,0,0,.55)); transition: transform .15s; } .tcg-sb img { display: block; height: 46px; width: auto; max-width: 90px; object-fit: contain; } .tcg-sb:hover { transform: translateY(-2px) scale(1.08); }
-    .tcg-mc { display: flex; flex-direction: column; align-items: center; } .tcg-mc .tcg-sb { margin-top: 2px; } .tcg-mc .tcg-sb img { height: 34px; }
-    .tcg-l > .tcg-sb, .tcg-mc > .tcg-sb { position: absolute; top: 10px; right: 10px; margin: 0; z-index: 8; } .tcg-l > .tcg-sb img { height: 36px; } .tcg-mc > .tcg-sb img { height: 30px; } .tcg-mc { position: relative; }
+    .tcg-mc.sel .tcg-flip { filter: drop-shadow(0 0 12px #f6d58a) drop-shadow(0 0 3px #fff3cf); } .tcg-mc { display: flex; flex-direction: column; align-items: center; } .tcg-mc .tcg-sb { margin-top: 2px; } .tcg-mc .tcg-sb img { height: 34px; }
+    .tcg-l > .tcg-sb, .tcg-mc > .tcg-sb { position: absolute; top: 10px; right: 10px; margin: 0; z-index: 8; } .tcg-l > .tcg-sb img { height: 34px; } .tcg-l > .tcg-sb, .tcg-mc > .tcg-sb { background: rgba(20,14,10,.62) !important; padding: 5px !important; border-radius: 50%; box-shadow: 0 0 0 1.5px rgba(255,236,190,.85), 0 3px 8px rgba(0,0,0,.5) !important; } .tcg-mc > .tcg-sb img { height: 30px; } .tcg-mc { position: relative; }
     .tcg-ctxp { position: fixed; z-index: 9800; display: flex; gap: 8px; padding: 8px 10px; background: rgba(20,16,10,.92); border: 1.5px solid #ca8a04; border-radius: 999px; box-shadow: 0 8px 22px rgba(0,0,0,.6); animation: tmIn .18s both; } .tcg-ctxp .tcg-ib { border: 1.5px solid #ca8a04; background: rgba(40,30,15,.9); border-radius: 999px; padding: 3px 10px; display: inline-flex; align-items: center; cursor: pointer; } .tcg-ctxp .tcg-ib img { height: 30px; width: auto; max-width: 40px; object-fit: contain; } #tcg-strip { height: 168px; } #tcg-ov.has-strip { padding-bottom: 176px; }
     .ts-arr { position: fixed; bottom: 70px; z-index: 5; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid #ca8a04; background: rgba(20,16,10,.8); color: #f6d58a; font-size: 1.4rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0 0 3px; } .ts-arr.l { left: 6px; } .ts-arr.r { right: 6px; }
     .ts-c { transform-origin: 50% 50%; width: 112px; margin-left: -22px; transform: translate(var(--x, 0px), var(--y, 0px)) rotate(var(--r, 0deg)) scale(var(--s, 1)); }
@@ -7334,7 +7334,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       c.style.setProperty('--r', rot.toFixed(1) + 'deg'); c.style.setProperty('--x', (RX * Math.sin(rd) - dp).toFixed(1) + 'px'); c.style.setProperty('--y', (RY * (1 - Math.cos(rd)) * 0.55 - 86 - f * 30).toFixed(1) + 'px'); c.style.setProperty('--s', (1 + f * .16).toFixed(3));
       c.style.zIndex = Math.round(100 - Math.abs(th) + f * 20); c.style.opacity = op.toFixed(2); c.style.pointerEvents = hid ? 'none' : ''; }); }
     // 부채꼴 카드를 위로 끌어 올리면 지금 카드 옆에 함께 펼침 (최대 5장)
-    let tcgMulti = [];
+    let tcgMulti = [], tcgMSel = -1, tcgMN = 0;
     function tcgStripAdd(k, id) {
       const key = k + ':' + id; if (!tcgSpec) return;
       if ((tcgMulti.length ? tcgMulti : [tcgSpec]).some(m => m.curKey === key)) { showToast('이미 펼쳐진 카드예요'); return; }
@@ -7344,8 +7344,9 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
     }
     function tcgRenderMulti() {
       const ov = document.getElementById('tcg-ov'); if (!ov) return; const n = tcgMulti.length, rows = n <= 3 ? 1 : 2, cols = Math.ceil(n / rows);
+      if (tcgMSel < 0 || tcgMSel >= n || n !== tcgMN) tcgMSel = n - 1; tcgMN = n;
       const ah = innerHeight - 170 - 20, cw = Math.max(70, Math.min(370, (innerWidth - 28 - 8 * (cols - 1)) / cols, (ah / rows - 8 - (tcgMulti.some(s => s.edit) ? 38 : 0)) * 0.72));
-      ov.innerHTML = `<div class="tcg-multi" style="--cw:${cw.toFixed(0)}px;max-width:${(cw * cols + 8 * cols).toFixed(0)}px">${tcgMulti.map((sp, i) => { const bk = sp.backFn ? sp.backFn() : ''; return `<div class="tcg-mc${sp.old && !sp.fresh ? ' old' : ''}"><div class="tcg-flip${sp.fl ? ' flip' : ''}" data-mi="${i}"><div class="tf-in"><div class="tf-f">${tcgFront(sp, false)}</div><div class="tf-b">${bk}</div></div></div>${sp.edit ? tcgSheetBtn(sp, i) : ''}</div>`; }).join('')}</div>`;
+      ov.innerHTML = `<div class="tcg-multi" style="--cw:${cw.toFixed(0)}px;max-width:${(cw * cols + 8 * cols).toFixed(0)}px">${tcgMulti.map((sp, i) => { const bk = sp.backFn ? sp.backFn() : ''; return `<div class="tcg-mc${sp.old && !sp.fresh ? ' old' : ''}${i === tcgMSel ? ' sel' : ''}"><div class="tcg-flip${sp.fl ? ' flip' : ''}" data-mi="${i}"><div class="tf-in"><div class="tf-f">${tcgFront(sp, false)}</div><div class="tf-b">${bk}</div></div></div>${sp.edit ? tcgSheetBtn(sp, i) : ''}</div>`; }).join('')}</div>`;
       tcgMulti.forEach(m => { m.old = 0; });
       tcgStrip(ov);
     }
@@ -7380,7 +7381,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
         ov.addEventListener('pointerdown', e => { ov._lp = 0; if (tcgPanel || tcgMulti.length > 1 || e.target.closest('.tcg-flip,.tcg-bar,.tcg-r,.tcg-panel,.ts-c,.ts-arr,.tcg-ask')) return; const x = e.clientX, y = e.clientY; clearTimeout(_tcgAskT); _tcgAskT = setTimeout(() => { ov._lp = Date.now(); tcgAskDeco(); }, 600); const mv = ev => { if (Math.hypot(ev.clientX - x, ev.clientY - y) > 10) { clearTimeout(_tcgAskT); } }, up = () => { clearTimeout(_tcgAskT); ov.removeEventListener('pointermove', mv); ov.removeEventListener('pointerup', up); ov.removeEventListener('pointercancel', up); }; ov.addEventListener('pointermove', mv); ov.addEventListener('pointerup', up); ov.addEventListener('pointercancel', up); }); document.body.appendChild(ov); }
       tcgRender(true);
     }
-    function tcgClose() { const ov = document.getElementById('tcg-ov'); if (ov) ov.remove(); tcgSpec = null; tcgMulti = []; window.__tcgFan = 0; window.__drawn = null; }
+    function tcgClose() { const ov = document.getElementById('tcg-ov'); if (ov) ov.remove(); tcgSpec = null; tcgMulti = []; tcgMSel = -1; tcgMN = 0; window.__tcgFan = 0; window.__drawn = null; }
     function tcgReplay() { tcgRender(false); requestAnimationFrame(() => tcgRender(true)); }
     function tcgPanelToggle() { tcgPanel = !tcgPanel; tcgRender(false); }
     function tcgSet(k, v, keepFocus) {
@@ -7400,6 +7401,21 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
     function tcgUpOpen() { if (!tcgSpec) return; if (tcgSpec.card) { pccVirt = null; pccNpc = !!tcgSpec.npc; pccId = tcgSpec.card.id; pcUpOpen(); return; } pccVirt = tcgSpec.deco; pccVirt.id = 'tcgx'; pccId = 'tcgx'; pccNpc = false; pcUpOpen(); }
     function tcgEdit(i) { const sp = (i != null && tcgMulti[i]) ? tcgMulti[i] : tcgSpec; tcgClose(); if (sp && sp.edit) sp.edit(); }
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('tcg-ov')) tcgClose(); });
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('tcg-ov') || tcgMulti.length < 2 || tcgPanel || e.ctrlKey || e.metaKey || e.altKey || /INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || '') || (e.target && e.target.isContentEditable)) return;
+      const n = tcgMulti.length, rows = n <= 3 ? 1 : 2, cols = Math.ceil(n / rows), k = (e.key || '').toLowerCase(); let hd = true;
+      if (k === 'a' || k === 'd') tcgMSel = Math.max(0, Math.min(n - 1, tcgMSel + (k === 'a' ? -1 : 1)));
+      else if (k === 'w' || k === 's') { const j = tcgMSel + (k === 'w' ? -cols : cols); if (j >= 0 && j < n) tcgMSel = j; }
+      else if (k === 'e') { if (tcgMulti[tcgMSel] && tcgMulti[tcgMSel].edit) tcgEdit(tcgMSel); return e.preventDefault(); }
+      else if (k === 'f') { const m = tcgMulti[tcgMSel]; if (m) { m.fl = !m.fl; const el = document.querySelector('.tcg-flip[data-mi="' + tcgMSel + '"]'); if (el) el.classList.toggle('flip', !!m.fl); } }
+      else if (e.key === 'ArrowLeft') tcgStripGo(-1);
+      else if (e.key === 'ArrowRight') tcgStripGo(1);
+      else if (e.key === 'ArrowUp') { const o = tcgStripCenter(); if (o && o.cs[o.bi]) tcgStripAdd(o.cs[o.bi].dataset.k, o.cs[o.bi].dataset.id); }
+      else hd = false;
+      if (!hd) return; e.preventDefault(); e.stopImmediatePropagation();
+      document.querySelectorAll('.tcg-mc').forEach((c, i) => c.classList.toggle('sel', i === tcgMSel));
+    }, true);
+    document.addEventListener('keydown', e => { if (e.key !== 'ArrowUp' || e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || e.defaultPrevented || !document.getElementById('tcg-ov') || tcgPanel || /INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || '') || (e.target && e.target.isContentEditable)) return; const sp = tcgMulti.length > 1 ? tcgMulti[tcgMulti.length - 1] : tcgSpec; if (!sp || !sp.edit) return; e.preventDefault(); tcgEdit(tcgMulti.length > 1 ? tcgMulti.length - 1 : undefined); });
     // ---- 카드 뒷면: 시트/상세 정보 ----
     function tcgBkOrder(keys, d) { const o = (d && d.bkOrd) || [], out = o.filter(k => keys.includes(k)); keys.forEach(k => { if (!out.includes(k)) out.push(k); }); return out; }
     function tcgBk(title, secs, d) {
@@ -8272,7 +8288,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
     function pcCardHtml(p, i, prev) { let h = pcCardHtml0(p, i, prev); if (h.includes('pcl-bgonly')) { const S = Number(p.cardS) || 100; if (S < 100) h = h.replace('style="aspect-ratio:', 'style="width:' + S + '%;margin-left:auto;margin-right:auto;aspect-ratio:'); if (prev) { const k = h.indexOf('pcl-bgonly'), g = h.indexOf('>', k); if (g > 0) h = h.slice(0, g + 1) + '<span class="cd-rs" title="끌어서 가로·세로 조절" data-html2canvas-ignore="true"></span>' + h.slice(g + 1); } } if (p && p.sharp) h = h.replace('class="codex-card pc-card', 'data-sharp="1" class="codex-card pc-card'); const alt2 = p && p.img2 ? `<button type="button" class="pc-altb" title="두 번째 모습 보기" aria-label="두 번째 모습 보기" onclick="event.stopPropagation();pcAltToggle(this)">⇄</button>` : ''; if (p && Array.isArray(p.tbs) && p.tbs.length) { const tb = p.tbs.map(b => `<div class="pc-tb" data-tb="${escapeHtml(b.id)}" style="left:${Number(b.x) || 50}%;top:${Number(b.y) || 50}%;font-size:${(Number(b.s) || 100) / 100 * .9}rem;${Number(b.w) > 0 ? 'width:' + Number(b.w) + '%;white-space:normal;' : ''}${Number(b.h) > 0 ? 'height:' + Number(b.h) + '%;overflow:hidden;' : ''}${b.c ? 'color:' + escapeHtml(b.c) + ';' : ''}${b.f ? 'font-family:' + escapeHtml(fontOf(b.f)) + ';' : ''}">${escapeHtml(b.t || '').replace(/\n/g, '<br>')}${prev ? '<i class="tb-rs" title="끌어서 크기 조절"></i>' : ''}</div>`).join(''); h = h.replace(/<\/div>\s*$/, tb + '</div>'); } if (p && p.off) h = h.replace('class="', 'class="pc-off '); if (p && (p.st === 'dead' || p.st === 'missing')) { h = h.replace('class="', 'class="npc-' + (p.st === 'dead' ? 'dead' : 'miss') + ' '); h = h.replace('>', '><span class="st-bd">' + (p.st === 'dead' ? '†' : '?') + '</span>'); } if (p && (p.st === 'gray' || p.st === 'foe')) h = h.replace('class="', 'class="npc-' + p.st + ' '); if (alt2) { h = h.replace('>', ` data-alt="${escapeHtml(p.img2)}">`); h = h.replace(/<\/div>\s*$/, alt2 + '</div>'); } return h; }
     function npcStSet(id, st) { const n = state.globalNpcs.find(x => x.id === id); if (!n) return; if (st) n.st = st; else delete n.st; persistState(); try { renderNpcCodex(); } catch (e) {} if (pccNpc && pccId === id) { try { pcCfgRender(); } catch (e) {} } }
     function npcDelFan(id) { const n = state.globalNpcs.find(x => x.id === id); if (!n) return; delHint(); npcRemoveCore(id); state.boardTex.npcCards = (state.boardTex.npcCards || []).filter(x => x.id !== id); persistState(); if (pccNpc && pccId === id) closePcCfg(); try { renderNpcCodex(); } catch (e) {} }
-    function npcToolsHtml(id) { const n = state.globalNpcs.find(x => x.id === id) || {}, st = n.st || '', b = (v, l) => { const ik = LG_STI[LG_C2ST[v]]; return `<button type="button" class="${st === v ? 'on' : ''}${ik ? ' fan-sti' : ''}" title="${l}" aria-label="${l}" onclick="event.stopPropagation();npcStSet('${id}','${v}')">${ik ? `<img src="${ik}" alt="">` : l}</button>`; }; const tg = (n.tags || []).map(t => `<span class="fan-tg">${escapeHtml(t)}<i title="태그 지우기" data-k="${escapeHtml(t)}" onclick="event.stopPropagation();npcTagDel('${id}',this.dataset.k)">×</i></span>`).join(''); return `<div class="fan-tools">${b('gray', '비활성화')}${b('', '생존')}${b('dead', '사망')}${b('missing', '실종')}${b('foe', '적대')}<button type="button" class="del" onclick="event.stopPropagation();npcDelFan('${id}')">삭제</button></div>`; }
+    function npcToolsHtml(id) { const n = state.globalNpcs.find(x => x.id === id) || {}, st = n.st || '', b = (v, l) => { const ik = LG_STI[LG_C2ST[v]]; return `<button type="button" class="${st === v ? 'on' : ''}${ik ? ' fan-sti' : ''}" title="${l}" aria-label="${l}" onclick="event.stopPropagation();npcStSet('${id}','${v}')">${ik ? `<img src="${ik}" alt="">` : l}</button>`; }; const tg = (n.tags || []).map(t => `<span class="fan-tg">${escapeHtml(t)}<i title="태그 지우기" data-k="${escapeHtml(t)}" onclick="event.stopPropagation();npcTagDel('${id}',this.dataset.k)">×</i></span>`).join(''); return `<div class="fan-tools"><button type="button" class="del" onclick="event.stopPropagation();npcDelFan('${id}')">삭제</button></div>`; }
     function pcCardHtml0(p, i, prev) {
       const sh = p.sheet || {}, ty = PC_TYPES.some(t => t[0] === p.cardType) ? p.cardType : 'custom', src = p.art || p.img || '';
       const info = p.showInfo ? pcInfoLines(p) : [];
