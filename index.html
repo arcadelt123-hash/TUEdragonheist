@@ -2228,6 +2228,7 @@
         <button class="btn btn-primary btn-icon-top" id="top-add-btn" onclick="handleTopAddButton()" title="퀘스트 추가" aria-label="퀘스트 추가"><img class="ico-img top-ico" src="" data-ico="feather" alt=""></button>
         
         <button class="btn btn-secondary btn-icon-top" onclick="gsOpen()" title="통합 검색 (Ctrl+K)" aria-label="통합 검색"><img class="ico-img top-ico" id="gs-ico" src="" data-ico="search" alt=""></button>
+        <button class="btn btn-secondary" id="r20-btn" onclick="r20Open()" title="Roll20 연동 (날짜·거래 복사)" aria-label="Roll20 연동" style="display:none;padding:2px 8px;font-weight:700;align-items:center">R20</button>
         <button class="btn btn-secondary" id="qtrash-btn" onclick="qTrashOpen()" title="삭제된 퀘스트 (GM 휴지통)" aria-label="삭제된 퀘스트" style="display:none;position:relative;padding:2px 6px;align-items:center"><img id="qtrash-ico" alt="" style="width:26px;height:26px;object-fit:contain"><span id="qtrash-n" style="position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:8px;background:#7a4a14;color:#fff;font-size:11px;line-height:16px;text-align:center;padding:0 3px"></span></button>
         <button class="btn btn-secondary" id="sellreq-btn" onclick="sellReqGo()" title="판매 요청이 왔어요 — 눌러서 상점으로" aria-label="판매 요청" style="display:none;position:relative;padding:2px 6px;align-items:center"><img id="sellreq-ico" alt="" style="width:26px;height:26px;object-fit:contain"><span id="sellreq-n" style="position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:8px;background:#c0392b;color:#fff;font-size:11px;line-height:16px;text-align:center;padding:0 3px"></span></button>
         <button class="btn btn-secondary" id="presence-btn" onclick="presenceRename()" title="접속 중인 사람 (클릭: 내 이름 바꾸기)" style="display:none;gap:4px;align-items:center;padding:2px 8px;"></button>
@@ -5076,6 +5077,44 @@
       try { const rt = ((typeof mapData !== 'undefined' && mapData && mapData.realmTime) ? mapData : (mapLocal() || {})).realmTime; if (rt && rt.month) return (Number(rt.year) || '') + ' DR, ' + rt.month + ' ' + (Number(rt.day) || 1); } catch (e) {}
       return new Date().toLocaleDateString('sv-SE');
     };
+    // ---- Roll20 (ParchmentCards Mod) 연동: 날짜·상점 거래 복사 / Roll20 날짜 받기 ----
+    function r20Rt() { try { const rt = ((typeof mapData !== 'undefined' && mapData && mapData.realmTime) ? mapData : (mapLocal() || {})).realmTime; if (rt && rt.month) return { year: Number(rt.year) || 1492, month: String(rt.month), day: Number(rt.day) || 1, timeSlot: String(rt.timeSlot || ''), festival: String(rt.festival || '') }; } catch (e) {} return null; }
+    function r20DateCmd() { const r = r20Rt(); if (!r) return ''; return '!시간 동기 ' + [r.year, r.month, r.day, r.timeSlot || 'Morning', r.festival].join('|'); }
+    function r20ShopCmd() {
+      const pcs = (state.boardTex.pcs || []).filter(p => p && !p.off && p.sheet).map(p => {
+        const d = (p.sheet && p.sheet.detail) || {}, m = d.money || {};
+        return { n: p.name || '', gp: Number(m.gp) || 0, sp: Number(m.sp) || 0, cp: Number(m.cp) || 0, L: (d.ledger || []).filter(e => /·\s*(구매|판매)\s*:/.test(e.text || '')).slice(0, 40).map(e => String(e.d || '').replace(/\|/g, '/') + '|' + e.text) };
+      });
+      const o = { pcs }, r = r20Rt(); if (r) o.date = r;
+      return '!상점반영 ' + JSON.stringify(o).replace(/\[\[/g, '[ [').replace(/\]\]/g, '] ]').replace(/\{\{/g, '{ {').replace(/\}\}/g, '} }');
+    }
+    function r20Copy(kind) {
+      const txt = kind === 'date' ? r20DateCmd() : r20ShopCmd();
+      if (!txt) { showToast('지도의 인게임 날짜가 아직 없어요. 지도에서 날짜를 먼저 정해 주세요.'); return; }
+      const done = () => showToast('복사했어요. Roll20 채팅에 붙여넣고 Enter를 누르세요.');
+      const fb = () => { const t = document.createElement('textarea'); t.value = txt; t.style.cssText = 'position:fixed;left:-999px'; document.body.appendChild(t); t.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e) {} t.remove(); if (ok) done(); else { const b = document.getElementById('r20-ta'); if (b) { b.value = txt; b.style.display = 'block'; b.select(); } showToast('자동 복사가 막혔어요. 아래 글을 직접 복사해 주세요.'); } };
+      try { navigator.clipboard.writeText(txt).then(done, fb); } catch (e) { fb(); }
+    }
+    function r20Open() {
+      if (!AUTH_S.gm || plView()) return; const old = document.getElementById('r20-ov'); if (old) old.remove();
+      const ov = document.createElement('div'); ov.id = 'r20-ov'; ov.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center';
+      const r = r20Rt(), dt = r ? r.year + ' DR, ' + r.month + ' ' + r.day + (r.timeSlot ? ' · ' + r.timeSlot : '') + (r.festival ? ' [' + r.festival + ']' : '') : '(지도에 날짜가 없어요)';
+      ov.innerHTML = `<div style="background:#fbf3df;color:#3b2a14;border:2px solid #b8893a;border-radius:12px;padding:14px;width:min(460px,94vw);font:13px sans-serif"><div style="display:flex;align-items:center;gap:8px"><b style="font-size:15px;flex:1">Roll20 연동 (ParchmentCards)</b><button class="btn btn-secondary" style="padding:3px 10px" onclick="document.getElementById('r20-ov').remove()">닫기</button></div>
+        <p style="margin:8px 0 4px">인게임 날짜: <b>${escapeHtml(dt)}</b></p>
+        <p style="opacity:.7;margin:0 0 10px">복사한 글을 Roll20 채팅에 붙여넣으면 Mod가 처리해요. (Roll20에 ParchmentCards가 켜져 있어야 해요)</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-primary" onclick="r20Copy('date')">날짜 복사 (!시간 동기)</button><button class="btn btn-primary" onclick="r20Copy('shop')">소지금·거래 복사 (!상점반영)</button></div>
+        <textarea id="r20-ta" readonly style="display:none;width:100%;height:80px;margin-top:8px"></textarea></div>`;
+      document.body.appendChild(ov); ov.addEventListener('pointerdown', e => { if (e.target === ov) ov.remove(); });
+    }
+    // Roll20 Mod의 "저널에 반영" 링크: ...#r20date=1492|Mirtul|15|Morning|축제
+    function r20ApplyDate(key) {
+      const p = String(key || '').split('|').map(x => x.trim()), y = parseInt(p[0], 10), mo = p[1], d = parseInt(p[2], 10) || 1; if (!(y > 0) || !mo) return;
+      if (!confirm('Roll20 날짜로 저널의 인게임 날짜를 바꿀까요?\n\n' + y + ' DR, ' + mo + ' ' + d + (p[3] ? ' · ' + p[3] : '') + (p[4] ? ' [' + p[4] + ']' : ''))) return;
+      const apply = base => { base = base || { maps: [], pins: [] }; base.realmTime = Object.assign({}, base.realmTime || {}, { year: y, month: mo, day: Math.max(1, Math.min(30, d)), timeSlot: p[3] || (base.realmTime || {}).timeSlot || 'Morning', festival: p[4] || '' }); mapSave(base, true); try { if (mapReady) mapInit(base); } catch (e) {} showToast('인게임 날짜를 Roll20과 맞췄어요.'); };
+      srvMapLoad(dd => { const ok = dd && ((dd.maps && dd.maps.length) || (dd.pins && dd.pins.length) || dd.imageData); const loc = mapLocal(); if (ok) apply(dd); else if (loc) apply(loc); else showToast('지도 데이터를 불러오지 못해서 날짜를 바꾸지 못했어요.'); }, () => { const loc = mapLocal(); if (loc) apply(loc); else showToast('지도 데이터를 불러오지 못해서 날짜를 바꾸지 못했어요.'); });
+    }
+    (function () { try { const m = String(location.hash || '').match(/^#r20date=(.+)$/); if (!m) return; const key = decodeURIComponent(m[1]); let n = 0; const t = setInterval(() => { if (++n > 40) { clearInterval(t); return; } if (!(AUTH_S.gm && !plView())) return; clearInterval(t); try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} r20ApplyDate(key); }, 500); } catch (e) {} })();
+    setInterval(() => { try { const b = document.getElementById('r20-btn'); if (b) b.style.display = (AUTH_S.gm && !plView()) ? 'inline-flex' : 'none'; } catch (e) {} }, 900);
     function qTrashList() { const b = state.boardTex = state.boardTex || {}; b.qTrash = Array.isArray(b.qTrash) ? b.qTrash : []; return b.qTrash; }
     function questSoftDelete(id) {
       const i = state.quests.findIndex(x => x.id === id); if (i < 0) return; const q = state.quests[i];
