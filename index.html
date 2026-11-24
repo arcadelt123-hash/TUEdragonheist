@@ -9497,6 +9497,14 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       persistState(); try { sheetSend(); } catch (e) {} try { renderAll(); } catch (e) {} showToast(plan.length + '명의 소지금을 Roll20과 맞췄어요.');
     }
     (function () { try { const m = String(location.hash || '').match(/^#r20sheet=(.+)$/); if (!m) return; const raw = decodeURIComponent(m[1]); let n = 0; const t = setInterval(() => { if (++n > 360) { clearInterval(t); return; } if (!(AUTH_S.gm && !plView())) return; clearInterval(t); try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} r20SheetImport(raw); }, 500); } catch (e) {} })();
+    // Roll20 !상점열기 링크: ...#shop=잡화점&pc=Tulian  → 로그인 뒤 그 PC로 그 상점을 바로 열어요
+    (function () { try { const m = String(location.hash || '').match(/^#shop=([^&]*)&pc=(.*)$/); if (!m) return; const sn = decodeURIComponent(m[1]), pn = decodeURIComponent(m[2]); let n = 0;
+      const t = setInterval(() => { if (++n > 360) { clearInterval(t); return; } if (document.getElementById('auth-ov') || !((state.boardTex || {}).pcs || []).length) return; clearInterval(t);
+        try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+        const sq = x => String(x || '').replace(/\s+/g, '').toLowerCase(), shops = shopsList(), sh = (sn && shops.find(s => sq(s.name) === sq(sn))) || (sn && shops.find(s => sq(s.name).includes(sq(sn)))) || shops.find(s => !s.off) || shops[0];
+        const pc = pn && (state.boardTex.pcs || []).find(p => sq(p.name) === sq(pn));
+        if (pc && canEditPc(pc.id)) state.shopPc = pc.id; if (sh) state.shopId = sh.id; state.shopSel = null;
+        try { setViewMode('journal', ''); jSet('jView', 'shop'); } catch (e) {} try { renderShop(); } catch (e) {} }, 500); } catch (e) {} })();
     function renderNpcModal() {
       const n = state.globalNpcs.find(x => x.id === npcEditId), box = document.getElementById('npc-md-box'); if (!n) { closeNpcModal(); return; }
       box.innerHTML = `<div class="npc-md-top"><div class="npc-md-av">${n.image ? `<img src="${escapeHtml(n.image)}" alt="">` : ICONS.npc}</div>
