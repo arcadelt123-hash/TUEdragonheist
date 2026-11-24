@@ -2187,8 +2187,7 @@
 </style>
 <link rel="preconnect" href="https://cdn.tailwindcss.com">
 <script>/* 캐릭터 시트가 쓸 라이브러리를 한가할 때 미리 받아 둠 */(function(){function pf(){['https://cdn.tailwindcss.com'].forEach(function(u){var l=document.createElement('link');l.rel='prefetch';l.as='script';l.href=u;document.head.appendChild(l);});}if('requestIdleCallback' in window)window.addEventListener('load',function(){requestIdleCallback(pf,{timeout:4000});});else window.addEventListener('load',function(){setTimeout(pf,2500);});})();</script>
-  <style>/* 1차 수정: 좁은 화면(전체 퀘스트·도감·지도 등)에서도 상단 메뉴바를 넓은 화면과 같은 폭으로 펼쳐 글자가 세로로 꺾이지 않게 */
-    .container:not(.wide) > .top-bar { --tbw: max(100%, min(1178px, calc(100vw - 48px))); width: var(--tbw) !important; max-width: none !important; margin-left: calc((100% - var(--tbw)) / 2) !important; margin-right: calc((100% - var(--tbw)) / 2) !important; }
+  <style>/* 1차 수정: 상단 메뉴 칩 글자가 세로로 꺾이지 않게 */
     .top-bar #gmcast-btn, .top-bar #shoplive-btn, .top-bar #r20-btn { white-space: nowrap; }
   </style>
 </head>
@@ -11643,5 +11642,29 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
 })();
 </script>
 
+<script>/* 1차 수정: 상단 메뉴바가 버튼보다 좁거나(좁은 화면) '상단 메뉴 꾸미기'에서 정한 가로 길이보다 좁으면
+   필요한 만큼 넓히고 가운데 맞춤. 화면마다 메뉴바 폭이 달라지지 않게 해요. */
+(function () {
+  function fit() {
+    try {
+      var tb = document.querySelector('.top-bar'); if (!tb || !tb.offsetParent) return;
+      ['min-width', 'margin-left', 'margin-right'].forEach(function (p) { tb.style.removeProperty(p); });
+      var cs = getComputedStyle(tb), gap = parseFloat(cs.columnGap) || 0;
+      var kids = Array.prototype.filter.call(tb.children, function (c) { var s = getComputedStyle(c); return s.display !== 'none' && s.position !== 'absolute' && s.position !== 'fixed'; });
+      var need = Math.ceil(kids.reduce(function (a, c) { return a + c.scrollWidth; }, 0) + gap * Math.max(0, kids.length - 1) + parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + 2);
+      var set = 0; try { set = Number((typeof tbarGet === 'function' ? tbarGet() : {}).w) || 0; } catch (e) {}   // '상단 메뉴 꾸미기'에서 정한 가로 길이
+      var w = Math.min(Math.max(need, set), window.innerWidth - 56);   // 넓은 화면의 원래 폭(화면 - 56px)과 같게
+      if (window.innerWidth <= 760 || w <= tb.getBoundingClientRect().width + 1) return;   // 모바일은 원래대로 두 줄 배치
+      tb.style.setProperty('min-width', w + 'px', 'important');
+      var p = tb.parentElement, pc = getComputedStyle(p), pw = p.clientWidth - parseFloat(pc.paddingLeft) - parseFloat(pc.paddingRight);
+      if (w > pw) { var m = (pw - w) / 2 + 'px'; tb.style.setProperty('margin-left', m, 'important'); tb.style.setProperty('margin-right', m, 'important'); }
+    } catch (e) {}
+  }
+  window.tbFit = fit;
+  window.addEventListener('resize', fit);
+  window.addEventListener('load', fit);
+  setInterval(fit, 800);
+})();
+</script>
 </body>
 </html>
