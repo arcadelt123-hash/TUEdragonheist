@@ -2187,6 +2187,10 @@
 </style>
 <link rel="preconnect" href="https://cdn.tailwindcss.com">
 <script>/* 캐릭터 시트가 쓸 라이브러리를 한가할 때 미리 받아 둠 */(function(){function pf(){['https://cdn.tailwindcss.com'].forEach(function(u){var l=document.createElement('link');l.rel='prefetch';l.as='script';l.href=u;document.head.appendChild(l);});}if('requestIdleCallback' in window)window.addEventListener('load',function(){requestIdleCallback(pf,{timeout:4000});});else window.addEventListener('load',function(){setTimeout(pf,2500);});})();</script>
+  <style>/* 1차 수정: 좁은 화면(전체 퀘스트·도감·지도 등)에서도 상단 메뉴바를 넓은 화면과 같은 폭으로 펼쳐 글자가 세로로 꺾이지 않게 */
+    .container:not(.wide) > .top-bar { --tbw: max(100%, min(1178px, calc(100vw - 48px))); width: var(--tbw) !important; max-width: none !important; margin-left: calc((100% - var(--tbw)) / 2) !important; margin-right: calc((100% - var(--tbw)) / 2) !important; }
+    .top-bar #gmcast-btn, .top-bar #shoplive-btn, .top-bar #r20-btn { white-space: nowrap; }
+  </style>
 </head>
 <body>
   <div id="toast" role="status" aria-live="polite"></div>
@@ -2728,7 +2732,7 @@
     setInterval(() => { const s = JSON.stringify(lampCfg() || 0) + '|' + lampOwner(); if (s !== window.__lampSig) { window.__lampSig = s; lampApply(); } }, 1500);
     function lampBoxRender() {
       const el = document.getElementById('lamp-body'); if (!el) return; const vt = lampTgt(), lg = (k, d) => lampGet(k, d, vt || undefined), st0 = lg('adv_lamp_style', 'lamp'), st = (st0 === 'white' || st0 === 'tree') ? st0 : 'lamp', pos = lg('adv_lamp_pos', 'bl'), sy = lg('adv_lamp_sync', '1') !== '0';
-      const tsel = AUTH_S.gm ? `<div class="lp-row">설정 대상 <select onchange="lampTgtSet(this.value)"><option value=""${!window.__lampTgt ? ' selected' : ''}>내 설정</option><option value="def"${window.__lampTgt === 'def' ? ' selected' : ''}>기본값 (모두에게 적용)</option><option value="gm"${window.__lampTgt === 'gm' ? ' selected' : ''}>시금치 (GM)</option>${plsList().map(p => `<option value="${escapeHtml(p.id)}"${window.__lampTgt === p.id ? ' selected' : ''}>${escapeHtml(p.name || 'PL')}</option>`).join('')}</select></div>` : '';
+      const tsel = (AUTH_S.gm && !plView()) ? `<div class="lp-row">설정 대상 <select onchange="lampTgtSet(this.value)"><option value=""${!window.__lampTgt ? ' selected' : ''}>내 설정</option><option value="def"${window.__lampTgt === 'def' ? ' selected' : ''}>기본값 (모두에게 적용)</option><option value="gm"${window.__lampTgt === 'gm' ? ' selected' : ''}>시금치 (GM)</option>${plsList().map(p => `<option value="${escapeHtml(p.id)}"${window.__lampTgt === p.id ? ' selected' : ''}>${escapeHtml(p.name || 'PL')}</option>`).join('')}</select></div>` : '';
       const tnote = vt === 'def' ? '기본값: PL이 따로 정하지 않은 사람에게 적용돼요.' : (vt ? '이 설정은 해당 PL이 어느 기기로 접속해도 따라가요.' : '이 설정은 내 계정(PL)에 저장돼서 다른 기기에서도 똑같이 보여요.');
       const o = [['lamp', '등불'], ['tree', '촛불 나무'], ['white', '표식']];
       const ps = lg('adv_pres_style', 'lamp'), po = [['lamp', '등불'], ['tree', '촛불 나무'], ['white', '표식']];
@@ -2774,7 +2778,7 @@
 
 
     // ===== 서버 연결: google.script.run 이 응답 없으면 같은 주소로 직접 요청(fetch)으로 자동 전환 =====
-    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxCEJMUwjlRuK43uPnQ2ukiUTkhGvIQX9PC9_an6tYKCXL9NuOLk6E9zK5jQHZQk5x3/exec';
+    const EXEC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbwJ-98tXwMDDOlBcRfzVARwU3Ub5ixtObVjSIVsdalMPgvidSjh5RhUlW-8I8rtfG7X/exec';
     function execUrl() { try { return localStorage.getItem('adventure_exec_url') || EXEC_URL_DEFAULT; } catch (e) { return EXEC_URL_DEFAULT; } }
     function diagShow(msg) { try { console.info('[sync]', msg); } catch (e) {} }
     const AUTH_S = { tk: (() => { try { return localStorage.getItem('adv_dev_tk') || ''; } catch (e) { return ''; } })(), gm: false, off: false, st: null, gate: false, bg: '' };
@@ -3812,7 +3816,7 @@
       const opt = (cur, k, n) => `<option value="${k}"${cur === k ? ' selected' : ''}>${n}</option>`;
       const frs = (typeof frameList === 'function' ? frameList() : []).filter(f => f.w != null && !(typeof isHid === 'function' && isHid('fr', f.k))), okSel = d.bd && d.bd.startsWith('f:') && LG_BD_OK.includes(d.bd.slice(2));
       el.innerHTML = `<div style="display:flex;align-items:center"><b style="flex:1">로그 화면 꾸미기</b><button class="lg-x" onclick="lgDecoToggle()">✕</button></div>
-        ${(() => { const t = lgTgt(), g = AUTH_S.gm, m = (state.boardTex || {}).lgDecoBy || {}; const sel = g ? `<label>설정 대상 <select onchange="lgDecoTgtSet(this.value)"><option value=""${!window.__lgTgt ? ' selected' : ''}>내 설정</option><option value="def"${window.__lgTgt === 'def' ? ' selected' : ''}>기본값 (모두에게 적용)</option>${(window.__lgTgt !== 'gm' && lgPlKey() !== 'gm') ? '<option value="gm">시금치 (GM)</option>' : ''}${plsList().map(p => `<option value="${escapeHtml(p.id)}"${window.__lgTgt === p.id ? ' selected' : ''}>${escapeHtml(p.name || 'PL')}</option>`).join('')}</select></label>` : ''; const own = t && t !== 'def' && !(m[t] && typeof m[t] === 'object'); const note = t === 'def' ? '기본값: 따로 꾸미지 않은 PL에게 보여요.' : (own ? '아직 꾸미지 않아서 기본값이 보여요. 바꾸면 내 화면으로 저장돼요.' : '내 계정에 저장돼서 어느 기기에서도 이 화면이 보여요.'); return `${sel}<div class="manual-note" style="font-size:.75rem;margin:4px 0">${note} <button type="button" class="pm-b" onclick="lgDecoReset()">${t === 'def' ? '기본값 비우기' : '기본값으로 되돌리기'}</button></div>`; })()}
+        ${(() => { const t = lgTgt(), g = AUTH_S.gm && !plView(), m = (state.boardTex || {}).lgDecoBy || {}; const sel = g ? `<label>설정 대상 <select onchange="lgDecoTgtSet(this.value)"><option value=""${!window.__lgTgt ? ' selected' : ''}>내 설정</option><option value="def"${window.__lgTgt === 'def' ? ' selected' : ''}>기본값 (모두에게 적용)</option>${(window.__lgTgt !== 'gm' && lgPlKey() !== 'gm') ? '<option value="gm">시금치 (GM)</option>' : ''}${plsList().map(p => `<option value="${escapeHtml(p.id)}"${window.__lgTgt === p.id ? ' selected' : ''}>${escapeHtml(p.name || 'PL')}</option>`).join('')}</select></label>` : ''; const own = t && t !== 'def' && !(m[t] && typeof m[t] === 'object'); const note = t === 'def' ? '기본값: 따로 꾸미지 않은 PL에게 보여요.' : (own ? '아직 꾸미지 않아서 기본값이 보여요. 바꾸면 내 화면으로 저장돼요.' : '내 계정에 저장돼서 어느 기기에서도 이 화면이 보여요.'); return `${sel}<div class="manual-note" style="font-size:.75rem;margin:4px 0">${note} <button type="button" class="pm-b" onclick="lgDecoReset()">${t === 'def' ? '기본값 비우기' : '기본값으로 되돌리기'}</button></div>`; })()}
         <h4>배경 텍스처</h4><label>종류 <select onchange="lgDecoSet('tex',this.value)">${opt(d.tex || '', '', '없음')}${Object.keys(LG_TEX).map(k => opt(d.tex || '', k, LG_TEX[k][0])).join('')}</select></label>
         <label>강도 <input type="range" min="10" max="100" value="${d.ti == null ? 40 : d.ti}" oninput="lgDecoSet('ti',+this.value,1)"></label><label>크기 <input type="range" min="40" max="300" value="${d.tz || 100}" oninput="lgDecoSet('tz',+this.value,1)"></label>
         <label>바탕색 <input type="color" value="${d.bg || '#fffaf0'}" oninput="lgDecoSet('bg',this.value,1)"></label>
@@ -6850,7 +6854,7 @@
     function renderShop() {
       const area = document.getElementById('main-content-area'); if (!area) return;
       if (!SHOP_CAT) { area.innerHTML = jHeaderHtml() + '<div class="bg-wait">상점을 불러오는 중…</div>'; shopCatLoad(() => { if (state.jView === 'shop') renderShop(); }); return; }
-      const gm = !!AUTH_S.gm, gmv0 = gm && !plView(), L = shopsList().filter(s => gmv0 || !s.off);
+      const gm = !!AUTH_S.gm && !plView(), gmv0 = gm, L = shopsList().filter(s => gmv0 || !s.off);
       if (!L.some(s => s.id === state.shopId)) state.shopId = L.length ? L[0].id : '';
       const sh = L.find(s => s.id === state.shopId), by = shopBuyer(), q = (state.shopQ || '').toLowerCase(), cat = state.shopCat || 'all';
       const d = shopData(by), ed = !!state.shopIcEdit;
@@ -7192,7 +7196,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
           ov.innerHTML = `<div class="itd-b"><button class="itd-x" onclick="document.getElementById('itd').remove()" aria-label="닫기">×</button>
             <div class="itd-top"><div class="itd-img">${(o.img || o.alt) ? `<img src="${escapeHtml(o.img || o.alt)}" alt="" onerror="this.remove()">` : escapeHtml([...(o.n || '?')][0])}</div><div><div class="itd-nm">${escapeHtml(koN(o) || '아이템')}</div><div class="itd-sub">${escapeHtml([o.f, o.cp ? shopPriceTxt(o.cp) : '', o.w ? o.w + ' lb' : ''].filter(Boolean).join(' · '))}</div></div></div>
             ${(e.p || []).length ? `<table class="itd-p">${e.p.map(r => `<tr><th>${escapeHtml(r[0])}</th><td>${escapeHtml(r[1])}</td></tr>`).join('')}</table>` : ''}
-            <div class="itd-d">${koD(ref) ? koD(ref).split(/\n{2,}/).map(p => '<p>' + escapeHtml(p).replace(/\n/g, '<br>') + '</p>').join('') + `<p class="itd-en" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">원문 보기 ▾</p><div style="display:none">${e.h ? itdSafe(e.h) : ''}</div>` : (e.h ? itdSafe(e.h) : (o.d ? '<p>' + escapeHtml(o.d) + '</p>' : '<p>설명이 없어요.</p>'))}</div>${(() => { try { return AUTH_S.gm; } catch (_) { return false; } })() ? `<div class="itd-tr"><button type="button" onclick="itemKoEdit('${ref}')">번역 편집</button>${koU(ref) ? `<button type="button" onclick="itemKoClear('${ref}')">내 번역 지우기</button>` : ''}</div>` : ''}</div>`;
+            <div class="itd-d">${koD(ref) ? koD(ref).split(/\n{2,}/).map(p => '<p>' + escapeHtml(p).replace(/\n/g, '<br>') + '</p>').join('') + `<p class="itd-en" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">원문 보기 ▾</p><div style="display:none">${e.h ? itdSafe(e.h) : ''}</div>` : (e.h ? itdSafe(e.h) : (o.d ? '<p>' + escapeHtml(o.d) + '</p>' : '<p>설명이 없어요.</p>'))}</div>${(() => { try { return AUTH_S.gm && !plView(); } catch (_) { return false; } })() ? `<div class="itd-tr"><button type="button" onclick="itemKoEdit('${ref}')">번역 편집</button>${koU(ref) ? `<button type="button" onclick="itemKoClear('${ref}')">내 번역 지우기</button>` : ''}</div>` : ''}</div>`;
           ov.addEventListener('pointerdown', ev => { if (ev.target === ov) ov.remove(); }); document.body.appendChild(ov);
         };
         if (ITD_C[k]) return go(ITD_C[k]);
@@ -7339,7 +7343,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
     function clueBgBoxRender() {
       const el = document.getElementById('cluebg-body'); if (!el) return; const t = clueTgt(), cur = clueTgtVal(t || 'def'), b = state.boardTex;
       const own = t && t !== 'def' && !((b.clueBgPl || {})[t]);
-      const sel = AUTH_S.gm ? `<div style="margin-bottom:6px;font-size:.85rem">설정 대상 <select onchange="window.__clueTgt=this.value;clueBgBoxRender()"><option value=""${!window.__clueTgt ? ' selected' : ''}>내 설정</option><option value="def"${window.__clueTgt === 'def' ? ' selected' : ''}>기본값 (모두에게 적용)</option><option value="gm"${window.__clueTgt === 'gm' ? ' selected' : ''}>시금치 (GM)</option>${plsList().map(p => `<option value="${escapeHtml(p.id)}"${window.__clueTgt === p.id ? ' selected' : ''}>${escapeHtml(p.name || 'PL')}</option>`).join('')}</select></div>` : '';
+      const sel = (AUTH_S.gm && !plView()) ? `<div style="margin-bottom:6px;font-size:.85rem">설정 대상 <select onchange="window.__clueTgt=this.value;clueBgBoxRender()"><option value=""${!window.__clueTgt ? ' selected' : ''}>내 설정</option><option value="def"${window.__clueTgt === 'def' ? ' selected' : ''}>기본값 (모두에게 적용)</option><option value="gm"${window.__clueTgt === 'gm' ? ' selected' : ''}>시금치 (GM)</option>${plsList().map(p => `<option value="${escapeHtml(p.id)}"${window.__clueTgt === p.id ? ' selected' : ''}>${escapeHtml(p.name || 'PL')}</option>`).join('')}</select></div>` : '';
       const cells = clueBgList().filter(x => !isHid('bg', x[0]) || cur === x[0]).map(x => { const pp = patOf(x[0]); return `<div class="pm-c" style="cursor:pointer;${cur === x[0] ? 'outline:2px solid #d9a83a;outline-offset:1px;border-radius:6px;' : ''}" onclick="clueBgPick('${x[0]}')"><div class="pm-sw ${pp && pp.cls ? pp.cls : ''}" style="${pp ? pp.st.replace(/"/g, '&quot;') : ''}"></div><span>${escapeHtml(x[1])}</span></div>`; }).join('');
       el.innerHTML = `${sel}<div class="manual-note" style="margin-bottom:6px">${t === 'def' ? '기본값: PL이 따로 정하지 않은 사람의 단서 탭 배경이에요.' : (t ? '이 설정은 해당 PL이 어느 기기로 접속해도 따라가요.' : '내 계정(PL)에 저장돼서 다른 기기에서도 똑같이 보여요.')}${t && t !== 'def' ? ` <button class="pm-b" onclick="clueBgReset()">${own ? '기본값 따르는 중' : '기본값 따라가기'}</button>` : ''}</div><div class="pm-grid pm-in">${cells}</div>`;
     }
@@ -9533,7 +9537,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
     // ===== NPC 소지품 + PC에게 보내기 (기록 남김) =====
     function npcItemsOf(n) { n.items = Array.isArray(n.items) ? n.items : []; return n.items; }
     function npcItemsHtml(n) {
-      if (!AUTH_S.gm) return '';
+      if (!AUTH_S.gm || plView()) return '';
       const L = npcItemsOf(n), log = Array.isArray(n.xfer) ? n.xfer : [];
       const row = it => `<div class="ni-row"><span class="ni-ic">${it.img ? `<img src="${escapeHtml(it.img)}" alt="" loading="lazy" onerror="this.remove()">` : escapeHtml([...(it.name || '?')][0])}</span><b title="${escapeHtml(it.note || '')}"${it.ref ? ` style="cursor:pointer;text-decoration:underline dotted" onclick="itemDescShow('${it.ref}')"` : ''}>${escapeHtml(it.name || '(이름 없음)')}</b><span class="ni-q"><button onclick="npcItemQty('${n.id}','${it.id}',-1)">−</button>${Number(it.qty) || 0}<button onclick="npcItemQty('${n.id}','${it.id}',1)">+</button></span><button class="btn-mini" onclick="npcItemSendOpen('${n.id}','${it.id}')">보내기</button><button class="btn-mini" onclick="npcItemDel('${n.id}','${it.id}')">×</button></div>`;
       return `<div class="ni-box"><div class="ni-h"><b>소지품 ${L.length}종</b><span style="flex:1"></span><button class="btn-mini" onclick="npcItemCat('${n.id}')">+ 카탈로그</button><button class="btn-mini" onclick="npcItemAdd('${n.id}')">+ 직접</button></div>
