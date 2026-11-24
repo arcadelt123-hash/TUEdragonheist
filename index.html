@@ -4158,7 +4158,7 @@
           loadSettled = true;
           clearTimeout(loadTimer); clearInterval(window.__syncTick);
           console.error(err);
-          showToast('서버 오류: ' + (err && err.message ? err.message : '시트 응답 실패'));
+          if (!document.getElementById('auth-ov')) showToast('서버 오류: ' + (err && err.message ? err.message : '시트 응답 실패'));   // 2차 보완: 로그인·PL 고르기 화면에서는 띄우지 않음
           loadFromCache('연결 오류: ' + (err && err.message ? err.message : '시트 응답 실패'));
         });
     }
