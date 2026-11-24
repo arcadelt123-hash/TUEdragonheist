@@ -4159,7 +4159,7 @@
           clearTimeout(loadTimer); clearInterval(window.__syncTick);
           console.error(err);
           if (!document.getElementById('auth-ov')) showToast('서버 오류: ' + (err && err.message ? err.message : '시트 응답 실패'));   // 2차 보완: 로그인·PL 고르기 화면에서는 띄우지 않음
-          loadFromCache('연결 오류: ' + (err && err.message ? err.message : '시트 응답 실패'));
+          if (!document.getElementById('auth-ov')) loadFromCache('연결 오류: ' + (err && err.message ? err.message : '시트 응답 실패'));   // 2차 보완: 로그인 화면 뒤에서 오래된 임시 저장본을 꺼내지 않음
         });
     }
 
@@ -4592,7 +4592,9 @@
       syncConf = true; return m;
     }
     function syncMergeFromServer(retry) {
-      if (!SYNC_BASE || syncMergeN >= 3) { syncMergeN = 0; persistState(true); return; }
+      // 2차 보완(데이터 보호): 예전에는 여기서 이 기기 내용으로 서버를 강제로 덮어썼어요 → 이제는 서버 최신 데이터로 맞추거나 멈춰요
+      if (!SYNC_BASE) { syncMergeN = 0; loadFromSheet(); return; }
+      if (syncMergeN >= 3) { syncMergeN = 0; setSyncBadge('error', '합치기 실패 · 새로고침해 주세요'); return; }
       syncMergeN++; syncConf = false; 
       srvLoad(theirs => {
         try {
@@ -4604,7 +4606,7 @@
           syncRender();
           if (syncConf) showToast('같은 칸을 동시에 고쳤어요. 이 기기의 내용이 남아요.');
           persistState();
-        } catch (e) { console.error(e); syncMergeN = 0; persistState(true); }
+        } catch (e) { console.error(e); syncMergeN = 0; setSyncBadge('error', '합치기 실패 · 새로고침해 주세요'); }
       }, () => { syncMergeN = 0; setSyncBadge('error', '합치기 실패 · 잠시 뒤 다시 시도해요'); });
     }
     let _pollLast = 0, _edSent = '', _lastAct = 0;
@@ -4665,7 +4667,9 @@
             if (res && res.status === 'CONFLICT') {
               saveInFlight = 0; saveAgain = false;
               setSyncBadge('error', '저장 충돌 감지!');
-              if (!SYNC_BASE) SYNC_BASE = '{}'; syncMergeFromServer();
+              // 2차 보완(데이터 보호): 비교 기준이 없으면 합치지 않고 서버 최신 데이터로 맞춰요 (오래된 기기가 서버를 덮어쓰던 문제)
+              if (!SYNC_BASE) { try { showToast('다른 기기에서 바뀐 내용이 있어 최신 데이터로 맞췄어요.'); } catch (e) {} loadFromSheet(); return; }
+              syncMergeFromServer();
               return;
             }
             if (res && res.status === 'ERROR') {
