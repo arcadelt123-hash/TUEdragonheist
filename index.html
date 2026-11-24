@@ -2393,6 +2393,7 @@
     <div class="modal-box">
       <div class="modal-title">환경 설정 · 백업 · 폴더 관리</div>
       <details class="land-box" id="land-box" open><summary>기본 랜딩 페이지 · 인물 보기 모드</summary><div id="land-body"></div></details>
+      <details class="folder-mgmt-item" id="tbar-box" ontoggle="if(this.open)tbarUi()" style="cursor:default;"><summary>상단 메뉴 꾸미기 (이 기기·이 캐릭터 기준)</summary><div id="tbar-ui" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div></details>
       
       <div class="folder-mgmt-item">
         <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-main);">데이터 수동 백업 및 복원 (자동 백업: 시트 내 일 1회)</div>
@@ -5129,7 +5130,7 @@
       try {
         if (!(window.__fbx && __fbx.ok()) || (AUTH_S.gm && !plView())) return;
         const inShop = state.viewMode === 'journal' && state.jView === 'shop'; let pc = null; try { pc = shopBuyer().pc; } catch (e) {}
-        if (!pc) return; const path = 'shop/live/' + pc.id;
+        if (!pc) { let nm = ''; try { nm = presName(); } catch (e) {} pc = { id: 'u_' + PRES.id, name: (String(nm || '').trim() || '접속자') + ' (공용 가방)' }; } const path = 'shop/live/' + pc.id;
         if (!inShop) { if (__shopLiveSent) { __fbx.set(path, null); __shopLiveSent = ''; } return; }
         const sh = shopsList().find(s => s.id === state.shopId) || {}, sel = state.shopSel || {};
         let item = ''; try { if (sel.w === 's') { const it = (sh.items || []).find(i => i.id === sel.k); item = it ? shopRes(it).name : ''; } else if (sel.w === 'm') { const x = shopData(shopBuyer()).items[sel.k]; item = x ? (x.name || '') : ''; } } catch (e) {}
@@ -5144,7 +5145,7 @@
     (function () { let n = 0; const t = setInterval(() => { if (window.__fbx) { clearInterval(t); __fbx.watch('shop/stock', shopStockApply); __fbx.watch('shop/live', v => { window.__shopLive = v || {}; }); } else if (++n > 60) clearInterval(t); }, 1000); })();
     setInterval(shopLivePush, 2000);
     function shopLiveList() { const now = Date.now(); return Object.keys(window.__shopLive || {}).map(k => Object.assign({ id: k }, window.__shopLive[k])).filter(x => x && now - (x.t || 0) < 60000); }
-    function shopLiveGo(pcId, sid) { try { state.shopPc = pcId; if (sid) state.shopId = sid; state.shopSel = null; setViewMode('journal', ''); jSet('jView', 'shop'); const o = document.getElementById('shoplive-ov'); if (o) o.remove(); } catch (e) {} }
+    function shopLiveGo(pcId, sid) { try { if ((state.boardTex.pcs || []).some(x => x.id === pcId)) state.shopPc = pcId; if (sid) state.shopId = sid; state.shopSel = null; setViewMode('journal', ''); jSet('jView', 'shop'); const o = document.getElementById('shoplive-ov'); if (o) o.remove(); } catch (e) {} }
     function shopLiveOpen() {
       if (!AUTH_S.gm || plView()) return; const old = document.getElementById('shoplive-ov'); if (old) old.remove();
       const ov = document.createElement('div'); ov.id = 'shoplive-ov'; ov.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center';
@@ -5153,7 +5154,7 @@
         ${L.length ? L.map(x => `<div style="display:flex;gap:6px;align-items:center;border-top:1px dashed #c9b07a;padding:6px 0;margin-top:6px"><span style="flex:1;min-width:0"><b>${E(x.n || 'PC')}</b> · ${E(x.s || '')}${x.i ? `<br><small style="opacity:.75">보고 있는 물건: ${E(x.i)}</small>` : ''}</span><button class="btn btn-secondary" style="padding:3px 10px" onclick="shopLiveGo('${E(x.id)}','${E(x.sid || '')}')">보러 가기</button></div>`).join('') : '<div style="padding:18px;text-align:center;opacity:.6">상점에 있는 PC가 없어요.</div>'}</div>`;
       document.body.appendChild(ov); ov.addEventListener('pointerdown', e => { if (e.target === ov) ov.remove(); });
     }
-    setInterval(() => { try { const b = document.getElementById('shoplive-btn'); if (!b) return; const n = (AUTH_S.gm && !plView()) ? shopLiveList().length : 0; b.style.display = n ? 'inline-flex' : 'none'; const nn = document.getElementById('shoplive-n'); if (nn) nn.textContent = n; } catch (e) {} }, 1000);
+    setInterval(() => { try { const b = document.getElementById('shoplive-btn'); if (!b) return; const gm = AUTH_S.gm && !plView(), n = gm ? shopLiveList().length : 0; b.style.display = gm ? 'inline-flex' : 'none'; const nn = document.getElementById('shoplive-n'); if (nn) { nn.textContent = n; nn.style.background = n ? '#b3261e' : '#7a4a14'; } } catch (e) {} }, 1000);
     function qTrashList() { const b = state.boardTex = state.boardTex || {}; b.qTrash = Array.isArray(b.qTrash) ? b.qTrash : []; return b.qTrash; }
     function questSoftDelete(id) {
       const i = state.quests.findIndex(x => x.id === id); if (i < 0) return; const q = state.quests[i];
@@ -5279,7 +5280,7 @@
       document.querySelectorAll('.tab-ico, .top-ico, .gear-img').forEach(im => { if (!im.dataset.ico) return; const u = ({ scrolls: IC_SCROLLS, open: SCROLL_OPEN, closed: SCROLL_CLOSED, human: IC_HUMAN, bonfire: IC_BONFIRE, timeline: IC_TIMELINE, gear: IC_GEAR, feather: IC_FEATHER, needle: IC_NEEDLE, journal: IC_JOURNAL, map: IC_MAP, search: (() => { try { return (SRCH_SVG.match(/src="([^"]+)"/) || [])[1]; } catch (e) { return ''; } })() })[im.dataset.ico]; if (u) im.src = u; });
       document.getElementById('tab-timeline').classList.toggle('active', state.viewMode === 'timeline');
       document.getElementById('tab-journal').classList.toggle('active', state.viewMode === 'journal');
-      btSync();
+      btSync(); tbarApply();
       topAddBtn.style.display = (state.viewMode === 'journal' || state.viewMode === 'map') ? 'none' : '';
       document.getElementById('tab-map').classList.toggle('active', state.viewMode === 'map');
       try { mapSync(state.viewMode === 'map'); } catch (e) { console.error(e); }
@@ -8003,7 +8004,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
     function bsIconOf(x) { return x.icon || (x.id === 'main' ? BOOK_IMG : SCROLL_OPEN); }
     function boardIconBar() {
       const bt = bsEnsure();
-      return bt.sets.map(x => `<button class="btn btn-tab bs-ic ${x.id === bt.active ? 'active' : ''}" data-bid="${escapeHtml(x.id)}" title="${escapeHtml(x.name || '보드')}${x.id === bt.active ? ' — 눌러서 진행 중 · 완료 · 전체 선택' : ''}" aria-label="${escapeHtml(x.name || '보드')}" onclick="boardIconClick(this)"><img src="${escapeHtml(bsIconOf(x))}" alt="" draggable="false"></button>`).join('') + `<button class="btn btn-tab bs-ic${state.boardFilterOpen ? ' active' : ''}" onclick="state.boardFilterOpen=!state.boardFilterOpen;renderBoard()" title="폴더 · 태그별로 분류해서 보기" aria-label="폴더 태그 필터"><img src="${IC_BOOKMARK}" alt="" draggable="false"></button><button class="btn btn-tab bs-ic" onclick="openBsModal('new')" title="새 보드판 만들기" aria-label="새 보드판 만들기"><img src="${IC_FEATHER}" alt="" draggable="false"></button>`;
+      return bt.sets.map(x => `<button class="btn btn-tab bs-ic ${x.id === bt.active ? 'active' : ''}" data-bid="${escapeHtml(x.id)}" title="${escapeHtml(x.name || '보드')}${x.id === bt.active ? ' — 눌러서 진행 중 · 완료 · 전체 선택' : ''}" aria-label="${escapeHtml(x.name || '보드')}" onclick="boardIconClick(this)"><img src="${escapeHtml(bsIconOf(x))}" alt="" draggable="false"></button>`).join('') + `<button class="btn btn-tab bs-ic${state.boardFilterOpen ? ' active' : ''}" onclick="state.boardFilterOpen=!state.boardFilterOpen;renderBoard()" title="폴더 · 태그별로 분류해서 보기" aria-label="폴더 태그 필터"><img src="${IC_BOOKMARK}" alt="" draggable="false"></button><button class="btn btn-tab bs-ic" onclick="openBsModal('new')" title="새 보드판 만들기" aria-label="새 보드판 만들기"><img src="${IC_FEATHER}" alt="" draggable="false"></button><button class="btn btn-tab bs-ic" onclick="btGo('timeline')" title="타임라인 (회차별 정리)" aria-label="타임라인"><img src="${IC_TIMELINE}" alt="" draggable="false"></button>`;
     }
     function closeBsPop() { const p = document.getElementById('bs-pop'); if (p) p.remove(); }
     function boardIconClick(btn) {
@@ -8273,11 +8274,40 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
         const jb = document.getElementById('tab-journal'); if (jb) jb.classList.toggle('active', state.viewMode === 'journal' && state.jView !== 'shop');
         let p = document.getElementById('bt-sw');
         if (!p) { p = document.createElement('div'); p.id = 'bt-sw'; p.style.cssText = 'position:fixed;left:10px;bottom:10px;z-index:60;display:none;gap:2px;padding:3px;border-radius:999px;background:rgba(40,28,14,.82);box-shadow:0 2px 8px rgba(0,0,0,.35);font:600 12px sans-serif'; document.body.appendChild(p); }
-        const on = (state.viewMode === 'board' || state.viewMode === 'timeline') && !state.boardPopup;
+        const on = false;
         p.style.display = on ? 'flex' : 'none'; if (!on) return;
         const b = (m, t) => '<button type="button" onclick="btGo(\'' + m + '\')" style="border:0;cursor:pointer;border-radius:999px;padding:4px 12px;color:' + (state.viewMode === m ? '#2b1d0c' : '#eadbb8') + ';background:' + (state.viewMode === m ? '#e9d49a' : 'transparent') + '">' + t + '</button>';
         const h = b('board', '보드') + b('timeline', '타임라인'); if (p.dataset.k !== h) { p.dataset.k = h; p.innerHTML = h; }
       } catch (e) {}
+    }
+    // ---- 상단 메뉴 꾸미기: 숨기기 · 가로 길이 · 배경 · 테두리 ----
+    const TBAR_ITEMS = [['tab-active', '전체 퀘스트'], ['tab-npcs', '도감'], ['tab-board', '퀘스트 보드'], ['tab-journal', '기록실'], ['tab-shop', '상점'], ['tab-map', '지도'], ['lg-chip', '세션 로그'], ['cal-chip', '일정']];
+    function tbarGet() { let v = null; try { v = prefGet('tbar'); } catch (e) {} return Object.assign({ hide: [], w: 0, bg: '', bd: '', bw: 3 }, v || {}); }
+    function tbarSet(patch) { const v = Object.assign(tbarGet(), patch); try { prefSet('tbar', v); } catch (e) {} tbarApply(); }
+    function tbarApply() {
+      try {
+        const v = tbarGet(); let st = document.getElementById('tbar-style'); if (!st) { st = document.createElement('style'); st.id = 'tbar-style'; document.head.appendChild(st); }
+        let c = '';
+        if (v.w) c += `body .top-bar{max-width:${v.w}px !important;width:calc(100% - 24px)}`;
+        if (v.bg) c += `.top-bar::before{background:${v.bg} !important}`;
+        if (v.bd) c += `.top-bar::before{border-color:${v.bd} !important}`;
+        if (v.bw !== 3) c += `.top-bar::before{border-width:${v.bw}px !important}`;
+        st.textContent = c;
+        TBAR_ITEMS.forEach(([id]) => { const e = document.getElementById(id); if (!e) return; if (v.hide.includes(id)) e.style.setProperty('display', 'none', 'important'); else e.style.removeProperty('display'); });
+        const l = document.getElementById('lg-chip'); if (l && !v.hide.includes('lg-chip') && l.dataset.was === undefined) l.dataset.was = '';
+      } catch (e) {}
+    }
+    function tbarToggle(id, off) { const v = tbarGet(), h = v.hide.filter(x => x !== id); if (off) h.push(id); tbarSet({ hide: h }); tbarUi(); }
+    function tbarUi() {
+      const b = document.getElementById('tbar-ui'); if (!b) return; const v = tbarGet();
+      b.innerHTML = `<div style="font-size:.8rem;color:var(--text-muted)">숨긴 메뉴는 여기서 다시 켤 수 있어요.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px 12px">${TBAR_ITEMS.map(([id, t]) => `<label style="display:flex;align-items:center;gap:4px;font-size:.85rem"><input type="checkbox" ${v.hide.includes(id) ? '' : 'checked'} onchange="tbarToggle('${id}',!this.checked)"> ${t}</label>`).join('')}</div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:.85rem">가로 길이 <input type="range" min="600" max="1800" step="20" value="${v.w || 900}" oninput="document.getElementById('tbar-wv').textContent=this.value+'px'" onchange="tbarSet({w:+this.value})" style="flex:1"><span id="tbar-wv" style="width:56px">${v.w ? v.w + 'px' : '기본'}</span></label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:.85rem">
+          <label>배경색 <input type="color" value="${/^#[0-9a-f]{6}$/i.test(v.bg) ? v.bg : '#b48a58'}" onchange="tbarSet({bg:this.value})"></label>
+          <label>테두리색 <input type="color" value="${/^#[0-9a-f]{6}$/i.test(v.bd) ? v.bd : '#624222'}" onchange="tbarSet({bd:this.value})"></label>
+          <label>테두리 굵기 <input type="range" min="0" max="10" value="${v.bw}" onchange="tbarSet({bw:+this.value})" style="width:90px"></label>
+          <button class="btn btn-secondary" onclick="tbarSet({hide:[],w:0,bg:'',bd:'',bw:3});tbarUi()">기본으로</button></div>`;
     }
     function applyTabOrder() {
       const grp = document.querySelector('.tab-group'); if (!grp) return;
@@ -10860,7 +10890,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       area.innerHTML = `
         <div class="tl-toolbar">
           <div class="tl-toolbar-row">
-            ${hint ? `<span class="tl-hint">${hint}</span>` : '<span></span>'}
+            <span style="display:flex;align-items:center;gap:8px"><button class="btn btn-tab bs-ic" onclick="btGo('board')" title="퀘스트 보드로" aria-label="퀘스트 보드"><img src="${IC_BONFIRE}" alt="" draggable="false"></button>${hint ? `<span class="tl-hint">${hint}</span>` : ''}</span>
             <span style="display:flex;align-items:center;gap:8px;">${srchHtml('tl')}
             <button class="btn btn-secondary board-fold" onclick="state.tlToolsOpen=!state.tlToolsOpen;renderTimeline()" title="설정 펼치기/접기" aria-label="설정"><img class="ico-img gear-img" src="${IC_GEAR}" alt=""></button></span>
           </div>
