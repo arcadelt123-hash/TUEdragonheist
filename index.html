@@ -1123,6 +1123,7 @@
     .bg-slot { width: 52px; height: 52px; position: relative; background: linear-gradient(#1b1721, #100e14); border: 2px solid #3a3342; border-radius: 4px; cursor: pointer; padding: 0; }
     .bg-slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 3px; z-index: 1; } .bg-slot:hover { filter: brightness(1.3); } .bg-slot.sel { outline: 2px solid #fff6; } .bg-slot.out { opacity: .35; }
     .bg-slot .ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 700 18px sans-serif; color: #7d7387; }
+    .bg-slot.msel { outline: 3px solid #e0a526; outline-offset: 1px; box-shadow: 0 0 0 5px rgba(224,165,38,.35); } .bg-slot.hid { opacity: .4; } .bg-slot.hid::after { content: "숨김"; position: absolute; left: 1px; top: 0; z-index: 3; font: 700 9px sans-serif; color: #fff; background: #8a5a00; border-radius: 3px; padding: 0 2px; }
     .bg-slot .q { position: absolute; right: 2px; bottom: 0; font: 700 12px sans-serif; color: #fff; text-shadow: 0 0 3px #000, 0 0 3px #000; z-index: 2; }
     .bg-detail { margin-top: 12px; border: 1px solid #6b5a3a; border-radius: 8px; background: #0e0c11; padding: 10px 12px; min-height: 84px; display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
     .bg-big { width: 64px; height: 64px; border: 2px solid #3a3342; border-radius: 6px; background: #15121a; flex: none; display: flex; align-items: center; justify-content: center; overflow: hidden; color: #7d7387; font: 700 26px sans-serif; } .bg-big img { max-width: 100%; max-height: 100%; }
@@ -6842,7 +6843,7 @@
     }
     function shopSlot(o, qty, w, out, key) {
       const sel = state.shopSel && state.shopSel.w === w && state.shopSel.k === key, rc = SHOP_RC[o.r] || '#3a3342';
-      return `<button class="bg-slot${out ? ' out' : ''}${sel ? ' sel' : ''}" style="border-color:${rc}"${w === 'm' ? ` draggable="true" ondragstart="shopDrag(event,'${key}')" ondragend="shopDragEnd()"` : ''}${w === 's' && !out ? ` draggable="true" ondragstart="shopDragBuy(event,'${key}')" ondragend="shopDragEnd()"` : ''} onclick="shopPick('${w}','${key}')" title="${escapeHtml(o.name)} · ${shopPriceTxt(o.cp)}">${o.img ? `<img src="${escapeHtml(o.img)}" alt="" loading="lazy" draggable="false" onerror="this.remove()">` : ''}<span class="ph">${escapeHtml([...(o.name || '?')][0])}</span>${qty > 1 ? `<span class="q">${qty}</span>` : ''}</button>`;
+      return `<button class="bg-slot${out ? ' out' : ''}${sel ? ' sel' : ''}${o.hide ? ' hid' : ''}${w === 's' && shopMsHas(key) ? ' msel' : ''}" data-w="${w}" data-k="${escapeHtml(String(key))}" style="border-color:${rc}"${w === 'm' ? ` draggable="true" ondragstart="shopDrag(event,'${key}')" ondragend="shopDragEnd()"` : ''}${w === 's' && !out ? ` draggable="true" ondragstart="shopDragBuy(event,'${key}')" ondragend="shopDragEnd()"` : ''} onclick="shopPick('${w}','${key}')" title="${escapeHtml(o.name)} · ${shopPriceTxt(o.cp)}">${o.img ? `<img src="${escapeHtml(o.img)}" alt="" loading="lazy" draggable="false" onerror="this.remove()">` : ''}<span class="ph">${escapeHtml([...(o.name || '?')][0])}</span>${qty > 1 ? `<span class="q">${qty}</span>` : ''}</button>`;
     }
     function shopPick(w, k) { state.shopSel = { w, k }; renderShop(); }
     function shopSellRes(x) {
@@ -6883,7 +6884,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       h += `<div class="bg-bar"><input type="search" id="shop-q" placeholder="검색" value="${escapeHtml(state.shopQ || '')}" oninput="state.shopQ=this.value;shopFilterKeep()"><span class="bg-chips">${SHOP_CATS.map(chip).join('')}${gmv ? `<button class="bg-chip${ed ? ' on' : ''}" onclick="state.shopIcEdit=!state.shopIcEdit;renderShop()" title="분류 아이콘 설정 (GM에게만 보여요)">${ed ? '아이콘 설정 끝' : '분류 아이콘'}</button>${ed ? `<select onchange="state.shopIcTgt=this.value;renderShop()" aria-label="적용 대상" style="padding:3px 6px;border-radius:8px"><option value="all"${tgt === 'all' ? ' selected' : ''}>적용 대상: 기본(모두)</option>${by.pcs.map(p => `<option value="${escapeHtml(p.id)}"${tgt === p.id ? ' selected' : ''}>${escapeHtml(p.name || 'PC')} 전용</option>`).join('')}</select>` : ''}` : ''}</span>
                 ${gm ? `<span class="bg-gmtools" style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px;max-width:100%"><span style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px"><button class="bg-chip" onclick="shopToggle('${sh.id}')" title="비활성 상인은 PC에게 보이지 않고, 물건을 사지도 팔지도 못해요">${sh.off ? '상인 활성화' : '상인 비활성화'}</button><button class="bg-chip" onclick="shopRename('${sh.id}')">상점 이름·설명</button><button class="bg-chip" onclick="shopArt('${sh.id}')">상점 그림</button><button class="bg-chip" onclick="shopNpcImport('${sh.id}')" title="도감의 NPC를 상점으로 불러오기">NPC 불러오기</button><button class="bg-chip" onclick="shopApprToggle('${sh.id}')" title="켜면 PL의 구매가 GM 승인 뒤에 처리돼요">구매 승인제 ${sh.appr ? '켜짐' : '꺼짐'}</button></span><span style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px"><button class="bg-chip" onclick="shopBgDlg('${sh.id}')" title="상점 배경 이미지 (기본 / 상인별)">상점 배경</button><button class="bg-chip" onclick="shopCatPick('${sh.id}')">+ 카탈로그에서 추가</button><button class="bg-chip" onclick="shopItemEdit('${sh.id}','')">+ 직접 만들기</button><button class="bg-chip" onclick="shopDel('${sh.id}')">상점 삭제</button></span></span>` : ''}</div>`;
       const ok = o => (cat === 'all' || o.c === cat) && (!q || o.name.toLowerCase().includes(q));
-      const shopRows = (sh.items || []).map(it => ({ it, o: shopRes(it) })).filter(r => ok(r.o));
+      shopMsSync(); const shopRows = (sh.items || []).filter(it => gm || !it.hide).map(it => ({ it, o: Object.assign(shopRes(it), { hide: !!it.hide }) })).filter(r => ok(r.o));
       const bagRows = d ? d.items.map((x, i) => ({ x, i, o: { name: x.name || '?', img: x.img || '', r: x.rar || '', cp: 0, c: (shopSellRes(x) || {}).c || x.cat || 'gear' } })).filter(r => ok(r.o)) : [];
       const eq = d && !d.shared ? d.items.map((x, i) => ({ x, i })).filter(r => r.x.equipped) : [];
       const ownArt = by.shared ? `<img src="${IC_BAG}" alt="" style="object-fit:contain">` : pcIconImg(by.pc), ownNm = by.shared ? '공용 가방' : (by.pc.name || 'PC');
@@ -6891,7 +6892,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       const sArt = shopArtSrc(sh), shHead = `<div class="bg-own"><div class="bg-art" title="${escapeHtml(sh.name || '')}">${sArt ? `<img src="${escapeHtml(sArt)}" alt="" draggable="false">` : `<img src="${SHOP_COIN}" alt="" style="object-fit:contain">`}</div><div class="bg-eq"><b>${escapeHtml(sh.name || '')}</b>${sh.desc ? `<span class="bg-dim">${escapeHtml(sh.desc)}</span>` : ''}</div></div>`;
       const charOn = false;
       h += `<div class="bg-cols${charOn ? ' wc' : ''}">${charOn ? shopCharHtml(by, d) : ''}<div class="bg-bdrop" ondragover="shopBOver(event,this)" ondragleave="this.classList.remove('sd-over')" ondrop="shopBDrop(event,this)">${charOn ? '' : own}<div class="bg-h">${by.shared ? '공용 가방' : '내 가방'}</div><div class="bg-grid">` + (bagRows.length ? bagRows.map(r => shopSlot({ ...r.o, cp: (shopSellRes(r.x) || { cp: 0 }).cp }, Number(r.x.qty) || 1, 'm', false, r.i)).join('') : '<span class="bg-dim">비어 있어요</span>') + '</div></div>';
-      h += `<div class="bg-sdrop" ondragover="shopDragOver(event,this)" ondragleave="this.classList.remove('sd-over')" ondrop="shopDrop(event,this)">${shHead}<div class="bg-h">상품</div><div class="bg-grid">` + (shopRows.length ? shopRows.map(r => { const inf = r.it.stock == null || r.it.stock === ''; return shopSlot(r.o, inf ? 1 : Number(r.it.stock) || 0, 's', !inf && !(Number(r.it.stock) > 0), r.it.id); }).join('') : `<span class="bg-dim">${gm ? '"+ 카탈로그에서 추가"로 물건을 진열하세요.' : '진열된 물건이 없어요.'}</span>`) + '</div></div></div>';
+      h += `<div class="bg-sdrop" ondragover="shopDragOver(event,this)" ondragleave="this.classList.remove('sd-over')" ondrop="shopDrop(event,this)">${shHead}<div class="bg-h">상품${gm ? '<span style="font-weight:400;font-size:11px;opacity:.7;margin-left:8px">우클릭: 수량·숨기기·빼기 · Shift+클릭/드래그: 여러 개</span> <b id="shop-ms-n" style="font-size:11px;color:#8a5a00"></b>' : ''}</div><div class="bg-grid">` + (shopRows.length ? shopRows.map(r => { const inf = r.it.stock == null || r.it.stock === ''; return shopSlot(r.o, inf ? 1 : Number(r.it.stock) || 0, 's', !inf && !(Number(r.it.stock) > 0), r.it.id); }).join('') : `<span class="bg-dim">${gm ? '"+ 카탈로그에서 추가"로 물건을 진열하세요.' : '진열된 물건이 없어요.'}</span>`) + '</div></div></div>';
       // detail
       const S = state.shopSel; let dt = '<div class="bg-dim">칸을 누르면 설명과 가격이 나와요.</div>';
       if (S) {
@@ -6914,6 +6915,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       const fin = ok => { try { done && done(ok); } catch (e) {} };
       const sh = shopsList().find(s => s.id === sid), it = sh && (sh.items || []).find(x => x.id === iid), by = shopBuyer(); if (!it || !by) { fin(false); return; }
       if (sh.off && !(AUTH_S.gm && !plView())) { showToast('지금은 이 상인이 장사를 하지 않아요.'); fin(false); return; }
+      if (it.hide && !(AUTH_S.gm && !plView())) { showToast('지금은 살 수 없는 물건이에요.'); fin(false); return; }
       const o = shopRes(it), n = nOver || Math.max(1, Math.floor(Number((document.getElementById('sq-' + iid) || {}).value) || 1)), inf = it.stock == null || it.stock === '';
       if (!inf && n > (Number(it.stock) || 0)) { showToast('재고가 부족해요.'); fin(false); return; }
       const total = o.cp * n, d = shopData(by), nm0 = shopPay(d.money, total);
@@ -7085,6 +7087,81 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       };
       draw();
     }
+    // ===== 상점 상품: 우클릭 메뉴 + 여러 개 선택 (GM) — Shift(또는 Ctrl)+클릭, Shift+드래그로 영역 선택 =====
+    const SHOP_MS = { sid: '', set: new Set() };
+    function shopMsGm() { try { return !!AUTH_S.gm && !plView(); } catch (e) { return false; } }
+    function shopMsHas(k) { return SHOP_MS.sid === state.shopId && SHOP_MS.set.has(String(k)); }
+    function shopMsSync() { if (SHOP_MS.sid !== state.shopId) { SHOP_MS.sid = state.shopId; SHOP_MS.set.clear(); } }
+    function shopMsPaint() { document.querySelectorAll('.bg-sdrop .bg-slot[data-w="s"]').forEach(b => b.classList.toggle('msel', SHOP_MS.set.has(b.dataset.k))); const c = document.getElementById('shop-ms-n'); if (c) c.textContent = SHOP_MS.set.size ? SHOP_MS.set.size + '개 선택 · 우클릭' : ''; }
+    function shopMsClear() { SHOP_MS.set.clear(); shopMsPaint(); }
+    function shopMsMenuClose() { const m = document.getElementById('shop-ms-menu'); if (m) m.remove(); }
+    function shopMsMenu(x, y) {
+      shopMsMenuClose(); const sh = shopsList().find(s => s.id === state.shopId); if (!sh) return;
+      const ids = [...SHOP_MS.set], items = (sh.items || []).filter(i => ids.includes(i.id)); if (!items.length) return;
+      const one = items.length === 1 ? items[0] : null, allHid = items.every(i => i.hide), E = escapeHtml;
+      const m = document.createElement('div'); m.id = 'shop-ms-menu';
+      m.style.cssText = 'position:fixed;z-index:9500;min-width:180px;background:#fffdf7;border:2px solid #b8893a;border-radius:10px;padding:4px;box-shadow:0 6px 20px rgba(0,0,0,.3);font:13px sans-serif;color:#3b2c12';
+      const row = (a, t, red) => `<button type="button" data-a="${a}" style="display:block;width:100%;text-align:left;padding:6px 10px;border:0;border-radius:6px;background:none;cursor:pointer;color:${red ? '#a12' : 'inherit'};font:inherit">${t}</button>`;
+      m.innerHTML = `<div style="padding:4px 10px 6px;font-weight:700;border-bottom:1px dashed #e0d4b4;margin-bottom:2px">${one ? E(shopRes(one).name) : items.length + '개 선택'}</div>` +
+        row('stock', '수량(재고) 바꾸기…') + row('hide', allHid ? 'PL에게 다시 보이기' : 'PL에게 숨기기') + (one ? row('edit', '자세히 편집…') : row('clear', '선택 해제')) + row('del', '상점에서 빼기', 1);
+      document.body.appendChild(m);
+      m.style.left = Math.max(4, Math.min(innerWidth - m.offsetWidth - 4, x)) + 'px'; m.style.top = Math.max(4, Math.min(innerHeight - m.offsetHeight - 4, y)) + 'px';
+      m.querySelectorAll('button').forEach(b => { b.onmouseenter = () => b.style.background = '#f3e6c4'; b.onmouseleave = () => b.style.background = 'none'; });
+      m.addEventListener('click', e => {
+        const a = (e.target.closest('[data-a]') || {}).dataset; if (!a) return; const act = a.a; shopMsMenuClose();
+        if (act === 'clear') { shopMsClear(); return; }
+        if (act === 'edit') { shopItemEdit(sh.id, one.id); return; }
+        if (act === 'stock') {
+          const cur = one ? (one.stock == null || one.stock === '' ? '' : String(one.stock)) : '';
+          const v = prompt((one ? '' : items.length + '개 모두 ') + '재고 수량 (비우면 무제한)', cur); if (v === null) return;
+          const t = v.trim(), st = t === '' ? null : Math.max(0, Math.floor(Number(t) || 0));
+          items.forEach(i => { i.stock = st; shopStockPush(sh.id, i.id, st); });
+          persistState(); renderShop(); showToast(items.length + '개 재고를 ' + (st == null ? '무제한' : st + '개') + '으로 바꿨어요.'); return;
+        }
+        if (act === 'hide') { items.forEach(i => { if (allHid) delete i.hide; else i.hide = true; }); persistState(); renderShop(); showToast(items.length + '개를 ' + (allHid ? 'PL에게 다시 보이게 했어요.' : 'PL에게 숨겼어요. (GM에게는 흐리게 보여요)')); return; }
+        if (act === 'del') {
+          if (!confirm((one ? shopRes(one).name : items.length + '개') + '를 상점에서 뺄까요?')) return;
+          const set = new Set(items.map(i => i.id)); sh.items = (sh.items || []).filter(i => !set.has(i.id));
+          items.forEach(i => { try { shopStockPush(sh.id, i.id, null); } catch (e) {} });
+          if (state.shopSel && state.shopSel.w === 's' && set.has(state.shopSel.k)) state.shopSel = null;
+          SHOP_MS.set.clear(); persistState(); renderShop(); showToast(items.length + '개를 뺐어요.'); return;
+        }
+      });
+    }
+    (function shopMsInit() {
+      let drag = null;
+      const slotAt = t => t && t.closest && t.closest('.bg-sdrop .bg-slot[data-w="s"]');
+      document.addEventListener('pointerdown', e => {
+        if (!document.getElementById('shop-ms-menu') || e.target.closest('#shop-ms-menu')) {} else shopMsMenuClose();
+        if (e.button !== 0 || !(e.shiftKey || e.ctrlKey || e.metaKey) || !shopMsGm() || state.jView !== 'shop') return;
+        const zone = e.target.closest && e.target.closest('.bg-sdrop'); if (!zone) return;
+        shopMsSync(); e.preventDefault(); e.stopPropagation();
+        const base = new Set(SHOP_MS.set), box = document.createElement('div');
+        box.style.cssText = 'position:fixed;z-index:9400;border:1.5px dashed #b8893a;background:rgba(184,137,58,.15);pointer-events:none;display:none';
+        document.body.appendChild(box); drag = { x: e.clientX, y: e.clientY, base, box, moved: false, slot: slotAt(e.target) };
+      }, true);
+      document.addEventListener('pointermove', e => {
+        if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (!drag.moved && Math.hypot(dx, dy) < 5) return; drag.moved = true;
+        const L = Math.min(e.clientX, drag.x), T = Math.min(e.clientY, drag.y), W = Math.abs(dx), H = Math.abs(dy);
+        Object.assign(drag.box.style, { display: 'block', left: L + 'px', top: T + 'px', width: W + 'px', height: H + 'px' });
+        SHOP_MS.set = new Set(drag.base);
+        document.querySelectorAll('.bg-sdrop .bg-slot[data-w="s"]').forEach(b => { const r = b.getBoundingClientRect(); if (r.right > L && r.left < L + W && r.bottom > T && r.top < T + H) SHOP_MS.set.add(b.dataset.k); });
+        shopMsPaint();
+      }, true);
+      document.addEventListener('pointerup', e => {
+        if (!drag) return; const d = drag; drag = null; d.box.remove();
+        if (!d.moved && d.slot) { const k = d.slot.dataset.k; if (SHOP_MS.set.has(k)) SHOP_MS.set.delete(k); else SHOP_MS.set.add(k); }
+        shopMsPaint();
+      }, true);
+      document.addEventListener('click', e => { if ((e.shiftKey || e.ctrlKey || e.metaKey) && shopMsGm() && slotAt(e.target)) { e.preventDefault(); e.stopPropagation(); } }, true);
+      document.addEventListener('dragstart', e => { if ((e.shiftKey || e.ctrlKey || e.metaKey) && slotAt(e.target)) e.preventDefault(); }, true);
+      document.addEventListener('contextmenu', e => {
+        const b = slotAt(e.target); if (!b || !shopMsGm()) return; e.preventDefault(); shopMsSync();
+        if (!SHOP_MS.set.has(b.dataset.k)) { SHOP_MS.set.clear(); SHOP_MS.set.add(b.dataset.k); }
+        shopMsPaint(); shopMsMenu(e.clientX, e.clientY);
+      });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') { shopMsMenuClose(); if (SHOP_MS.set.size) shopMsClear(); } });
+    })();
         function shopAdd() { const n = prompt('상점 이름', ''); if (n === null || !n.trim()) return; const s = { id: 'sh_' + Date.now().toString(36), name: n.trim(), desc: '', items: [] }; shopsList().push(s); state.shopId = s.id; persistState(); renderShop(); }
     function shopApprToggle(id) {
       if (!AUTH_S.gm || plView()) return; const s = shopsList().find(x => x.id === id); if (!s) return;
