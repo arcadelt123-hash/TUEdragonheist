@@ -12050,7 +12050,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       { sel: '.bg-who', name: '가방 고르기', desc: '공용 가방과 PC중에 하나를 선택할 수 있어요.' },
       { sel: '.bg-shops .bg-tab:not(.ghost)', name: '상점', desc: '상점 이름이에요.' },
       { sel: '.bg-cols', name: '사고팔기', desc: '아이템을 드래그해서 판매나 구매를 할 수 있어요.' }] },
-    '#lg-modal': { title: '세션 로그', autoSide: 'below', intro: '회차별 세션 로그를 읽고, 대사에 메모를 남기는 창이에요.', auto: true, ex: ['#lg-list', '#lg-main'], notes: [
+    '#lg-modal': { title: '세션 로그', autoSide: 'below', loose: 1, intro: '회차별 세션 로그를 읽고, 대사에 메모를 남기는 창이에요.', auto: true, ex: ['#lg-list', '#lg-main'], notes: [
       { sel: '#lg-main .lg-cast', first: 1, name: '등장인물', desc: '등장한 PC와 NPC를 안내해요. 첫 번째가 PC, 두 번째가 NPC에요. 기본적으로 접혀 있어요.' },
       { sel: '#lg-main .lg-qadd-b', first: 1, name: '퀘스트', desc: '연결된 퀘스트 목록이에요. 좌클릭하면 연결된 퀘스트를 확인하고, 새로 연결할 수도 있어요.' },
       { sel: '#lg-main .lg-m[data-i]', first: 4, inView: 1, mask: 1, name: '로그 메모', desc: '로그를 드래그해서 그 부분에 메모를 남길 수 있어요.' }] },
@@ -12248,8 +12248,9 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     var placed = [], pr = panel && !panel.classList.contains('min') ? panel.getBoundingClientRect() : null;
     if (pr) placed.push({ l: pr.left, t: pr.top, r: pr.right, b: pr.bottom });
     if (topPanel) { var tr = topPanel.getBoundingClientRect(); placed.push({ l: tr.left, t: tr.top, r: tr.right, b: tr.bottom }); }
-    items.forEach(function (it) { if (it.r && it.at !== 'center' && (it.mask || it.r.width * it.r.height < W * H * 0.03)) placed.push({ l: it.r.left - 1, t: it.r.top - 1, r: it.r.right + 1, b: it.r.bottom + 1 }); });
-    try { var cnt = 0; [].forEach.call(document.querySelectorAll('button,select,input:not([type=hidden]),textarea,a[href],[onclick]'), function (el) { if (cnt > 500 || mine(el) || (curScope && !curScope.contains(el))) return; var r = el.getBoundingClientRect(); if (r.width < 4 || r.height < 4 || r.bottom < 0 || r.top > H || r.right < 0 || r.left > W || r.width * r.height > W * H * 0.15) return; if (!vis(el)) return; cnt++; placed.push({ l: r.left, t: r.top, r: r.right, b: r.bottom }); }); } catch (e) {}
+    items.forEach(function (it) { if (it.tb && it.tb.style.display !== 'none' && it.tb.style.left) { var bl = parseFloat(it.tb.style.left), bt = parseFloat(it.tb.style.top); placed.push({ l: bl, t: bt, r: bl + 22, b: bt + 22 }); } });   
+    if (!curLoose) items.forEach(function (it) { if (it.r && it.at !== 'center' && (it.mask || it.r.width * it.r.height < W * H * 0.03)) placed.push({ l: it.r.left - 1, t: it.r.top - 1, r: it.r.right + 1, b: it.r.bottom + 1 }); });
+    if (!curLoose) try { var cnt = 0; [].forEach.call(document.querySelectorAll('button,select,input:not([type=hidden]),textarea,a[href],[onclick]'), function (el) { if (cnt > 500 || mine(el) || (curScope && !curScope.contains(el))) return; var r = el.getBoundingClientRect(); if (r.width < 4 || r.height < 4 || r.bottom < 0 || r.top > H || r.right < 0 || r.left > W || r.width * r.height > W * H * 0.15) return; if (!vis(el)) return; cnt++; placed.push({ l: r.left, t: r.top, r: r.right, b: r.bottom }); }); } catch (e) {}
     function hit(a) { if (a.l < 2 || a.t < 2 || a.r > W - 2 || a.b > H - 2) return true; for (var k = 0; k < placed.length; k++) { var p = placed[k]; if (a.l < p.r + 3 && a.r > p.l - 3 && a.t < p.b + 3 && a.b > p.t - 3) return true; } return false; }
     items.forEach(function (it) {
       var m = it.bb; if (!m) return; var r = it.r;
@@ -12272,7 +12273,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     if (anyFar && panel && !panel._autoList && !panel.classList.contains('min')) { panel._autoList = 1; panel.classList.add('list'); }   // 접혀 있으면 그대로 (번호를 누르면 펼쳐져요)
     if (hl && hl._it && hl._it.r) { var r2 = hl._it.r; Object.assign(hl.style, { display: '', left: r2.left - 4 + 'px', top: r2.top - 4 + 'px', width: r2.width + 8 + 'px', height: r2.height + 8 + 'px' }); }
   }
-  var topPanel = null, tPos = null, curScope = null;
+  var topPanel = null, tPos = null, curScope = null, curLoose = false;
   function dragBy(hd, el, done) {   // 안내창 옮기기: 지도·시트 위로 지나가도 끊기지 않게 포인터를 붙잡아요
     hd.style.touchAction = 'none';
     hd.addEventListener('pointerdown', function (e) {
@@ -12286,7 +12287,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
   }
   function close(mark) { if (mark && cur) markSeen(cur); if (layer) layer.remove(); if (panel) { pPos = { l: panel.style.left, t: panel.style.top }; panel.remove(); } if (topPanel) topPanel.remove(); layer = panel = topPanel = null; items = []; cur = ''; }
   function show(sc) {
-    css(); close(false); if (sc.quiet) return; curScope = sc.base ? null : sc.scope; var rl0 = ruleFor(sc); if (rl0 && rl0.intro) sc.intro = rl0.intro; if (rl0 && rl0.title) sc.title = rl0.title; var withTop = !!sc.base; items = build(sc, withTop); if (!items.length && (!sc.intro || !sc.base)) return; cur = sc.key;
+    css(); close(false); if (sc.quiet) return; curScope = sc.base ? null : sc.scope; curLoose = false; var rl0 = ruleFor(sc); curLoose = !!(rl0 && rl0.loose); if (rl0 && rl0.intro) sc.intro = rl0.intro; if (rl0 && rl0.title) sc.title = rl0.title; var withTop = !!sc.base; items = build(sc, withTop); if (!items.length && (!sc.intro || !sc.base)) return; cur = sc.key;
     layer = document.createElement('div'); layer.id = 'tut-layer';
     var topN = items.filter(function (x) { return x.top; }).length, NOBB = !!(rl0 && rl0.nobb); items.forEach(function (it, i) { it.no = it.top ? i + 1 : i - topN + 1; });
     items.forEach(function (it, i) { if (it.mask) { var mk = document.createElement('div'); mk.className = 'mk'; it.mk = mk; layer.appendChild(mk); } var b = document.createElement('div'); b.className = 'tb' + (it.top ? ' top nb' : '') + (NOBB && !it.top && !it.bb ? ' nb' : ''); b.textContent = it.no; b.dataset.i = i; it.tb = b; layer.appendChild(b); });
