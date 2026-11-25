@@ -6351,7 +6351,8 @@
         if (!isBoardLike()) return;
         const cn = e.target.closest && e.target.closest('.qconn');
         if (cn && e.target.closest('.qc-hit')) { e.preventDefault(); showCtx('conn', cn.dataset.cid, e.clientX, e.clientY); return; }
-        const el = e.target.closest && e.target.closest('.qnote, .qmemo, .qnpc');
+        let el = e.target.closest && e.target.closest('.qnote, .qmemo, .qnpc');
+        if (!el && e.target.closest && e.target.closest('#qboard')) { try { el = document.elementsFromPoint(e.clientX, e.clientY).map(x => x.closest && x.closest('.qnote, .qmemo, .qnpc')).find(Boolean) || null; } catch (x) {} }   // 카드 위에 다른 층이 덮여 있어도 카드 메뉴가 뜨게
         if (el) { e.preventDefault(); showCtx(el.classList.contains('qmemo') ? 'memo' : el.classList.contains('qnpc') ? 'npc' : 'quest', el.dataset.qid || el.dataset.mid || el.dataset.nid, e.clientX, e.clientY); return; }
         const bd = e.target.closest && e.target.closest('#qboard');
         if (bd) {
@@ -6865,11 +6866,97 @@
       const col = ks => `<div class="bg-ec">${ks.map(cell).join('')}</div>`;
       return `<div class="bg-char" title="${E(p.name || '')}"><div class="bg-cart">${art ? `<img src="${E(art)}" alt="" draggable="false" style="transform:translate(${Number(sh.artX) || 0}px,${Number(sh.artY) || 0}px) scale(${(Number(sh.artScale) || 100) / 100})">` : ''}</div><div class="bg-ecl">${col(['head', 'neck', 'cloak', 'body', 'hands'])}</div><div class="bg-ecr">${col(['feet', 'ring1', 'ring2'])}</div><div class="bg-ecb">${['main', 'off', 'ranged'].map(cell).join('')}</div></div>`;
     }
+    // ===== PC끼리 거래 (상대 PC가 수락해야 처리 · GM은 모든 거래 내역을 봐요) =====
+    function trList() { const b = state.boardTex; return (b.trades = Array.isArray(b.trades) ? b.trades : []); }
+    function trPc(id) { return (state.boardTex.pcs || []).find(p => p.id === id) || null; }
+    function trCp(v) { const n = parseFloat(v); return isNaN(n) || n <= 0 ? 0 : Math.round(n * 100); }
+    function trItemsTxt(L) { return (L || []).map(x => x.name + (x.qty > 1 ? ' ×' + x.qty : '')).join(', '); }
+    function trSummary(t) {
+      const a = [], b = [];
+      if (t.give && t.give.length) a.push(trItemsTxt(t.give)); if (t.pay) a.push(shopPriceTxt(t.pay));
+      if (t.take && t.take.length) b.push(trItemsTxt(t.take)); if (t.ask) b.push(shopPriceTxt(t.ask));
+      return escapeHtml(t.fromName) + ' → ' + escapeHtml(t.toName) + ': ' + (a.join(' + ') || '없음') + '  ⇄  ' + (b.join(' + ') || '없음');
+    }
+    function trDraft() { const d = state.tradeDraft = state.tradeDraft || { to: '', give: [], take: [], pay: '', ask: '', note: '' }; return d; }
+    function trPick(side, i) {
+      const dr = trDraft(), L = dr[side], have = side === 'give' ? (shopBuyer().pc ? shopDetail(shopBuyer().pc).items[i] : null) : (trPc(dr.to) ? shopDetail(trPc(dr.to)).items[i] : null); if (!have) return;
+      if (have.equipped && side === 'give') { showToast('장착 중인 물건은 거래할 수 없어요. 먼저 장착을 풀어 주세요.'); return; }
+      const ex = L.find(x => x.i === i), max = Number(have.qty) || 1;
+      if (ex) { if (ex.qty < max) ex.qty++; else { L.splice(L.indexOf(ex), 1); } } else L.push({ i, name: have.name || '물건', qty: 1 });
+      renderShop();
+    }
+    function trTradeHtml(by) {
+      const gm = !!AUTH_S.gm && !plView(), me = by.shared ? null : by.pc, dr = trDraft(), T = trList();
+      const others = (state.boardTex.pcs || []).filter(p => !p.off && (!me || p.id !== me.id));
+      if (dr.to && !others.some(p => p.id === dr.to)) { dr.to = ''; dr.take = []; }
+      let h = '<div class="bg-trd" style="display:flex;flex-direction:column;gap:10px;padding:6px 2px">';
+      // 받은 제안 / 보낸 제안
+      const mine = me ? T.filter(t => t.st === 'wait' && (t.to === me.id || t.from === me.id)) : [];
+      const inc = mine.filter(t => t.to === me.id), out = mine.filter(t => t.from === me.id);
+      if (inc.length || out.length) h += `<div style="border:1.5px solid #b99a5b;background:rgba(185,154,91,.12);border-radius:10px;padding:8px 10px;font-size:13px">${inc.map(t => `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:3px 0"><b>[받은 제안]</b><span>${trSummary(t)}</span>${t.note ? `<small style="opacity:.75">“${escapeHtml(t.note)}”</small>` : ''}<span style="flex:1"></span><button class="bg-btn" onclick="trAccept('${t.id}')">수락</button><button class="bg-btn" onclick="trClose('${t.id}','no')">거절</button></div>`).join('')}${out.map(t => `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:3px 0"><b>[보낸 제안]</b><span>${trSummary(t)}</span><span style="opacity:.7">· 상대가 확인하면 처리돼요</span><span style="flex:1"></span><button class="bg-btn" onclick="trClose('${t.id}','cancel')">취소</button></div>`).join('')}</div>`;
+      if (!me) h += '<div class="bg-empty">위에서 거래할 내 PC를 골라 주세요. (공용 가방은 거래할 수 없어요)</div>';
+      else {
+        const to = trPc(dr.to), myD = shopDetail(me), toD = to ? shopDetail(to) : null;
+        const cell = (side, x, i) => { const sel = dr[side].find(y => y.i === i); return `<button class="bg-slot${sel ? ' sel' : ''}${side === 'give' && x.equipped ? ' out' : ''}" title="${escapeHtml(x.name || '?')}${(Number(x.qty) || 1) > 1 ? ' (보유 ' + x.qty + ')' : ''}${x.equipped ? ' · 장착 중' : ''}" onclick="trPick('${side}',${i})">${x.img ? `<img src="${escapeHtml(x.img)}" alt="" loading="lazy" draggable="false" onerror="this.remove()">` : ''}<span class="ph">${escapeHtml([...(x.name || '?')][0])}</span>${sel ? `<span class="q">${sel.qty}</span>` : ((Number(x.qty) || 1) > 1 ? `<span class="q" style="opacity:.55">${x.qty}</span>` : '')}</button>`; };
+        const col = (title, side, items, moneyKey, ph) => `<div style="flex:1;min-width:240px;border:1px solid rgba(120,90,40,.35);border-radius:10px;padding:8px;background:rgba(255,252,240,.6)"><b>${title}</b><div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;max-height:240px;overflow:auto">${items.length ? items.map((x, i) => cell(side, x, i)).join('') : '<span style="opacity:.6;font-size:12px">가방이 비어 있어요</span>'}</div><div style="font-size:12px;opacity:.8">${dr[side].length ? '고른 것: ' + escapeHtml(trItemsTxt(dr[side])) : '칸을 눌러 고르세요 (여러 번 누르면 개수가 늘어요)'}</div><label style="display:flex;gap:6px;align-items:center;margin-top:6px;font-size:13px">${ph} <input type="number" min="0" step="any" value="${escapeHtml(dr[moneyKey])}" oninput="trDraft().${moneyKey}=this.value" style="width:90px"> gp</label></div>`;
+        h += `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><b>거래 상대</b>${others.map(p => `<button class="bg-pcb${dr.to === p.id ? ' on' : ''}" title="${escapeHtml(p.name || 'PC')}" ${pcIconSty(p)} onclick="trDraft().to='${p.id}';trDraft().take=[];renderShop()">${pcIconImg(p)}</button>`).join('') || '<span style="opacity:.6">다른 PC가 없어요</span>'}</div>`;
+        if (to) {
+          h += `<div style="display:flex;gap:10px;flex-wrap:wrap">${col('내가 줄 것 (' + escapeHtml(me.name || 'PC') + ')', 'give', myD.items, 'pay', '내가 줄 돈')}${col('내가 받을 것 (' + escapeHtml(to.name || 'PC') + ')', 'take', toD.items, 'ask', '받을 돈')}</div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input type="text" placeholder="한마디 (선택)" value="${escapeHtml(dr.note)}" oninput="trDraft().note=this.value" style="flex:1;min-width:180px"><button class="bg-btn" onclick="trSend()">거래 제안 보내기</button><button class="bg-btn" onclick="state.tradeDraft=null;renderShop()">비우기</button></div>
+            <div style="font-size:12px;opacity:.75">가격은 자유롭게 정해요. 상대가 수락하면 아이템과 돈이 옮겨지고, 양쪽 금전 내역에 기록돼요.</div>`;
+        }
+      }
+      // 거래 내역: GM은 전부, PL은 자기 것만
+      const hist = T.filter(t => t.st !== 'wait' && (gm || (me && (t.from === me.id || t.to === me.id)))).slice().sort((a, b) => (b.tEnd || b.t) - (a.tEnd || a.t)).slice(0, 60);
+      const ST = { done: '완료', no: '거절', cancel: '취소', fail: '실패' };
+      if (hist.length || gm) h += `<details${gm ? ' open' : ''} style="border-top:1px dashed rgba(120,90,40,.4);padding-top:6px"><summary style="cursor:pointer;font-weight:700">거래 내역${gm ? ' (GM: 전체)' : ''} ${hist.length}건</summary>${hist.length ? hist.map(t => `<div style="font-size:12.5px;margin:4px 0;display:flex;gap:6px;flex-wrap:wrap"><span style="opacity:.6">${new Date(t.tEnd || t.t).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span><b>[${ST[t.st] || t.st}]</b><span>${trSummary(t)}</span>${t.note ? `<small style="opacity:.7">“${escapeHtml(t.note)}”</small>` : ''}${t.why ? `<small style="color:#a33">${escapeHtml(t.why)}</small>` : ''}</div>`).join('') : '<div style="font-size:12px;opacity:.6">아직 거래가 없어요.</div>'}</details>`;
+      return h + '</div>';
+    }
+    function trSend() {
+      const by = shopBuyer(), me = by.pc, dr = trDraft(), to = trPc(dr.to); if (!me || !to) return;
+      const pay = trCp(dr.pay), ask = trCp(dr.ask);
+      if (!dr.give.length && !dr.take.length && !pay && !ask) { showToast('주고받을 것을 골라 주세요.'); return; }
+      if (pay && !shopPay(shopDetail(me).money, pay)) { showToast('돈이 부족해요. (필요: ' + shopPriceTxt(pay) + ')'); return; }
+      const t = { id: 'tr_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), from: me.id, fromName: me.name || 'PC', to: to.id, toName: to.name || 'PC', give: dr.give.map(x => ({ name: x.name, qty: x.qty })), take: dr.take.map(x => ({ name: x.name, qty: x.qty })), pay, ask, note: (dr.note || '').slice(0, 120), st: 'wait', t: Date.now() };
+      trList().push(t); state.tradeDraft = null;
+      try { window.__fbcSend && window.__fbcSend({ ev: 'trade', t: '[거래 제안] ' + trSummary(t).replace(/&[a-z#0-9]+;/g, '') }); } catch (e) {}
+      persistState(); showToast(t.toName + '에게 거래 제안을 보냈어요. 상대가 수락하면 처리돼요.'); renderShop();
+    }
+    function trClose(id, st, why) {
+      const t = trList().find(x => x.id === id); if (!t || t.st !== 'wait') return; t.st = st; t.tEnd = Date.now(); if (why) t.why = why;
+      try { window.__fbcSend && window.__fbcSend({ ev: 'trade', t: '[거래 ' + ({ no: '거절', cancel: '취소', fail: '실패' }[st] || st) + '] ' + trSummary(t).replace(/&[a-z#0-9]+;/g, '') }); } catch (e) {}
+      persistState(); renderShop();
+    }
+    function trAccept(id) {
+      const t = trList().find(x => x.id === id); if (!t || t.st !== 'wait') return;
+      const A = trPc(t.from), B = trPc(t.to); if (!A || !B) { trClose(id, 'fail', 'PC를 찾지 못했어요'); return; }
+      const dA = shopDetail(A), dB = shopDetail(B);
+      const findAll = (d, L) => L.map(x => { const k = d.items.findIndex(y => (y.name || '물건') === x.name && !y.equipped && (Number(y.qty) || 1) >= x.qty); return k; });
+      const kA = findAll(dA, t.give), kB = findAll(dB, t.take);
+      if (kA.includes(-1)) { showToast(t.fromName + '에게 그 물건이 이제 없어서 거래할 수 없어요.'); trClose(id, 'fail', t.fromName + '의 물건이 없어요'); return; }
+      if (kB.includes(-1)) { showToast('내 가방에 그 물건이 없어요 (장착 중이면 먼저 풀어 주세요).'); return; }
+      const mA = shopMoneyCp(dA.money) - t.pay + t.ask, mB = shopMoneyCp(dB.money) + t.pay - t.ask;
+      if (shopMoneyCp(dA.money) < t.pay) { trClose(id, 'fail', t.fromName + '의 돈이 부족해요'); showToast(t.fromName + '의 돈이 부족해서 거래할 수 없어요.'); return; }
+      if (shopMoneyCp(dB.money) < t.ask) { showToast('돈이 부족해요. (필요: ' + shopPriceTxt(t.ask) + ')'); return; }
+      if (!confirm(trSummary(t).replace(/&[a-z#0-9]+;/g, '') + '\n\n이 거래를 수락할까요?')) return;
+      const move = (dFrom, dTo, L, ks) => { const take = L.map((x, j) => ({ x, src: dFrom.items[ks[j]] })); take.forEach(({ x, src }) => { const cp = Object.assign({}, src); delete cp.equipped; delete cp.slot; delete cp.sellPend; delete cp.bag; cp.qty = x.qty; const same = dTo.items.find(y => (y.name || '') === (cp.name || '') && !y.equipped && (y.img || '') === (cp.img || '')); if (same) same.qty = (Number(same.qty) || 1) + x.qty; else dTo.items.push(cp); const have = Number(src.qty) || 1; if (have > x.qty) src.qty = have - x.qty; else src._del = 1; }); dFrom.items = dFrom.items.filter(y => !y._del); return dFrom.items; };
+      dA.items = move(dA, dB, t.give, kA); dB.items = move(dB, dA, t.take, kB);
+      dA.money = shopFromCp(mA); dB.money = shopFromCp(mB);
+      const gd = (typeof __gameDate === 'function') ? __gameDate() : '', line = (s, txt) => ({ d: gd, s, text: txt });
+      const aTxt = '거래 (' + t.toName + '): 줌 ' + (trItemsTxt(t.give) || '-') + (t.pay ? ' · ' + shopPriceTxt(t.pay) : '') + ' / 받음 ' + (trItemsTxt(t.take) || '-') + (t.ask ? ' · ' + shopPriceTxt(t.ask) : '');
+      const bTxt = '거래 (' + t.fromName + '): 줌 ' + (trItemsTxt(t.take) || '-') + (t.ask ? ' · ' + shopPriceTxt(t.ask) : '') + ' / 받음 ' + (trItemsTxt(t.give) || '-') + (t.pay ? ' · ' + shopPriceTxt(t.pay) : '');
+      const net = t.ask - t.pay;
+      dA.ledger.unshift(line(net >= 0 ? 1 : -1, (net ? (net > 0 ? '+' : '−') + shopPriceTxt(Math.abs(net)) + ' · ' : '') + aTxt)); dA.ledger = dA.ledger.slice(0, 100);
+      dB.ledger.unshift(line(net <= 0 ? 1 : -1, (net ? (net < 0 ? '+' : '−') + shopPriceTxt(Math.abs(net)) + ' · ' : '') + bTxt)); dB.ledger = dB.ledger.slice(0, 100);
+      t.st = 'done'; t.tEnd = Date.now();
+      try { window.__fbcSend && window.__fbcSend({ ev: 'trade', t: '[거래 완료] ' + trSummary(t).replace(/&[a-z#0-9]+;/g, '') }); } catch (e) {}
+      persistState(); try { sheetSend(); } catch (e) {} showToast('거래를 마쳤어요.'); renderShop();
+    }
     function renderShop() {
       const area = document.getElementById('main-content-area'); if (!area) return;
       if (!SHOP_CAT) { area.innerHTML = jHeaderHtml() + '<div class="bg-wait">상점을 불러오는 중…</div>'; shopCatLoad(() => { if (state.jView === 'shop') renderShop(); }); return; }
       const gm = !!AUTH_S.gm && !plView(), gmv0 = gm, L = shopsList().filter(s => gmv0 || !s.off);
-      if (!L.some(s => s.id === state.shopId)) state.shopId = L.length ? L[0].id : '';
+      if (state.shopId !== '__trade' && !L.some(s => s.id === state.shopId)) state.shopId = L.length ? L[0].id : '';
       const sh = L.find(s => s.id === state.shopId), by = shopBuyer(), q = (state.shopQ || '').toLowerCase(), cat = state.shopCat || 'all';
       const d = shopData(by), ed = !!state.shopIcEdit;
       const who = `<button class="bg-pcb${by.shared ? ' on' : ''}" title="공용 가방" onclick="state.shopPc='-';state.shopSel=null;renderShop()"><img src="${IC_BAG}" alt="공용" style="object-fit:contain"></button>` + by.pcs.map(p => `<button class="bg-pcb${!by.shared && p.id === by.pc.id ? ' on' : ''}" title="${escapeHtml(p.name || 'PC')}" ${pcIconSty(p)} onclick="state.shopPc='${p.id}';state.shopSel=null;renderShop()">${pcIconImg(p)}</button>`).join('');
@@ -6877,10 +6964,11 @@
       let h = jHeaderHtml() + '<div class="bg-trade"' + (__bg ? ' style="background-image:linear-gradient(rgba(246,236,210,.55),rgba(234,217,174,.55)),url(\'' + String(__bg).replace(/'/g, '%27') + '\');background-size:cover;background-position:center"' : '') + '>';
       if (shopBack) h += `<button class="bg-back" title="캐릭터 시트" aria-label="캐릭터 시트" onclick="shopBackGo()"><img src="${SHOP_BACK_IC}" alt="" draggable="false"></button>`;
       h += `<div class="bg-top"><div class="bg-who">${who}</div>
-        <div class="bg-shops">${L.map(s => `<button class="bg-tab${s.id === state.shopId ? ' on' : ''}${s.off ? ' off' : ''}" ${s.off ? 'title="비활성 (나에게만 보여요)" style="opacity:.5;border-style:dashed"' : ''} onclick="state.shopId='${s.id}';state.shopSel=null;renderShop()">${escapeHtml(s.name || '상점')}${s.off ? ' (비활성)' : ''}</button>`).join('')}${gm ? '<button class="bg-tab ghost" onclick="shopAdd()">+ 상점</button><button class="bg-tab ghost" onclick="shopTplDlg()" title="D&amp;D Shop Catalog 문서의 상점 종류(대장간·잡화점·물약 상점 등)로 바로 진열">+ 템플릿</button>' : ''}</div>
+        <div class="bg-shops">${L.map(s => `<button class="bg-tab${s.id === state.shopId ? ' on' : ''}${s.off ? ' off' : ''}" ${s.off ? 'title="비활성 (나에게만 보여요)" style="opacity:.5;border-style:dashed"' : ''} onclick="state.shopId='${s.id}';state.shopSel=null;renderShop()">${escapeHtml(s.name || '상점')}${s.off ? ' (비활성)' : ''}</button>`).join('')}<button class="bg-tab${state.shopId === '__trade' ? ' on' : ''}" onclick="state.shopId='__trade';state.shopSel=null;renderShop()" title="다른 PC와 아이템·돈을 주고받아요 (상대가 수락해야 처리돼요)">PC 거래${(() => { const me = by.shared ? null : by.pc, n = me ? trList().filter(t => t.st === 'wait' && t.to === me.id).length : 0; return n ? ' <b style="color:#c0392b">(' + n + ')</b>' : ''; })()}</button>${gm ? '<button class="bg-tab ghost" onclick="shopAdd()">+ 상점</button><button class="bg-tab ghost" onclick="shopTplDlg()" title="D&amp;D Shop Catalog 문서의 상점 종류(대장간·잡화점·물약 상점 등)로 바로 진열">+ 템플릿</button>' : ''}</div>
         <div class="bg-coins">${d ? ['gp', 'sp', 'cp'].map(u => `<span class="cn" title="${u}"><img src="${SHOP_CN[u]}" alt="${u}" draggable="false">${d.money[u] || 0}</span>`).join('') : ''}</div></div>`;
       h += shopReqHtml();
       if (SHOP_CERR) h += '<div class="bg-warn">카탈로그 파일(shop_data/items.json)을 읽지 못했어요. 직접 만든 상품만 보여요.</div>';
+      if (state.shopId === '__trade') { h += trTradeHtml(by) + '</div>'; area.innerHTML = h; return; }
       if (!sh) { h += `<div class="bg-empty">${gm ? '상점이 아직 없어요. "+ 상점"으로 만들어 보세요.' : '열려 있는 상점이 없어요.'}</div></div>`; area.innerHTML = h; return; }
 const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forEach(it => { const c0 = shopRes(it).c; cnt[c0] = (cnt[c0] || 0) + 1; });
       const chip = c => { if (!gmv && c[0] !== 'all' && !cnt[c[0]]) return ''; const ic = c[0] !== 'all' ? shopCicGet(c[0], ed ? (tgt === 'all' ? '' : tgt) : (by.shared || !by.pc ? '' : by.pc.id)) : ''; const on = cat === c[0];
