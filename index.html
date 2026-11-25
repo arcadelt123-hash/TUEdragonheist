@@ -6906,10 +6906,10 @@
             <div style="font-size:12px;opacity:.75">가격은 자유롭게 정해요. 상대가 수락하면 아이템과 돈이 옮겨지고, 양쪽 금전 내역에 기록돼요.</div>`;
         }
       }
-      // 거래 내역: GM은 전부, PL은 자기 것만
-      const hist = T.filter(t => t.st !== 'wait' && (gm || (me && (t.from === me.id || t.to === me.id)))).slice().sort((a, b) => (b.tEnd || b.t) - (a.tEnd || a.t)).slice(0, 60);
+      // 거래 내역: 모두가 전체 거래를 볼 수 있어요
+      const hist = T.filter(t => t.st !== 'wait').slice().sort((a, b) => (b.tEnd || b.t) - (a.tEnd || a.t)).slice(0, 60);
       const ST = { done: '완료', no: '거절', cancel: '취소', fail: '실패' };
-      if (hist.length || gm) h += `<details${gm ? ' open' : ''} style="border-top:1px dashed rgba(120,90,40,.4);padding-top:6px"><summary style="cursor:pointer;font-weight:700">거래 내역${gm ? ' (GM: 전체)' : ''} ${hist.length}건</summary>${hist.length ? hist.map(t => `<div style="font-size:12.5px;margin:4px 0;display:flex;gap:6px;flex-wrap:wrap"><span style="opacity:.6">${new Date(t.tEnd || t.t).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span><b>[${ST[t.st] || t.st}]</b><span>${trSummary(t)}</span>${t.note ? `<small style="opacity:.7">“${escapeHtml(t.note)}”</small>` : ''}${t.why ? `<small style="color:#a33">${escapeHtml(t.why)}</small>` : ''}</div>`).join('') : '<div style="font-size:12px;opacity:.6">아직 거래가 없어요.</div>'}</details>`;
+      h += `<details${gm || hist.length ? ' open' : ''} style="border-top:1px dashed rgba(120,90,40,.4);padding-top:6px"><summary style="cursor:pointer;font-weight:700">거래 내역 (전체) ${hist.length}건</summary>${hist.length ? hist.map(t => `<div style="font-size:12.5px;margin:4px 0;display:flex;gap:6px;flex-wrap:wrap"><span style="opacity:.6">${new Date(t.tEnd || t.t).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span><b>[${ST[t.st] || t.st}]</b><span>${trSummary(t)}</span>${t.note ? `<small style="opacity:.7">“${escapeHtml(t.note)}”</small>` : ''}${t.why ? `<small style="color:#a33">${escapeHtml(t.why)}</small>` : ''}</div>`).join('') : '<div style="font-size:12px;opacity:.6">아직 거래가 없어요.</div>'}</details>`;
       return h + '</div>';
     }
     function trSend() {
