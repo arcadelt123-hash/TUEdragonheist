@@ -11934,6 +11934,8 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
   var VIEW = 'adv_tut_view';
   function view() { try { return localStorage.getItem(VIEW) === 'pick' ? 'pick' : 'all'; } catch (e) { return 'all'; } }
   function setView(v) { try { localStorage.setItem(VIEW, v); } catch (e) {} }
+  var OFF = 'adv_tut_off';
+  function autoOff() { try { return localStorage.getItem(OFF) === '1'; } catch (e) { return false; } }
   function mode() { try { return localStorage.getItem(MODE) === '1'; } catch (e) { return false; } }
   function setMode(v) { try { localStorage.setItem(MODE, v ? '1' : '0'); } catch (e) {} }
   function seen() { try { return JSON.parse(localStorage.getItem(SEEN) || '{}') || {}; } catch (e) { return {}; } }
@@ -12023,12 +12025,12 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     var topN = items.filter(function (x) { return x.top; }).length;
     panel.innerHTML = '<div class="th"><b>화면 안내 · ' + E(sc.title) + '</b><button data-a="list">목록</button><button data-a="bb">' + (view() === 'pick' ? '전체 보기' : '골라 보기') + '</button><button data-a="min">접기</button></div>' + (sc.intro ? '<div class="ti">' + E(sc.intro) + '</div>' : '') +
       '<ol>' + items.map(function (it, i) { return (i === 0 && topN ? '<li class="sec">상단 메뉴</li>' : '') + (i === topN && topN ? '<li class="sec">이 화면</li>' : '') + '<li data-i="' + i + '"><span class="n">' + (i + 1) + '</span><span><b>' + E(it.name) + '</b>' + (it.desc ? '<br>' + E(it.desc) : '') + '</span></li>'; }).join('') + '</ol>' +
-      '<div class="tf"><span>' + (view() === 'pick' ? '빨간 번호를 누르면 설명이 나와요 · ' : '') + (mode() ? '튜토리얼 모드 켜짐 · ' : '') + 'F1 또는 ? 키로 켜고 꺼요</span><button class="ok" data-a="ok">다 봤어요</button></div>';
+      '<div class="tf"><span>' + (view() === 'pick' ? '빨간 번호를 누르면 설명이 나와요 · ' : '') + (mode() ? '튜토리얼 모드 켜짐 · ' : '') + 'F1 또는 ? 키로 켜고 꺼요</span><button data-a="never" style="border:1px solid #b8893a;border-radius:6px;background:#fff8e6;color:#7a4a14;font:11px sans-serif;padding:4px 8px;cursor:pointer">더 이상 띄우지 않기</button><button class="ok" data-a="ok">다 봤어요</button></div>';
     document.body.appendChild(panel);
     if (pPos && pPos.l) { panel.style.left = pPos.l; panel.style.top = pPos.t; } else { panel.style.right = '16px'; panel.style.bottom = '16px'; }
     panel.addEventListener('mouseover', function (e) { var li = e.target.closest('li[data-i]'); hl._it = li ? items[+li.dataset.i] : null; if (!li) hl.style.display = 'none'; place(); });
     panel.addEventListener('mouseleave', function () { hl._it = null; hl.style.display = 'none'; });
-    panel.addEventListener('click', function (e) { var a = (e.target.closest('[data-a]') || {}).dataset; if (!a) return; if (a.a === 'min') { panel.classList.toggle('min'); e.target.textContent = panel.classList.contains('min') ? '펼치기' : '접기'; } if (a.a === 'ok') { if (mode()) setMode(false); close(true); } if (a.a === 'list') panel.classList.toggle('list'); if (a.a === 'bb') { var pk = !layer.classList.contains('pick'); layer.classList.toggle('pick', pk); setView(pk ? 'pick' : 'all'); items.forEach(function (x, k) { if (x.bb) x.bb.classList.remove('on'); if (layer.children[k]) layer.children[k].classList.remove('on'); }); e.target.textContent = pk ? '전체 보기' : '골라 보기'; var tf = panel.querySelector('.tf span'); if (tf) tf.textContent = (pk ? '빨간 번호를 누르면 설명이 나와요 · ' : '') + 'F1 또는 ? 키로 켜고 꺼요'; } place(); });
+    panel.addEventListener('click', function (e) { var a = (e.target.closest('[data-a]') || {}).dataset; if (!a) return; if (a.a === 'min') { panel.classList.toggle('min'); e.target.textContent = panel.classList.contains('min') ? '펼치기' : '접기'; } if (a.a === 'ok') { if (mode()) setMode(false); close(true); } if (a.a === 'never') { try { localStorage.setItem(OFF, '1'); } catch (x) {} setMode(false); close(true); try { showToast('화면 안내를 더 띄우지 않아요. 보고 싶을 땐 F1 또는 ? 키를 누르세요.'); } catch (x) {} return; } if (a.a === 'list') panel.classList.toggle('list'); if (a.a === 'bb') { var pk = !layer.classList.contains('pick'); layer.classList.toggle('pick', pk); setView(pk ? 'pick' : 'all'); items.forEach(function (x, k) { if (x.bb) x.bb.classList.remove('on'); if (layer.children[k]) layer.children[k].classList.remove('on'); }); e.target.textContent = pk ? '전체 보기' : '골라 보기'; var tf = panel.querySelector('.tf span'); if (tf) tf.textContent = (pk ? '빨간 번호를 누르면 설명이 나와요 · ' : '') + 'F1 또는 ? 키로 켜고 꺼요'; } place(); });
     var th = panel.querySelector('.th');
     th.addEventListener('mousedown', function (e) { if (e.target.closest('button')) return; var r = panel.getBoundingClientRect(), sx = e.clientX, sy = e.clientY; panel.style.right = panel.style.bottom = ''; panel.style.left = r.left + 'px'; panel.style.top = r.top + 'px';
       function mv(ev) { panel.style.left = Math.max(0, Math.min(innerWidth - 80, r.left + ev.clientX - sx)) + 'px'; panel.style.top = Math.max(0, Math.min(innerHeight - 40, r.top + ev.clientY - sy)) + 'px'; }
@@ -12044,7 +12046,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     pend = setTimeout(function () {
       var sc2 = screen(); if (sc2.key !== curSig) return;
       if (cur && cur !== sc2.key) markSeen(cur);
-      if (mode() || !seen()[sc2.key]) show(sc2); else close(false);
+      if (mode() || (!autoOff() && !seen()[sc2.key])) show(sc2); else close(false);
     }, 900);
   }
   function toggle() { if (mode() || panel) { setMode(false); close(true); } else { setMode(true); var sc = screen(); curSig = sc.key; show(sc); } }
