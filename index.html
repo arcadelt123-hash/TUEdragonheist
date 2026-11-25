@@ -2999,7 +2999,7 @@
     // ---- 접속 중인 사람 (Apps Script ping, 시트에 쓰지 않음)
     const PRES = { id: (() => { try { let v = localStorage.getItem('adv_pres_id'); if (!v) { v = 'u' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-3); localStorage.setItem('adv_pres_id', v); } return v; } catch (e) { return Math.random().toString(36).slice(2, 10); } })() };
     // 접속 표시 이름: 연결된 PC가 있으면 그 PC 이름, 없으면 직접 정한 이름
-    function presShown() { try { const plr = myRaw().filter(isPlId)[0]; if (plr) { const pl = plsList().find(x => x.id === plr); if (pl && pl.name) return String(pl.name).trim().slice(0, 20); } const id = landMe(); if (id) { const p = landPls().find(x => x.id === id); if (p) return String(p.key || p.name || '').replace(/\s*\(GM\)\s*$/i, '').trim().slice(0, 20) || presName(); } } catch (e) {} return presName(); }
+    function presShown() { try { const plr = myRaw().filter(isPlId)[0]; if (plr) { const pl = plsList().find(x => x.id === plr); if (pl && pl.name) return String(pl.name).trim().slice(0, 20); } const id = landMe(); if (id) { const p = landPls().find(x => x.id === id); if (p) return String(p.key || p.name || '').replace(/\s*\(GM\)\s*$/i, '').trim().slice(0, 20) || presName(); } } catch (e) {} try { const st = (typeof AUTH_S !== 'undefined' && AUTH_S.st) || {}; if (st.pcn && st.pcn !== 'GM') return String(st.pcn).split(/\s*[,/]\s*/)[0].trim().slice(0, 20); if (typeof AUTH_S !== 'undefined' && AUTH_S.gm) return (window.CUSTOM && window.CUSTOM.GM_NAME) || '시금치'; } catch (e) {} return presName(); }   // PL을 못 찾으면 로그인 기기에 연결된 PC 이름
     function presName() { try { return (localStorage.getItem('adv_pres_name') || '').trim(); } catch (e) { return ''; } }
     function presencePanel(keep) {
       let p = document.getElementById('pres-panel');
@@ -3210,7 +3210,7 @@
     }
     (function pcAskWatch() { let n = 0; const iv = setInterval(() => { n++; try { if (localStorage.getItem('adv_pc_ask') || myRaw().length || n > 60) { clearInterval(iv); return; } if (!AUTH_S.gate && AUTH_S.st && AUTH_S.st.valid && state.boardTex && (plsList().length > 0)) { clearInterval(iv); pcAskOpen(); } } catch (e) {} }, 800); })();
     function presencePing() {
-      if (document.hidden) return;
+      if (document.hidden || document.getElementById('auth-ov')) return;   // 로그인 화면에서는 접속 표시를 보내지 않아요
       try { authPushPls(); } catch (e) {}
       let edv = ''; try { edv = presEditing(); } catch (e) {}
       fetchGet('ping&id=' + encodeURIComponent(PRES.id) + '&name=' + encodeURIComponent(presShown()) + '&color=' + encodeURIComponent(presColor()) + '&ed=' + encodeURIComponent(edv)).then(t => { const j = typeof t === 'string' ? JSON.parse(t) : t; if (j && j.online) presenceRender(j.online); else throw 0; }).catch(() => { presenceRender([{ id: PRES.id, name: presShown() }], true); });
