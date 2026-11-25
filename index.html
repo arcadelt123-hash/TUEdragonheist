@@ -11973,11 +11973,11 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       { fr: '#map-frame', sel: '#openImageManagerBtn', name: '이미지 관리', desc: '관련 인물/아이템/이미지를 정리해요.' },
       { fr: '#map-frame', sel: '#openMapManagerBtn', name: '지도 관리', desc: '지도를 추가하거나 삭제해요.' },
       { fr: '#map-frame', sel: '#openCalendarModalBtn', name: '지도 달력', desc: '지도 속 날짜와 시간이에요. 눌러서 바꿔요.' },
-      { fr: '#map-frame', sel: '#navGearBtn', name: '메뉴 열기', desc: '메뉴 탭을 열고 닫아요.' },
-      { fr: '#map-frame', sel: '#mapSelect', name: '지도 선택', desc: '볼 지도를 골라요.' },
-      { fr: '#map-frame', sel: '#addFolderBtn', name: '분류 추가', desc: '분류는 일종의 폴더에요. 구역을 그려 나눌 수도 있어요.' },
-      { fr: '#map-frame', sel: '#toggleCatFilterBtn', name: '핀 모양별 보기', desc: '핀의 모양(카테고리) 별로 모아서 볼 수 있어요.' },
-      { fr: '#map-frame', sel: '.pin-title-area button[title="수정"]', first: 1, inView: 1, bpos: 'left', name: '핀 수정', desc: '누르면 수정 가능해요. 핀을 눌러도 같은 아이콘을 눌러 수정할 수 있어요.' }] },
+      { fr: '#map-frame', sel: '#navGearBtn', bb: 1, side: 'left', name: '메뉴 열기', desc: '메뉴 탭을 열고 닫아요.' },
+      { fr: '#map-frame', sel: '#mapSelect', bb: 1, side: 'left', name: '지도 선택', desc: '볼 지도를 골라요.' },
+      { fr: '#map-frame', sel: '#addFolderBtn', bb: 1, side: 'left', name: '분류 추가', desc: '분류는 일종의 폴더에요. 구역을 그려 나눌 수도 있어요.' },
+      { fr: '#map-frame', sel: '#toggleCatFilterBtn', bb: 1, side: 'left', name: '핀 모양별 보기', desc: '핀의 모양(카테고리) 별로 모아서 볼 수 있어요.' },
+      { fr: '#map-frame', sel: '.pin-title-area button[title="수정"]', first: 1, inView: 1, bpos: 'left', bb: 1, side: 'left', name: '핀 수정', desc: '누르면 수정 가능해요. 핀을 눌러도 같은 아이콘을 눌러 수정할 수 있어요.' }] },
     'quests': { auto: false, notes: [
       { sel: '#quest-srch-slot .srch-b:not(.bm)', name: '검색', desc: '퀘스트 이름·내용으로 찾아요.' },
       { sel: '#quest-srch-slot .srch-b.bm', name: '폴더·태그', desc: '폴더와 태그로 골라 봐요.' },
@@ -12051,6 +12051,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     var q = root.querySelectorAll('button, select, input:not([type=hidden]), textarea, a[href], [role=button], [onclick]');
     [].forEach.call(q, function (el) {
       if (mine(el) || !vis(el)) return; if (off.skipTop && el.closest('.top-bar,#fbc-pan,#fbc-fab,#fbc-bub')) return; if (off.ex && off.ex.some(function (x) { return el.closest(x); })) return; if (el.parentElement && el.parentElement.closest('button,a,[onclick]') && el.matches('[onclick]:not(button)')) return;
+      if (off.auto) { var vt = el.tagName === 'SELECT' ? ((el.options[el.selectedIndex] || {}).text || '') : /INPUT|TEXTAREA/.test(el.tagName) ? (el.value || el.placeholder || '') : (el.innerText || ''); if (/[가-힣]/.test(vt)) return; }   // 한글로 보이게 적힌 건 번호·설명 생략
       var L = label(el); if (!L || /^[\d\s.,:/+\-×%]+$/.test(L)) return;
       var r = el.getBoundingClientRect(); var rect = { x: r.left + off.x, y: r.top + off.y, w: r.width, h: r.height };
       if (rect.y > innerHeight + 200) return;
@@ -12060,13 +12061,13 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       var ti = el.getAttribute('title') || '', d = (ti && ti !== L && ti.length > L.length) ? ti : (DESC[key] || (el.tagName === 'SELECT' ? '눌러서 고르는 칸이에요.' : /INPUT|TEXTAREA/.test(el.tagName) ? '글자를 입력하는 칸이에요.' : ''));
       out.push({ el: el, off: off, name: key.length > 24 ? key.slice(0, 24) + '…' : key, desc: d });
     });
-    [].forEach.call(root.querySelectorAll('iframe'), function (f) { try { if (!vis(f) || !f.contentDocument) return; var r = f.getBoundingClientRect(); collect(f.contentDocument, { x: off.x + r.left, y: off.y + r.top, skipTop: off.skipTop }, out, seenL, cards); } catch (e) {} });
+    [].forEach.call(root.querySelectorAll('iframe'), function (f) { try { if (!vis(f) || !f.contentDocument) return; var r = f.getBoundingClientRect(); collect(f.contentDocument, { x: off.x + r.left, y: off.y + r.top, skipTop: off.skipTop, auto: off.auto }, out, seenL, cards); } catch (e) {} });
   }
   function build(sc, withTop) {
     var out = [], seenL = {}, cards = { n: 0, el: null }, rule = ruleFor(sc);
     if (withTop) { var tb = document.querySelector('.top-bar'); if (tb) collect(tb, { x: 0, y: 0 }, out, seenL, { n: 0 }); out.forEach(function (o) { o.top = 1; }); }
     if (!rule || rule.auto) {
-      collect(sc.scope, { x: 0, y: 0, skipTop: !!sc.base, ex: rule && rule.ex }, out, seenL, cards);
+      collect(sc.scope, { x: 0, y: 0, skipTop: !!sc.base, auto: 1, ex: rule && rule.ex }, out, seenL, cards);
       if (!rule && cards.n) out.push({ el: cards.el.el, off: { x: 0, y: 0 }, name: '카드·항목 (' + cards.n + '개)', desc: '눌러서 자세히 열어 볼 수 있는 항목들이에요.' });
     }
     if (rule) (rule.notes || []).forEach(function (n) {
@@ -12076,7 +12077,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       if (n.inView) els = els.filter(function (e) { var r = e.getBoundingClientRect(); return r.top >= 0 && r.bottom <= H0; });
       if (n.first) els = els.slice(0, n.first);
       if (!els.length) return;
-      out.push({ el: els[0], els: els, off: off, name: n.name, desc: n.desc, mask: n.mask, at: n.at, side: n.side, bpos: n.bpos, icon: icoHtml(els[0]) });
+      out.push({ el: els[0], els: els, off: off, name: n.name, desc: n.desc, mask: n.mask, at: n.at, side: n.side, bpos: n.bpos, bb: n.bb, icon: icoHtml(els[0]) });
     });
     return out.slice(0, 45);
   }
@@ -12095,7 +12096,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
   }
   function E(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function place() {
-    if (!layer) return; var hl = layer.querySelector('.hl'), W = innerWidth, H = innerHeight, pick = layer.classList.contains('pick');
+    if (!layer) return; var anyFar = false; var hl = layer.querySelector('.hl'), W = innerWidth, H = innerHeight, pick = layer.classList.contains('pick');
     items.forEach(function (it) { it.r = rectOf(it); });
     items.forEach(function (it) {
       var r = it.r;
@@ -12117,30 +12118,35 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       if (it.side === 'right') { c.unshift([x0 + r.width + 6, y0], [x0 + r.width + 6, y0 + r.height - bh]); if (mr) c.splice(2, 0, [mr.right + 8, y0], [mr.right + 8, y0 - bh / 2]); } else if (it.side === 'left') { c.unshift([x0 - bw - 6, y0], [x0 - bw - 6, y0 + r.height - bh]); if (mr) c.splice(2, 0, [mr.left - bw - 8, y0], [mr.left - bw - 8, y0 - bh / 2]); }
       if (it.mask) c = [[x0 + r.width + 8, y0], [x0 + r.width - bw, y0 - bh - 6], [x0 + r.width - bw, y0 + r.height + 6], [x0 - bw - 8, y0]];
       for (var k = 0; k < c.length && !pos; k++) { var a = { l: c[k][0], t: c[k][1], r: c[k][0] + bw, b: c[k][1] + bh }; if (!hit(a)) pos = a; }
+      if (!pos && (it.side === 'left' || it.side === 'right')) { var cols = [it.side === 'left' ? x0 - bw - 6 : x0 + r.width + 6]; try { var box2 = it.el.closest('.sidebar,.modal-box,.modal-content'); if (box2) { var br = box2.getBoundingClientRect(); cols.push(it.side === 'left' ? br.left + it.off.x - bw - 8 : br.right + it.off.x + 8); } } catch (x) {}
+        cols.forEach(function (sx2) { for (var d2 = 0; d2 < 260 && !pos; d2 += 6) { [y0 + d2, y0 - d2].forEach(function (yy) { if (pos) return; var a3 = { l: sx2, t: yy, r: sx2 + bw, b: yy + bh }; if (!hit(a3)) pos = a3; }); } }); }
       if (!pos) { var x = Math.max(4, Math.min(W - bw - 4, x0)), y = y0 + r.height + 4; for (var n = 0; n < 60; n++) { var a2 = { l: x, t: y, r: x + bw, b: y + bh }; if (!hit(a2)) { pos = a2; break; } y += 8; if (y + bh > H - 4) { y = Math.max(4, y0 - bh - 4); x = Math.min(W - bw - 4, x + bw / 2); } } }
-      if (!pos) { m.style.display = 'none'; return; }
+      var tbr = it.tb ? it.tb.getBoundingClientRect() : r, far = !pos || Math.max(Math.min(r.left, tbr.left) - pos.r, pos.l - Math.max(tbr.right, Math.min(r.right, tbr.right + 40)), Math.min(r.top, tbr.top) - pos.b, pos.t - Math.max(r.bottom, tbr.bottom)) > (it.side ? 240 : 48);   // 번호에서 멀리 떨어지면 말풍선 대신 목록으로
+      if (it.tb) it.tb.classList.toggle('nb', far);
+      if (far) { m.style.display = 'none'; it.far = 1; anyFar = true; return; } it.far = 0;
       m.style.left = pos.l + 'px'; m.style.top = pos.t + 'px'; placed.push(pos);
     });
+    if (anyFar && panel && !panel._autoList) { panel._autoList = 1; panel.classList.add('list'); }
     if (hl && hl._it && hl._it.r) { var r2 = hl._it.r; Object.assign(hl.style, { display: '', left: r2.left - 4 + 'px', top: r2.top - 4 + 'px', width: r2.width + 8 + 'px', height: r2.height + 8 + 'px' }); }
   }
   var topPanel = null, tPos = null;
   function close(mark) { if (mark && cur) markSeen(cur); if (layer) layer.remove(); if (panel) { pPos = { l: panel.style.left, t: panel.style.top }; panel.remove(); } if (topPanel) topPanel.remove(); layer = panel = topPanel = null; items = []; cur = ''; }
   function show(sc) {
-    css(); close(false); if (sc.quiet) return; var rl0 = ruleFor(sc); if (rl0 && rl0.intro) sc.intro = rl0.intro; if (rl0 && rl0.title) sc.title = rl0.title; var withTop = !!sc.base; items = build(sc, withTop); if (!items.length && !sc.intro) return; cur = sc.key;
+    css(); close(false); if (sc.quiet) return; var rl0 = ruleFor(sc); if (rl0 && rl0.intro) sc.intro = rl0.intro; if (rl0 && rl0.title) sc.title = rl0.title; var withTop = !!sc.base; items = build(sc, withTop); if (!items.length && (!sc.intro || !sc.base)) return; cur = sc.key;
     layer = document.createElement('div'); layer.id = 'tut-layer';
     var topN = items.filter(function (x) { return x.top; }).length, NOBB = !!(rl0 && rl0.nobb); items.forEach(function (it, i) { it.no = it.top ? i + 1 : i - topN + 1; });
-    items.forEach(function (it, i) { if (it.mask) { var mk = document.createElement('div'); mk.className = 'mk'; it.mk = mk; layer.appendChild(mk); } var b = document.createElement('div'); b.className = 'tb' + (it.top ? ' top nb' : '') + (NOBB && !it.top ? ' nb' : ''); b.textContent = it.no; b.dataset.i = i; it.tb = b; layer.appendChild(b); });
-    items.forEach(function (it, i) { if (it.top || NOBB) return; var m = document.createElement('div'); m.className = 'bb'; m.innerHTML = '<span class="bn">' + it.no + '</span><b>' + E(it.name) + '</b>' + (it.desc ? '<br>' + E(it.desc) : ''); it.bb = m; layer.appendChild(m); });
+    items.forEach(function (it, i) { if (it.mask) { var mk = document.createElement('div'); mk.className = 'mk'; it.mk = mk; layer.appendChild(mk); } var b = document.createElement('div'); b.className = 'tb' + (it.top ? ' top nb' : '') + (NOBB && !it.top && !it.bb ? ' nb' : ''); b.textContent = it.no; b.dataset.i = i; it.tb = b; layer.appendChild(b); });
+    items.forEach(function (it, i) { if (it.top || (NOBB && !it.bb)) return; var m = document.createElement('div'); m.className = 'bb'; m.innerHTML = '<span class="bn">' + it.no + '</span><b>' + E(it.name) + '</b>' + (it.desc ? '<br>' + E(it.desc) : ''); it.bb = m; layer.appendChild(m); });
     var hl = document.createElement('div'); hl.className = 'hl'; hl.style.display = 'none'; layer.appendChild(hl); document.body.appendChild(layer);
     if (view() === 'pick') layer.classList.add('pick');
     layer.addEventListener('click', function (e) { var b = e.target.closest('.tb'); if (!b || !(layer.classList.contains('pick') || b.classList.contains('nb'))) return; var i = +b.dataset.i, it = items[i]; if (!it) return;
       if (it.top) { var on = !b.classList.contains('on'); items.forEach(function (x) { if (x.top && x.tb) x.tb.classList.remove('on'); }); if (topPanel) [].forEach.call(topPanel.querySelectorAll('li'), function (li) { li.classList.toggle('on', on && +li.dataset.i === i); if (on && +li.dataset.i === i) li.scrollIntoView({ block: 'nearest' }); }); if (on) b.classList.add('on'); if (topPanel) topPanel.classList.remove('min'); return; }
-      if (!it.bb) { var on2 = !b.classList.contains('on'); items.forEach(function (x) { if (!x.top && x.tb) x.tb.classList.remove('on'); }); [].forEach.call(panel.querySelectorAll('li[data-i]'), function (li) { var hit = on2 && +li.dataset.i === i; li.classList.toggle('on', hit); if (hit) li.scrollIntoView({ block: 'nearest' }); }); if (on2) b.classList.add('on'); panel.classList.add('list'); panel.classList.remove('min'); return; }
+      if (!it.bb || it.far) { var on2 = !b.classList.contains('on'); items.forEach(function (x) { if (!x.top && x.tb) x.tb.classList.remove('on'); }); [].forEach.call(panel.querySelectorAll('li[data-i]'), function (li) { var hit = on2 && +li.dataset.i === i; li.classList.toggle('on', hit); if (hit) li.scrollIntoView({ block: 'nearest' }); }); if (on2) b.classList.add('on'); panel.classList.add('list'); panel.classList.remove('min'); return; }
       var was = it.bb.classList.contains('on');
       items.forEach(function (x) { if (x.bb) x.bb.classList.remove('on'); if (x.tb && !x.top) x.tb.classList.remove('on'); }); if (!was) { it.bb.classList.add('on'); b.classList.add('on'); } place(); });
     panel = document.createElement('div'); panel.id = 'tut-panel';
     panel.innerHTML = '<div class="th"><b>화면 안내 · ' + E(sc.title) + '</b><button data-a="list">목록</button><button data-a="bb">' + (view() === 'pick' ? '전체 보기' : '골라 보기') + '</button><button data-a="min">접기</button></div>' + (sc.intro ? '<div class="ti">' + E(sc.intro) + '</div>' : '') +
-      '<ol>' + items.map(function (it, i) { if (it.top) return ''; return '<li data-i="' + i + '"><span class="n">' + it.no + '</span>' + (it.icon ? '<span class="ic">' + it.icon + '</span>' : '') + '<span><b>' + E(it.name) + '</b>' + (it.desc ? '<br>' + E(it.desc) : '') + '</span></li>'; }).join('') + '</ol>' +
+      '<ol>' + items.map(function (it, i) { if (it.top || (NOBB && it.bb)) return ''; return '<li data-i="' + i + '"><span class="n">' + it.no + '</span>' + (it.icon ? '<span class="ic">' + it.icon + '</span>' : '') + '<span><b>' + E(it.name) + '</b>' + (it.desc ? '<br>' + E(it.desc) : '') + '</span></li>'; }).join('') + '</ol>' +
       '<div class="tf"><span>' + (view() === 'pick' ? '빨간 번호를 누르면 설명이 나와요 · ' : '') + (mode() ? '튜토리얼 모드 켜짐 · ' : '') + 'F1 또는 ? 키로 켜고 꺼요</span><button data-a="never" style="border:1px solid #b8893a;border-radius:6px;background:#fff8e6;color:#7a4a14;font:11px sans-serif;padding:4px 8px;cursor:pointer">더 이상 띄우지 않기</button><button class="ok" data-a="ok">다 봤어요</button></div>';
     document.body.appendChild(panel);
     if (NOBB) { panel.classList.add('list'); var bbB = panel.querySelector('[data-a=bb]'); if (bbB) bbB.style.display = 'none'; layer.classList.remove('pick'); }
