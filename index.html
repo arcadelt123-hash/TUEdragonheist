@@ -12103,7 +12103,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     'journal:shop': { auto: false, notes: [
       { sel: '.bg-who', name: '가방 고르기', desc: '공용 가방과 PC중에 하나를 선택할 수 있어요.' },
       { sel: '.bg-shops .bg-tab:not(.ghost)', name: '상점', desc: '상점 이름이에요.' },
-      { sel: '.bg-cols', name: '사고팔기', desc: '아이템을 드래그해서 판매나 구매를 할 수 있어요.' }] },
+      { sel: '.bg-cols .bg-grid', first: 1, inside: 1, name: '사고팔기', desc: '아이템을 드래그해서 판매나 구매를 할 수 있어요.' }] },
     '#lg-modal': { title: '세션 로그', autoSide: 'below', loose: 1, drop: { '메모': 200 }, intro: '회차별 세션 로그를 읽고, 대사에 메모를 남기는 창이에요.', auto: true, ex: ['#lg-list', '#lg-main'], notes: [
       { sel: '#lg-main .lg-cast', first: 1, name: '등장인물', desc: '등장한 PC와 NPC를 안내해요. 첫 번째가 PC, 두 번째가 NPC에요. 기본적으로 접혀 있어요.' },
       { sel: '#lg-main .lg-qadd-b', first: 1, name: '퀘스트', desc: '연결된 퀘스트 목록이에요. 좌클릭하면 연결된 퀘스트를 확인하고, 새로 연결할 수도 있어요.' },
@@ -12273,7 +12273,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       if (n.inView) els = els.filter(function (e) { var r = e.getBoundingClientRect(); return r.top >= 0 && r.bottom <= H0; });
       if (n.first) els = els.slice(0, n.first);
       if (!els.length) return;
-      out.push({ el: els[0], els: els, off: off, name: n.name, desc: n.desc, mask: n.mask, at: n.at, side: n.side, bpos: n.bpos, bdy: n.bdy || 0, bb: n.bb, attach: n.attach, icon: icoHtml(els[0]) });
+      out.push({ el: els[0], els: els, off: off, name: n.name, desc: n.desc, mask: n.mask, at: n.at, side: n.side, bpos: n.bpos, bdy: n.bdy || 0, inside: n.inside, bb: n.bb, attach: n.attach, icon: icoHtml(els[0]) });
     });
     return out.slice(0, 45);
   }
@@ -12314,6 +12314,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       var mb0 = it.el && it.el.closest && it.el.closest('.modal-box,.modal-content,[role=dialog]'), mr = mb0 ? mb0.getBoundingClientRect() : null;
       if (it.side === 'below') c.unshift([x0 + r.width / 2 - bw / 2, Math.min(y0 + r.height + 2, innerHeight - bh - 4)], [x0 + r.width / 2 - bw / 2, y0 + r.height - bh - 30]);
       if (it.side === 'right') { c.unshift([x0 + r.width + 6, y0], [x0 + r.width + 6, y0 + r.height - bh]); if (mr) c.splice(2, 0, [mr.right + 8, y0], [mr.right + 8, y0 - bh / 2]); } else if (it.side === 'left') { c.unshift([x0 - bw - 6, y0], [x0 - bw - 6, y0 + r.height - bh]); if (mr) c.splice(2, 0, [mr.left - bw - 8, y0], [mr.left - bw - 8, y0 - bh / 2]); }
+      if (it.inside) c = [[x0 + 30, y0 + r.height - bh - 8], [x0 + 30, y0 + 6], [x0 + r.width - bw - 8, y0 + r.height - bh - 8]].concat(c);
       if (it.dy) c.unshift([x0 + r.width / 2 - bw / 2, y0 + r.height + it.dy], [x0 + r.width / 2 - bw / 2, y0 + r.height + it.dy + 40], [x0 + r.width - bw, y0 + r.height + it.dy]);
       if (it.mask) c = [[x0 + r.width + 8, y0], [x0 + r.width - bw, y0 - bh - 6], [x0 + r.width - bw, y0 + r.height + 6], [x0 - bw - 8, y0]];
       for (var k = 0; k < c.length && !pos; k++) { var a = { l: c[k][0], t: c[k][1], r: c[k][0] + bw, b: c[k][1] + bh }; if (!hit(a)) pos = a; }
