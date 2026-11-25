@@ -12053,7 +12053,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     '#lg-modal': { title: '세션 로그', autoSide: 'below', loose: 1, intro: '회차별 세션 로그를 읽고, 대사에 메모를 남기는 창이에요.', auto: true, ex: ['#lg-list', '#lg-main'], notes: [
       { sel: '#lg-main .lg-cast', first: 1, name: '등장인물', desc: '등장한 PC와 NPC를 안내해요. 첫 번째가 PC, 두 번째가 NPC에요. 기본적으로 접혀 있어요.' },
       { sel: '#lg-main .lg-qadd-b', first: 1, name: '퀘스트', desc: '연결된 퀘스트 목록이에요. 좌클릭하면 연결된 퀘스트를 확인하고, 새로 연결할 수도 있어요.' },
-      { sel: '#lg-main .lg-m[data-i]', first: 4, inView: 1, mask: 1, name: '로그 메모', desc: '로그를 드래그해서 그 부분에 메모를 남길 수 있어요.' }] },
+      { sel: '#lg-main .lg-m[data-i]', first: 4, inView: 1, mask: 1, bdy: 30, name: '로그 메모', desc: '로그를 드래그해서 그 부분에 메모를 남길 수 있어요.' }] },
     '#quest-detail-modal': { title: '퀘스트 자세히', intro: '퀘스트 한 개의 자세한 내용을 적고 고치는 창이에요. 번호에 맞춰 설명을 확인하세요.', nobb: 1, notes: [
       { sel: '#qd-body select[title="폴더 분류"]', name: '폴더', desc: '이 퀘스트가 들어갈 폴더를 골라요.' },
       { sel: '#qd-body input[title="세션 회차"]', name: '세션 회차', desc: '이 퀘스트가 시작된 회차예요.' },
@@ -12219,7 +12219,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       if (n.inView) els = els.filter(function (e) { var r = e.getBoundingClientRect(); return r.top >= 0 && r.bottom <= H0; });
       if (n.first) els = els.slice(0, n.first);
       if (!els.length) return;
-      out.push({ el: els[0], els: els, off: off, name: n.name, desc: n.desc, mask: n.mask, at: n.at, side: n.side, bpos: n.bpos, bb: n.bb, attach: n.attach, icon: icoHtml(els[0]) });
+      out.push({ el: els[0], els: els, off: off, name: n.name, desc: n.desc, mask: n.mask, at: n.at, side: n.side, bpos: n.bpos, bdy: n.bdy || 0, bb: n.bb, attach: n.attach, icon: icoHtml(els[0]) });
     });
     return out.slice(0, 45);
   }
@@ -12242,7 +12242,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     items.forEach(function (it) { it.r = rectOf(it); });
     items.forEach(function (it) {
       var r = it.r;
-      if (it.tb) { if (!r) it.tb.style.display = 'none'; else { it.tb.style.display = ''; if (it.tgt && it.tgt.tb && it.tgt.tb.style.left) { it.tb.style.left = (parseFloat(it.tgt.tb.style.left) + 24) + 'px'; it.tb.style.top = it.tgt.tb.style.top; } else if (it.bpos === 'bottom') { it.tb.style.left = Math.max(2, r.left + r.width / 2 - 10) + 'px'; it.tb.style.top = Math.max(2, Math.min(innerHeight - 24, r.bottom - 26)) + 'px'; } else if (it.bpos === 'left') { it.tb.style.left = Math.max(2, r.left - 24) + 'px'; it.tb.style.top = Math.max(2, r.top + r.height / 2 - 10) + 'px'; } else { it.tb.style.left = Math.max(2, r.left - 8) + 'px'; it.tb.style.top = Math.max(2, r.top - 8) + 'px'; } } }
+      if (it.tb) { if (!r) it.tb.style.display = 'none'; else { it.tb.style.display = ''; if (it.tgt && it.tgt.tb && it.tgt.tb.style.left) { it.tb.style.left = (parseFloat(it.tgt.tb.style.left) + 24) + 'px'; it.tb.style.top = it.tgt.tb.style.top; } else if (it.bpos === 'bottom') { it.tb.style.left = Math.max(2, r.left + r.width / 2 - 10) + 'px'; it.tb.style.top = Math.max(2, Math.min(innerHeight - 24, r.bottom - 26)) + 'px'; } else if (it.bpos === 'left') { it.tb.style.left = Math.max(2, r.left - 24) + 'px'; it.tb.style.top = Math.max(2, r.top + r.height / 2 - 10) + 'px'; } else { it.tb.style.left = Math.max(2, r.left - 8) + 'px'; it.tb.style.top = Math.max(2, r.top - 8 + (it.bdy || 0)) + 'px'; } } }
       if (it.mk) { if (!r) it.mk.style.display = 'none'; else Object.assign(it.mk.style, { display: '', left: r.left - 3 + 'px', top: r.top - 3 + 'px', width: r.width + 6 + 'px', height: r.height + 6 + 'px' }); }
     });
     var placed = [], pr = panel && !panel.classList.contains('min') ? panel.getBoundingClientRect() : null;
