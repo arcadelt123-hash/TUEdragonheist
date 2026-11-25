@@ -3856,17 +3856,17 @@
     function lgPmList(id) { const M = (state.boardTex || {}).lgMemos || {}; return Array.isArray(M[id]) ? M[id] : []; }
     function lgPmHtml(id) {
       const me = lgMeId(), pc = (state.boardTex.pcs || []).find(p => p.id === me), nm = me === 'gm' ? '시금치 (GM)' : (pc ? pc.name : ''), L = lgPmList(id);
-      const items = L.map(m => { const ap = (state.boardTex.pcs || []).find(p => (p.name || '') === m.n), can = me === 'gm' || (m.by && m.by === me); return `<div class="lg-pmi"><span class="pcib">${ap ? pcIconImg(ap) + deadX(ap) : ''}</span><div class="lg-pmb"><b>${escapeHtml(m.n || '')}</b>${m.c ? ` <span class="lg-pmtag">${escapeHtml(m.c)}</span>` : ''}${m.t ? `<div>${escapeHtml(m.t).replace(/\n/g, '<br>')}</div>` : ''}${m.img ? `<img class="lg-pmimg" src="${escapeHtml(m.img)}" alt="" onclick="window.open(this.src)">` : ''}</div>${can ? `<button class="lg-rune" title="메모 삭제" aria-label="메모 삭제" onclick="lgPmDel('${id}','${m.id}')"><img src="${IC_RUNE}" alt=""></button>` : ''}</div>`; }).join('');
-      const form = nm ? `<div class="lg-pmf"><textarea id="lg-pmt" rows="1" placeholder="${escapeHtml(nm)}의 한 줄 메모 (이 회차에 붙여요)"></textarea><div class="lg-pmr"><button class="lg-seal" type="button" style="margin-left:auto" title="붙이기" aria-label="붙이기" onclick="lgPmAdd('${id}')"><img src="${LGI.seal}" alt=""></button></div></div>` : '<div style="font-size:.76rem;opacity:.65;padding:4px 2px">PC를 고르면 메모를 쓸 수 있어요.</div>';
+      const items = L.map(m => { const ap = (state.boardTex.pcs || []).find(p => (p.name || '') === m.n), can = me === 'gm' || (m.by && m.by === me); return `<div class="lg-pmi"><span class="pcib">${ap ? pcIconImg(ap) + deadX(ap) : ''}</span><div class="lg-pmb"><b>${m.pl ? '<small style="opacity:.7">PL</small> ' : ''}${escapeHtml(m.n || '')}</b>${m.c ? ` <span class="lg-pmtag">${escapeHtml(m.c)}</span>` : ''}${m.t ? `<div>${escapeHtml(m.t).replace(/\n/g, '<br>')}</div>` : ''}${m.img ? `<img class="lg-pmimg" src="${escapeHtml(m.img)}" alt="" onclick="window.open(this.src)">` : ''}</div>${can ? `<button class="lg-rune" title="메모 삭제" aria-label="메모 삭제" onclick="lgPmDel('${id}','${m.id}')"><img src="${IC_RUNE}" alt=""></button>` : ''}</div>`; }).join('');
+      const form = (nm || memoPlName()) ? `<div class="lg-pmf">${memoAsHtml(nm, 'lgPmRefresh(' + id + ')')}<textarea id="lg-pmt" rows="1" placeholder="${escapeHtml(memoAuthor(nm).n)}의 한 줄 메모 (이 회차에 붙여요)"></textarea><div class="lg-pmr"><button class="lg-seal" type="button" style="margin-left:auto" title="붙이기" aria-label="붙이기" onclick="lgPmAdd('${id}')"><img src="${LGI.seal}" alt=""></button></div></div>` : '<div style="font-size:.76rem;opacity:.65;padding:4px 2px">PC를 고르면 메모를 쓸 수 있어요.</div>';
       const sz = window.__pmSz ? ` style="width:${window.__pmSz[0]}px;height:${window.__pmSz[1]}px"` : ''; return `<div class="lg-pmw"${sz}><details class="lg-pm" open><summary title="메모" aria-label="메모"><img src="${LGI.scrap}" alt=""></summary><div class="lg-pml">${items}</div>${form}</details></div>`;
     }
     window.__lgPmImg = '';
     document.addEventListener('mouseup', e => { const d = document.querySelector('#lg-main .lg-pmw'); if (d && (d.offsetWidth && d.offsetHeight) && (e.target.closest && e.target.closest('.lg-pmw'))) { const w = d.offsetWidth, hh = d.offsetHeight; if (!window.__pmSz || Math.abs(window.__pmSz[0] - w) > 2 || Math.abs(window.__pmSz[1] - hh) > 2) { if (d.style.width || d.style.height) window.__pmSz = [w, hh]; } } });
     function lgPmImg() { const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; i.onchange = () => { const f = i.files[0]; if (!f) return; const u = URL.createObjectURL(f), im = new Image(); im.onload = () => { const k = Math.min(1, 480 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); window.__lgPmImg = c.toDataURL('image/jpeg', .68); URL.revokeObjectURL(u); const n = document.getElementById('lg-pmn'); if (n) n.textContent = '이미지 첨부됨 ✓'; }; im.src = u; }; i.click(); }
     function lgPmAdd(id) {
-      const me = lgMeId(), pc = (state.boardTex.pcs || []).find(p => p.id === me), nm = me === 'gm' ? '시금치 (GM)' : (pc ? pc.name : ''); if (!nm) return;
+      const me = lgMeId(), pc = (state.boardTex.pcs || []).find(p => p.id === me), nm0 = me === 'gm' ? '시금치 (GM)' : (pc ? pc.name : ''), au = memoAuthor(nm0), nm = au.n; if (!nm) return;
       const t = (document.getElementById('lg-pmt') || {}).value || '', img = window.__lgPmImg || ''; if (!t.trim() && !img) { showToast('내용이나 이미지를 넣어 주세요.'); return; }
-      const M = (state.boardTex.lgMemos = state.boardTex.lgMemos || {}); (M[id] = M[id] || []).push({ id: 'pm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), n: nm, by: me, t: t.trim(), img, ts: Date.now() });
+      const M = (state.boardTex.lgMemos = state.boardTex.lgMemos || {}); (M[id] = M[id] || []).push({ id: 'pm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), n: nm, by: me, t: t.trim(), img, ts: Date.now() }); if (au.pl) M[id][M[id].length - 1].pl = 1;
       window.__lgPmImg = ''; persistState(); lgPmRefresh(id);
     }
     function lgPmDel(id, mid) { const M = (state.boardTex.lgMemos || {}); M[id] = (M[id] || []).filter(m => m.id !== mid); persistState(); lgPmRefresh(id); delHint(); }
@@ -3907,6 +3907,12 @@
     new MutationObserver(() => { const fb = document.getElementById('fnt-box'); if (fb && !fb.firstChild) fb.innerHTML = fntUiHtml(); const b = document.querySelector('.bk-list2'); if (b && !b._dn) { b._dn = 1; dndInit(b, o => { const d = tcgSpec && tcgSpec.deco; if (!d) return; d.bkOrd = o; tcgSave(); tcgBkRefresh(); }); } }).observe(document.body, { childList: true, subtree: true });
     // ---- 로그 대사 댓글 (여러 줄 선택) ----
     function lgCmtList(id) { const M = (state.boardTex || {}).lgCmts || {}; return Array.isArray(M[id]) ? M[id] : []; }
+    function memoPlName() { try { const id = myPlId(); if (!id || id === 'gm') return ''; const p = plsList().find(x => x.id === id); return p ? (p.name || '') : ''; } catch (e) { return ''; } }
+    function memoAsPl() { try { return localStorage.getItem('adv_memo_as') === 'pl'; } catch (e) { return false; } }
+    function memoAsSet(v) { try { localStorage.setItem('adv_memo_as', v ? 'pl' : 'pc'); } catch (e) {} }
+    function memoAsHtml(pcNm, onch) { const pl = memoPlName(); if (!pl || !pcNm || pl === pcNm) return ''; const on = memoAsPl(); return `<span class="memo-as" style="display:inline-flex;gap:2px;border:1px solid #b99a5b;border-radius:8px;overflow:hidden;font-size:.76rem;vertical-align:middle" title="누구 이름으로 쓸지 골라요"><button type="button" style="border:0;padding:2px 8px;cursor:pointer;background:${on ? 'transparent' : '#8a6a2a'};color:${on ? '#5a4520' : '#fff6dc'}" onclick="memoAsSet(false);${onch}">PC ${escapeHtml(pcNm)}</button><button type="button" style="border:0;padding:2px 8px;cursor:pointer;background:${on ? '#8a6a2a' : 'transparent'};color:${on ? '#fff6dc' : '#5a4520'}" onclick="memoAsSet(true);${onch}">PL ${escapeHtml(pl)}</button></span>`; }
+    function lgCasRefresh() { const e = document.getElementById('lg-cas'); if (e) e.innerHTML = memoAsHtml(lgCmtMe().nm, 'lgCasRefresh()'); }
+    function memoAuthor(pcNm) { const pl = memoPlName(); if (pl && (memoAsPl() || !pcNm)) return { n: pl, pl: 1 }; return { n: pcNm, pl: 0 }; }
     function lgMeId() { let me = ''; try { me = landMe(); } catch (e) {} if (me) return me; try { const ids = (state.boardTex.pcs || []).map(p => p.id), raw = (typeof myRaw === 'function' ? myRaw() : []).find(x => ids.includes(x)); if (raw) return raw; const st = (typeof AUTH_S !== 'undefined' && AUTH_S.st) || {}; const c = String(st.pc || '').split(',').find(x => x === 'gm' || ids.includes(x)); if (c) return c; if (typeof AUTH_S !== 'undefined' && AUTH_S.gm) return 'gm'; } catch (e) {} return ''; }   // 메모: PL도 쓸 수 있게
     function lgCmtMe() { const me = lgMeId(), pc = (state.boardTex.pcs || []).find(p => p.id === me); return { me, nm: me === 'gm' ? '시금치 (GM)' : (pc ? pc.name : ''), pc }; }
     function lgCmtApply(id) {
@@ -3917,7 +3923,7 @@
         const idx = (c.idx || []).map(Number), set = new Set(idx); let last = null; rows.forEach(r => { const i = Number(r.dataset.i); if (set.has(i)) { r.classList.add('lg-cmh'); last = r; } });
         if (!last) return; const ap = (state.boardTex.pcs || []).find(p => (p.name || '') === c.n), can = U.me === 'gm' || (c.by && c.by === U.me);
         const first = rows.find(r => set.has(Number(r.dataset.i))), q = first ? (first.querySelector('.lg-t') || first).textContent.trim().slice(0, 40) : '';
-        const d = document.createElement('div'); d.className = 'lg-cb'; d.innerHTML = `<div class="q">↳ ${idx.length}줄 · “${escapeHtml(q)}…”</div><div class="by"><span class="pcib">${ap ? pcIconImg(ap) + deadX(ap) : ''}</span>${escapeHtml(c.n || '')}</div><div>${escapeHtml(c.t || '').replace(/\n/g, '<br>')}</div>${can ? `<button class="lg-rune" title="메모 삭제" aria-label="메모 삭제" onclick="lgCmtDel('${id}','${c.id}')"><img src="${IC_RUNE}" alt=""></button>` : ''}`;
+        const d = document.createElement('div'); d.className = 'lg-cb'; d.innerHTML = `<div class="q">↳ ${idx.length}줄 · “${escapeHtml(q)}…”</div><div class="by"><span class="pcib">${ap ? pcIconImg(ap) + deadX(ap) : ''}</span>${c.pl ? '<small style="opacity:.7">PL</small> ' : ''}${escapeHtml(c.n || '')}</div><div>${escapeHtml(c.t || '').replace(/\n/g, '<br>')}</div>${can ? `<button class="lg-rune" title="메모 삭제" aria-label="메모 삭제" onclick="lgCmtDel('${id}','${c.id}')"><img src="${IC_RUNE}" alt=""></button>` : ''}`;
         last.after(d);
       });
       if (false && !main.querySelector('.lg-cbar')) main.insertAdjacentHTML('beforeend', `<div class="lg-cbar"><span id="lg-cn" style="font-size:.78rem;white-space:nowrap">0줄 선택</span><textarea id="lg-ct" rows="1" placeholder="선택한 대사에 메모…"></textarea><button class="btn btn-secondary" onclick="lgCmtAdd()">달기</button><button class="btn btn-secondary" onclick="lgSelToggle(false)">닫기</button></div>`);
@@ -3951,16 +3957,16 @@
       setTimeout(() => document.addEventListener('pointerdown', function f(ev) { if (!ev.target.closest('#lg-cctx')) m.remove(); document.removeEventListener('pointerdown', f, true); }, true), 0);
     });
     function lgCmtPanel(idx) {
-      const U = lgCmtMe(); if (!U.nm) { showToast('PC를 먼저 골라 주세요.'); return; }
+      const U = lgCmtMe(); if (!U.nm && !memoPlName()) { showToast('PC를 먼저 골라 주세요.'); return; }
       const ms = LG.data[LG.cur] || [], q = idx.slice(0, 4).map(i => { const m = ms[i]; return m ? escapeHtml((m[1] ? m[1] + ': ' : '') + String(m[2] || '').slice(0, 80)) : ''; }).filter(Boolean).join('<br>') + (idx.length > 4 ? '<br>… 외 ' + (idx.length - 4) + '줄' : '');
       let el = document.getElementById('lg-paste'); if (!el) { el = document.createElement('div'); el.id = 'lg-paste'; el.className = 'lg-paste'; document.querySelector('#lg-modal .lg-box').appendChild(el); }
       window.__lgCmtIdx = idx;
-      el.innerHTML = `<div class="lg-pbox" style="width:min(480px,94%)"><b>대사에 메모 달기</b><div class="lg-psub" style="background:rgba(228,211,168,.4);padding:6px 8px;border-radius:8px">${q}</div><textarea id="lg-ct2" style="height:110px" placeholder="메모 내용"></textarea><div class="lg-prow"><button class="btn btn-secondary" onclick="lgPasteClose()">닫기</button><span style="flex:1"></span><button class="btn btn-primary" onclick="lgCmtPanelAdd()">붙이기</button></div></div>`;
+      el.innerHTML = `<div class="lg-pbox" style="width:min(480px,94%)"><b>대사에 메모 달기</b> <span id="lg-cas">${memoAsHtml(U.nm, 'lgCasRefresh()')}</span><div class="lg-psub" style="background:rgba(228,211,168,.4);padding:6px 8px;border-radius:8px">${q}</div><textarea id="lg-ct2" style="height:110px" placeholder="메모 내용"></textarea><div class="lg-prow"><button class="btn btn-secondary" onclick="lgPasteClose()">닫기</button><span style="flex:1"></span><button class="btn btn-primary" onclick="lgCmtPanelAdd()">붙이기</button></div></div>`;
       el.style.display = 'flex'; setTimeout(() => document.getElementById('lg-ct2').focus(), 30);
     }
     function lgCmtPanelAdd() {
       const U = lgCmtMe(), t = ((document.getElementById('lg-ct2') || {}).value || '').trim(); if (!t) { showToast('메모 내용을 써 주세요.'); return; }
-      const id = LG.cur, M = (state.boardTex.lgCmts = state.boardTex.lgCmts || {}); (M[id] = M[id] || []).push({ id: 'cm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 4), idx: window.__lgCmtIdx.slice(), n: U.nm, by: U.me, t, ts: Date.now() });
+      const id = LG.cur, M = (state.boardTex.lgCmts = state.boardTex.lgCmts || {}); (M[id] = M[id] || []).push({ id: 'cm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 4), idx: window.__lgCmtIdx.slice(), n: memoAuthor(U.nm).n, by: U.me, t, ts: Date.now() }); if (memoAuthor(U.nm).pl) M[id][M[id].length - 1].pl = 1;
       persistState(); lgPasteClose(); lgCmtApply(id);
     }
     function lgCmtDel(id, cid) { delHint(); const M = state.boardTex.lgCmts || {}; M[id] = (M[id] || []).filter(c => c.id !== cid); persistState(); lgCmtApply(id); }
@@ -5887,7 +5893,8 @@
     }
     function createMemo(pcId, qid, at) {
       const bt = state.boardTex; const arr = bt.memos = bt.memos || [];
-      const pc = (bt.pcs || []).find(p => p.id === pcId);
+      const plM = String(pcId || '').indexOf('pl:') === 0 ? plsList().find(l => l.id === String(pcId).slice(3)) : null;
+      const pc = plM ? null : (bt.pcs || []).find(p => p.id === pcId);
       const n = arr.length;
       const pkeys = Object.keys(NOTE_MEMO);
       const paper = pkeys[Math.floor(Math.random() * pkeys.length)];
@@ -5899,7 +5906,7 @@
       if (q && q.board) { x = q.board.x + Math.round(q.board.w * 0.1); y = q.board.y + Math.round(q.board.h * 0.55); }
       else if (at) { x = at.x; y = at.y; }
       else { x = (board ? board.scrollLeft / z : 0) + 30 + (n % 5) * 18; y = (board ? board.scrollTop / z : 0) + 30 + (n % 5) * 18; }
-      const m = { id: 'm_' + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36), text: '', x: Math.round(x), y: Math.round(y), w, h, z: ++boardTopZ, rot: ((n % 5) - 2) * 1.1, paper, qid: qid || null, pc: pc ? pc.name : '' };
+      const m = { id: 'm_' + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36), text: '', x: Math.round(x), y: Math.round(y), w, h, z: ++boardTopZ, rot: ((n % 5) - 2) * 1.1, paper, qid: qid || null, pc: plM ? (plM.name || 'PL') : (pc ? pc.name : '') }; if (plM) m.pl = 1;
       if (pc) { m.font = pc.font; if (pc.fc) m.fc = pc.fc; if (pc.fs) m.fs = pc.fs; }
       arr.push(m);
       if (q && q.board) placeAbove(m.id, q.id);
@@ -5981,7 +5988,7 @@
       ta.addEventListener('input', () => memoText(m.id, ta.value));
       ta.addEventListener('change', () => persistState());
       el.appendChild(ta);
-      if (m.pc) { const ap = (typeof landPls === 'function' ? landPls() : []).find(x => (x.name || '') === m.pc); const by = document.createElement('div'); by.className = 'qm-by'; by.title = m.pc + '의 메모'; by.innerHTML = (ap ? `<span class="pcib">${m.pimg ? `<img src="${escapeHtml(m.pimg)}" alt="">` : pcIconImg(ap)}${deadX(ap)}</span>` : '') + `<span class="nm">${escapeHtml(m.pc)}</span>`; el.appendChild(by); }
+      if (m.pc) { const ap = (typeof landPls === 'function' ? landPls() : []).find(x => (x.name || '') === m.pc); const by = document.createElement('div'); by.className = 'qm-by'; by.title = m.pc + '의 메모'; by.innerHTML = (ap ? `<span class="pcib">${m.pimg ? `<img src="${escapeHtml(m.pimg)}" alt="">` : pcIconImg(ap)}${deadX(ap)}</span>` : '') + `<span class="nm">${m.pl ? '<small style="opacity:.7">PL</small> ' : ''}${escapeHtml(m.pc)}</span>`; el.appendChild(by); }
       const rs = document.createElement('span'); rs.className = 'qn-resize'; rs.dataset.act = 'resize'; el.appendChild(rs);
       return el;
     }
@@ -6225,6 +6232,7 @@
     function memoPickHtml(qid, noBlank) {
       const me0 = landMe(), pcs = (state.boardTex.pcs || []).filter(p => !p.off).slice().sort((x, y) => (y.id === me0) - (x.id === me0));
       const btns = pcs.map(p => `<button class="cx-b cx-pcimg" style="${p.id === me0 ? 'outline:2px solid #e6b24a;outline-offset:1px' : ''}" title="${escapeHtml(p.name || 'PC')}${p.id === me0 ? ' (내 PC)' : ''}" aria-label="${escapeHtml(p.name || 'PC')}" data-pc="${escapeHtml(p.id)}" onclick="ctxMemo(this.dataset.pc)">${pcIconImg(p)}${deadX(p)}</button>`).join('')
+        + (() => { const myPl = (() => { try { return myPlId(); } catch (e) { return ''; } })(); return plsList().slice().sort((x, y) => (y.id === myPl) - (x.id === myPl)).map(l => `<button class="cx-b" style="font-size:.74rem;padding:2px 8px;${l.id === myPl ? 'outline:2px solid #e6b24a;outline-offset:1px' : ''}" title="PL ${escapeHtml(l.name || '')} 이름으로 메모${l.id === myPl ? ' (나)' : ''}" data-pc="pl:${escapeHtml(l.id)}" onclick="ctxMemo(this.dataset.pc)">PL ${escapeHtml(l.name || '')}</button>`).join(''); })()
         + (noBlank ? '' : `<button class="cx-b cx-pcimg" data-pc="" title="이름 없음" aria-label="이름 없음" onclick="ctxMemo('')"><span class="cx-blank"></span></button>`);
       return `<div class="cx-sec"><div class="cx-pcrow">${btns}</div></div>`;
     }
