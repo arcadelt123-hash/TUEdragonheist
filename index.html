@@ -12050,7 +12050,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       { sel: '.bg-who', name: '가방 고르기', desc: '공용 가방과 PC중에 하나를 선택할 수 있어요.' },
       { sel: '.bg-shops .bg-tab:not(.ghost)', name: '상점', desc: '상점 이름이에요.' },
       { sel: '.bg-cols', name: '사고팔기', desc: '아이템을 드래그해서 판매나 구매를 할 수 있어요.' }] },
-    '#lg-modal': { title: '세션 로그', intro: '회차별 세션 로그를 읽고, 대사에 메모를 남기는 창이에요.', auto: true, ex: ['#lg-list', '#lg-main'], notes: [
+    '#lg-modal': { title: '세션 로그', autoSide: 'below', intro: '회차별 세션 로그를 읽고, 대사에 메모를 남기는 창이에요.', auto: true, ex: ['#lg-list', '#lg-main'], notes: [
       { sel: '#lg-main .lg-cast', first: 1, name: '등장인물', desc: '등장한 PC와 NPC를 안내해요. 첫 번째가 PC, 두 번째가 NPC에요. 기본적으로 접혀 있어요.' },
       { sel: '#lg-main .lg-qadd-b', first: 1, name: '퀘스트', desc: '연결된 퀘스트 목록이에요. 좌클릭하면 연결된 퀘스트를 확인하고, 새로 연결할 수도 있어요.' },
       { sel: '#lg-main .lg-m[data-i]', first: 4, inView: 1, mask: 1, name: '로그 메모', desc: '로그를 드래그해서 그 부분에 메모를 남길 수 있어요.' }] },
@@ -12209,7 +12209,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     var out = [], seenL = {}, cards = { n: 0, el: null }, rule = ruleFor(sc);
     if (withTop) { var tb = document.querySelector('.top-bar'); if (tb) collect(tb, { x: 0, y: 0 }, out, seenL, { n: 0 }); out.forEach(function (o) { o.top = 1; }); var fab = document.getElementById('fbc-fab'); if (fab && vis(fab)) out.push({ el: fab, off: { x: 0, y: 0 }, top: 1, name: '채팅', desc: '채팅이 입력되면 노란 빛으로 빛납니다. 클릭하면 현재 접속한 사람이 보입니다. 실시간 채팅이 가능합니다.' }); }
     if (!rule || rule.auto) {
-      collect(sc.scope, { x: 0, y: 0, skipTop: !!sc.base, auto: 1, ex: rule && rule.ex }, out, seenL, cards);
+      var n0 = out.length; collect(sc.scope, { x: 0, y: 0, skipTop: !!sc.base, auto: 1, ex: rule && rule.ex }, out, seenL, cards); if (rule && rule.autoSide) out.slice(n0).forEach(function (o) { o.side = rule.autoSide; });
       if (!rule && cards.n) out.push({ el: cards.el.el, off: { x: 0, y: 0 }, name: '카드·항목 (' + cards.n + '개)', desc: '눌러서 자세히 열어 볼 수 있는 항목들이에요.' });
     }
     if (rule) (rule.notes || []).forEach(function (n) {
