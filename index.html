@@ -11980,7 +11980,15 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       { sel: '.board-tools > .btn-secondary', name: '보드 설정', desc: '이 보드의 배경과 모양을 정해요.' }].concat(BT, [
       { sel: '#main-content-area', name: '보드', desc: '카드를 끌어 옮기고, 우클릭으로 메뉴를 열어요. 카드끼리 선으로 이어 관계를 표시해요. 휠로 확대·축소해요.', at: 'center' }]) },
     'journal:pc': { auto: false, notes: [JT, { sel: '.j-pcs', name: '일지 고르기', desc: '누구의 일지를 볼지 골라요.' }].concat(BT, [{ sel: '#main-content-area', name: '일지', desc: '고른 PC의 일지와 메모를 모아 둔 곳이에요.', at: 'center' }]) },
-    'journal:items': { auto: false, notes: [JT, { sel: '.j-pcs', name: '가방 고르기', desc: '전체 · PC별 · 공용 가방 중에서 볼 곳을 골라요. 필터로 분류를 걸러요.' }].concat(BT, [{ sel: '.board-tools > .btn-secondary', name: '필터·설정', desc: '보일 분류와 창고 모양을 정해요.' }]) },
+    'journal:items': { auto: false, notes: [JT, { sel: '.j-pcs', name: '가방 고르기', desc: '전체 · PC별 · 공용 가방 중에서 볼 곳을 골라요. 필터로 분류를 걸러요.' }].concat(BT, [{ sel: '.board-tools > .btn-secondary', name: '필터·설정', desc: '보일 분류와 창고 모양을 정해요.' },
+      { sel: '.mb-card.mb-item:has(.mb-own) .mb-own', first: 1, inView: 1, side: 'left', name: '소유주', desc: '이 아이템을 가진 PC예요.' },
+      { sel: '.mb-card.mb-item:has(.mb-own)', first: 1, inView: 1, mask: 1, name: '아이템 카드', desc: '카드 우클릭할 시 꾸미기, 내용 수정, 삭제 가능해요.' }]) },
+    '#item-modal': { title: '아이템 기록', notes: [
+      { sel: '#itm-label', name: '아이템 이름', desc: '', side: 'left' },
+      { sel: '#itm-pcbox .itm-pcchip button, #itm-pcbox .itm-pcrow', side: 'right', name: '소유주', desc: '소유주를 선택할 수 있어요. 떼기를 선택하면 공용 가방으로 옮겨져요.' },
+      { sel: '#itm-cat, #itm-rar', side: 'right', name: '종류·등급', desc: '아이템의 종류와 등급을 정할 수 있어요.' },
+      { sel: '#itm-q', side: 'left', name: '얻은 퀘스트', desc: '어느 퀘스트에서 얻었는지 골라요.' },
+      { sel: '#itm-detail', side: 'right', name: '세부 사항', desc: '효과나 설명을 적어요.' }] },
     'journal:clues': { auto: false, notes: [JT, { sel: '.mb-lh .lh-name', first: 1, name: '회차 이름', desc: '단서를 회차별 줄로 정리해요. 줄 이름을 고칠 수 있어요.' }].concat(BT) },
     'journal:recap': { auto: false, notes: [JT].concat(BT) }
   };
@@ -12051,7 +12059,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       if (n.inView) els = els.filter(function (e) { var r = e.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; });
       if (n.first) els = els.slice(0, n.first);
       if (!els.length) return;
-      out.push({ el: els[0], els: els, off: { x: 0, y: 0 }, name: n.name, desc: n.desc, mask: n.mask, at: n.at });
+      out.push({ el: els[0], els: els, off: { x: 0, y: 0 }, name: n.name, desc: n.desc, mask: n.mask, at: n.at, side: n.side });
     });
     return out.slice(0, 45);
   }
@@ -12084,6 +12092,8 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       if (!r || (pick && !m.classList.contains('on'))) { if (!r) m.style.display = 'none'; else m.style.display = ''; return; }
       m.style.display = ''; var x0 = r.left, y0 = r.top, bw = m.offsetWidth, bh = m.offsetHeight;
       var c = it.at === 'center' ? [[x0 + r.width / 2 - bw / 2, y0 + r.height + 4]] : [[x0, y0 + r.height + 4], [x0 + r.width + 6, y0], [x0 - bw - 6, y0], [x0, y0 - bh - 4], [x0 + r.width / 2 - bw / 2, y0 + r.height + 4], [x0 + r.width - bw, y0 + r.height + 4]], pos = null;
+      var mb0 = it.el && it.el.closest && it.el.closest('.modal-box,.modal-content,[role=dialog]'), mr = mb0 ? mb0.getBoundingClientRect() : null;
+      if (it.side === 'right') { c.unshift([x0 + r.width + 6, y0], [x0 + r.width + 6, y0 + r.height - bh]); if (mr) c.splice(2, 0, [mr.right + 8, y0], [mr.right + 8, y0 - bh / 2]); } else if (it.side === 'left') { c.unshift([x0 - bw - 6, y0], [x0 - bw - 6, y0 + r.height - bh]); if (mr) c.splice(2, 0, [mr.left - bw - 8, y0], [mr.left - bw - 8, y0 - bh / 2]); }
       if (it.mask) c = [[x0 + r.width + 8, y0], [x0 + r.width - bw, y0 - bh - 6], [x0 + r.width - bw, y0 + r.height + 6], [x0 - bw - 8, y0]];
       for (var k = 0; k < c.length && !pos; k++) { var a = { l: c[k][0], t: c[k][1], r: c[k][0] + bw, b: c[k][1] + bh }; if (!hit(a)) pos = a; }
       if (!pos) { var x = Math.max(4, Math.min(W - bw - 4, x0)), y = y0 + r.height + 4; for (var n = 0; n < 60; n++) { var a2 = { l: x, t: y, r: x + bw, b: y + bh }; if (!hit(a2)) { pos = a2; break; } y += 8; if (y + bh > H - 4) { y = Math.max(4, y0 - bh - 4); x = Math.min(W - bw - 4, x + bw / 2); } } }
