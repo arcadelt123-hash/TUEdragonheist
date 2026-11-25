@@ -646,7 +646,7 @@
     .qv-paper .qv-tags span { border: 0; background: transparent; color: #5a4220; padding: 0 .2em; font-size: .85em; }
     .qv-paper .qv-head { gap: .5em; }
     .qv-paper .qv-title { font-size: 1.45em; text-align: center; color: #2f2210; }
-    .qv-fc .qv-title, .qv-fc .qv-txt, .qv-fc .qv-meta, .qv-fc .qv-tags span, .qv-fc .qv-done span { color: var(--qv-fc) !important; }
+    .qv-fc .qv-title, .qv-fc .qv-txt, .qv-fc .qv-meta, .qv-fc .qv-tags span, .qv-fc .qv-done span, .qnote.qv-fc .qn-title, .qnote.qv-fc .qn-meta, .qnote.qv-fc .qn-desc, .qnote.qv-fc .qn-out, .qnote.qv-fc .qn-tags { color: var(--qv-fc) !important; }
     .qv-fcb { position: relative; width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(90,66,32,.55); cursor: pointer; flex: 0 0 auto; align-self: center; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
     .qv-fcb input { position: absolute; inset: -6px; width: 34px; height: 34px; border: 0; padding: 0; opacity: 0; cursor: pointer; }
     .qv-paper .qv-x { position: static; flex: none; }
@@ -2314,6 +2314,7 @@
         <div class="nm-row"><span style="width:44px;font-size:.85rem;">너비</span><input type="range" id="nm-w" min="150" max="560" step="5" oninput="noteNum('w', this.value)"><span id="nm-w-v" style="width:48px;text-align:right;font-size:.85rem;"></span></div>
         <div class="nm-row"><span style="width:44px;font-size:.85rem;">높이</span><input type="range" id="nm-h" min="130" max="640" step="5" oninput="noteNum('h', this.value)"><span id="nm-h-v" style="width:48px;text-align:right;font-size:.85rem;"></span></div>
         <div class="nm-row"><span style="width:44px;font-size:.85rem;">기울기</span><input type="range" id="nm-rot" min="-8" max="8" step="0.5" oninput="noteNum('rot', this.value)"><span id="nm-rot-v" style="width:48px;text-align:right;font-size:.85rem;"></span></div>
+        <div class="nm-row"><span style="width:44px;font-size:.85rem;">글씨 색</span><input type="color" id="nm-fc" value="#2f2210" oninput="noteFc(this.value)" onchange="noteFc(this.value, 1)" style="width:44px;height:28px;padding:0;border:1px solid #b99a5b;border-radius:6px;cursor:pointer;background:none"><button class="btn btn-secondary" style="padding:2px 10px;font-size:.8rem" onclick="noteFc('', 1)">원래 색</button></div>
       </div>
       <div>
         <div class="nm-label">사진</div>
@@ -8585,8 +8586,8 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       const tex = texOf(q.paper || qPaperOf(q).key);
       const shape = (!tex.full && (q.paper || q.tshape ? q.tshape : b.shape) && NOTE_SHAPE[q.paper || q.tshape ? q.tshape : b.shape]) ? NOTE_SHAPE[q.paper || q.tshape ? q.tshape : b.shape] : null;
       el.className = 'qnote' + (tex.paper ? ' paper' : '') + (tex.full ? ' full' : '') + (shape ? ' shaped' : '') + (tex.dark ? ' tdark' : '') + (q.status === 'completed' ? ' done' : '');
-      el.dataset.qid = q.id;
-      el.style.cssText = `left:${x}px;top:${b.y}px;width:${w}px;height:${b.h}px;z-index:${b.z || 1};transform:rotate(${noteRot(q)}deg);`;
+      el.dataset.qid = q.id; if (q.fc) el.classList.add('qv-fc');
+      el.style.cssText = `left:${x}px;top:${b.y}px;width:${w}px;height:${b.h}px;z-index:${b.z || 1};transform:rotate(${noteRot(q)}deg);${q.fc ? '--qv-fc:' + q.fc + ';' : ''}`;
       if (tex.paper && !shape) el.style.backgroundImage = `url(${tex.url})`;
       let fullPadBottom = 0;
       if (shape) {
@@ -8846,7 +8847,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       document.querySelectorAll('#nm-shape .shape-opt').forEach(el => el.classList.toggle('sel', (el.dataset.shape || '') === ((q.paper || q.tshape ? q.tshape : b.shape) || '')));
       document.getElementById('nm-shape').classList.toggle('off', !!texOf(q.paper || qPaperOf(q).key).full);
       const set = (id, v, suf) => { document.getElementById(id).value = v; document.getElementById(id + '-v').textContent = Math.round(v * 10) / 10 + (suf || ''); };
-      set('nm-w', b.w); set('nm-h', b.h); set('nm-rot', noteRot(q), '°'); set('nm-arth', Number(b.artH) || 70);
+      try { document.getElementById('nm-fc').value = q.fc || '#2f2210'; } catch (e) {} set('nm-w', b.w); set('nm-h', b.h); set('nm-rot', noteRot(q), '°'); set('nm-arth', Number(b.artH) || 70);
       notePreview();
     }
     function notePreview() {
@@ -8865,6 +8866,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       if (t.full && t.ar) b.h = Math.round(Math.max(NOTE_MIN_H, Math.min(640, b.w / t.ar)));
       refreshNoteModal(); renderBoard();
     }
+    function noteFc(v, save) { const q = noteQ(); if (!q) return; if (v) q.fc = v; else delete q.fc; if (!v) { const e = document.getElementById('nm-fc'); if (e) e.value = '#2f2210'; } notePreview(); renderBoard(); try { if (qvId === q.id) renderQuestView(); } catch (e) {} if (save) persistState(); }
     function noteBorder(k) { const q = noteQ(); if (!q) return; noteBoard(q).border = k || ''; refreshNoteModal(); renderBoard(); }
     function noteShape(k) { const q = noteQ(); if (!q) return; noteBoard(q).shape = k || ''; if (k) q.tshape = k; else delete q.tshape; refreshNoteModal(); renderBoard(); }
     function noteSize(w, h) { const q = noteQ(); if (!q) return; const b = noteBoard(q); b.w = w; b.h = h; refreshNoteModal(); renderBoard(); }
@@ -10542,7 +10544,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       const w = Math.round(Math.min(VW, VH * ar, 660 * Math.sqrt(ar))), h = Math.round(w / ar);
       box.className = 'modal-box qv-card qv-paper' + (q.fc ? ' qv-fc' : '');
       box.style.cssText = `width:${w}px;height:${h}px;background-image:url(${pp.url});padding:${Math.round(h * pd[0])}px ${Math.round(w * pd[1])}px ${Math.round(h * pd[2])}px ${Math.round(w * pd[3])}px;--fs:${Math.max(12, Math.min(17, w / 30)).toFixed(1)}px;${q.fc ? '--qv-fc:' + q.fc + ';' : ''}`;
-      box.innerHTML = `<div class="qv-in"><div class="qv-body">${q.bannerImage ? `<img class="qv-banner" src="${escapeHtml(q.bannerImage)}" alt="" onerror="this.style.display='none'">` : ''}<div class="qv-head"><div class="qv-title">${escapeHtml(q.title || '제목 없음')}</div><button class="qv-quill" title="수정" aria-label="수정" onclick="questViewEdit()"><img src="${IC_FEATHER}" alt=""></button><label class="qv-fcb" title="글씨 색 (우클릭: 원래 색)" aria-label="글씨 색" style="background:${escapeHtml(q.fc || '#2f2210')}" oncontextmenu="event.preventDefault();event.stopPropagation();qvFc('${q.id}','',1)"><input type="color" value="${escapeHtml(q.fc || '#2f2210')}" oninput="qvFc('${q.id}',this.value)" onchange="qvFc('${q.id}',this.value,1)"></label></div>${meta ? `<div class="qv-meta">${escapeHtml(meta)}</div>` : ''}${npcs ? `<div class="qv-npc">${npcs}</div>` : ''}${q.description ? `<div class="qv-txt">${escapeHtml(q.description)}</div>` : ''}${q.outcome ? `<div class="qv-txt">${escapeHtml(q.outcome)}</div>` : ''}<div class="qv-foot"><button class="qv-done" onclick="qvToggle('${q.id}')" title="${done ? '진행 중으로 복귀' : '완료 처리'}" aria-label="${done ? '진행 중으로 복귀' : '퀘스트 완료 처리'}">${done ? ICONS.scrollClosed : ICONS.scrollOpen}<span>${done ? '완료됨' : '진행 중'}</span></button></div>${tags ? `<div class="qv-tagbar${qvTagsHide ? ' hide' : ''}"><button type="button" class="qv-tgl" onclick="qvTagsToggle()" title="태그 ${qvTagsHide ? '보이기' : '가리기'}" aria-label="태그 보이기/가리기">#</button><div class="qv-tags">${tags}</div></div>` : ''}</div></div>`;
+      box.innerHTML = `<div class="qv-in"><div class="qv-body">${q.bannerImage ? `<img class="qv-banner" src="${escapeHtml(q.bannerImage)}" alt="" onerror="this.style.display='none'">` : ''}<div class="qv-head"><div class="qv-title">${escapeHtml(q.title || '제목 없음')}</div><button class="qv-quill" title="수정" aria-label="수정" onclick="questViewEdit()"><img src="${IC_FEATHER}" alt=""></button></div>${meta ? `<div class="qv-meta">${escapeHtml(meta)}</div>` : ''}${npcs ? `<div class="qv-npc">${npcs}</div>` : ''}${q.description ? `<div class="qv-txt">${escapeHtml(q.description)}</div>` : ''}${q.outcome ? `<div class="qv-txt">${escapeHtml(q.outcome)}</div>` : ''}<div class="qv-foot"><button class="qv-done" onclick="qvToggle('${q.id}')" title="${done ? '진행 중으로 복귀' : '완료 처리'}" aria-label="${done ? '진행 중으로 복귀' : '퀘스트 완료 처리'}">${done ? ICONS.scrollClosed : ICONS.scrollOpen}<span>${done ? '완료됨' : '진행 중'}</span></button></div>${tags ? `<div class="qv-tagbar${qvTagsHide ? ' hide' : ''}"><button type="button" class="qv-tgl" onclick="qvTagsToggle()" title="태그 ${qvTagsHide ? '보이기' : '가리기'}" aria-label="태그 보이기/가리기">#</button><div class="qv-tags">${tags}</div></div>` : ''}</div></div>`;
       m.classList.add('open'); qvMoreInit();
     }
     function qvFc(id, v, save) { const q = state.quests.find(x => x.id === id); if (!q) return; if (v) q.fc = v; else delete q.fc; const box = document.getElementById('qv-box'); if (box) { box.classList.toggle('qv-fc', !!v); if (v) box.style.setProperty('--qv-fc', v); else box.style.removeProperty('--qv-fc'); const b = box.querySelector('.qv-fcb'); if (b) b.style.background = v || '#2f2210'; } if (save) { persistState(); if (!v) showToast('글씨 색을 원래대로 돌렸어요.'); } }
