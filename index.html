@@ -11978,6 +11978,11 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       { fr: '#map-frame', sel: '#addFolderBtn', bb: 1, side: 'left', name: '분류 추가', desc: '분류는 일종의 폴더에요. 구역을 그려 나눌 수도 있어요.' },
       { fr: '#map-frame', sel: '#toggleCatFilterBtn', bb: 1, side: 'left', name: '핀 모양별 보기', desc: '핀의 모양(카테고리) 별로 모아서 볼 수 있어요.' },
       { fr: '#map-frame', sel: '.pin-title-area button[title="수정"]', first: 1, inView: 1, bpos: 'left', bb: 1, side: 'left', name: '핀 수정', desc: '누르면 수정 가능해요. 핀을 눌러도 같은 아이콘을 눌러 수정할 수 있어요.' }] },
+    'timeline': { auto: false, notes: [
+      { sel: '.fl-h .fl-op', name: '투명도', desc: '' },
+      { sel: '.fl-h .fl-c', name: '접기 / 펼치기', desc: '' },
+      { sel: '.tl-toolbar .srch-b', name: '검색', desc: '' },
+      { sel: '.tl-toolbar .board-fold', name: '설정', desc: '' }] },
     'quests': { auto: false, notes: [
       { sel: '#quest-srch-slot .srch-b:not(.bm)', name: '검색', desc: '퀘스트 이름·내용으로 찾아요.' },
       { sel: '#quest-srch-slot .srch-b.bm', name: '폴더·태그', desc: '폴더와 태그로 골라 봐요.' },
