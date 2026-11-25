@@ -11983,8 +11983,10 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
   function autoOff() { try { return localStorage.getItem(OFF) === '1'; } catch (e) { return false; } }
   function mode() { try { return localStorage.getItem(MODE) === '1'; } catch (e) { return false; } }
   function setMode(v) { try { localStorage.setItem(MODE, v ? '1' : '0'); } catch (e) {} }
-  function seen() { try { return JSON.parse(localStorage.getItem(SEEN) || '{}') || {}; } catch (e) { return {}; } }
-  function markSeen(k) { var s = seen(); s[k] = 1; try { localStorage.setItem(SEEN, JSON.stringify(s)); } catch (e) {} }
+  // '더 이상 띄우지 않기'를 누르기 전까지 화면에 들어갈 때마다 안내를 띄워요. 상단 메뉴 설명만 새로고침 한 번에 한 번.
+  var SEEN_MEM = {};
+  function seen() { return SEEN_MEM; }
+  function markSeen(k) { if (k === 'top') SEEN_MEM.top = 1; }
   function vis(el) { if (!el || !el.getClientRects().length) return false; var r = el.getBoundingClientRect(); if (r.width < 4 || r.height < 4) return false; var cs = getComputedStyle(el); return cs.visibility !== 'hidden' && cs.display !== 'none' && +cs.opacity !== 0; }
   function mine(el) { return !!(el.closest && el.closest('#tut-layer,#tut-panel,#demo-badge')); }
   function topOverlay() {
