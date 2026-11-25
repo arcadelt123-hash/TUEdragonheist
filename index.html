@@ -3029,6 +3029,7 @@
         p.innerHTML = '<b>어떤 PC로 들어올까요?</b>' + __act.map(id => { const pc = landPls().find(x => x.id === id); return pc ? `<button type="button" onclick="presPcPick('${escapeHtml(id)}')" style="display:flex;align-items:center;gap:8px;border:1.5px solid ${id === cur ? '#b8893a' : '#e3d3a6'};border-radius:10px;background:${id === cur ? '#fde7a8' : '#fff'};padding:5px 8px;cursor:pointer;font-weight:${id === cur ? 800 : 600};color:#3b2c12"><span class="pcib">${pcIconImg(pc)}${deadX(pc)}</span>${escapeHtml(pc.name || 'PC')}${id === cur ? ' ✓' : ''}</button>` : ''; }).join('') + '<small style="opacity:.6">한 번에 한 PC만 활성화돼요</small>';
         document.body.appendChild(p); return;
       }
+      return;   // 내 접속 표시(이름·색) 바꾸기 창은 쓰지 않아요 (여러 PC 고르기는 위에서 그대로)
       const f = document.getElementById('pres-float'); const r = f ? f.getBoundingClientRect() : { left: 12, top: 100, bottom: 130 };
       p = document.createElement('div'); p.id = 'pres-edit';
       p.style.cssText = `position:fixed;z-index:410;left:${Math.max(8, Math.min(innerWidth - 232, Math.round(r.left)))}px;top:${Math.min(innerHeight - 150, Math.round(r.bottom + 6))}px;width:224px;background:#fffdf7;border:2px solid #b8893a;border-radius:12px;padding:10px;color:#3b2c12;display:flex;flex-direction:column;gap:8px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.3);`;
@@ -11605,6 +11606,12 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       if (typeof AUTH_S !== 'undefined' && AUTH_S.gm && !(typeof plView === 'function' && plView())) return (window.CUSTOM && window.CUSTOM.GM_NAME) || '시금치';
       var id = typeof landMe === 'function' ? landMe() : ''; var l = typeof landPls === 'function' ? landPls() : [];
       var p = l.find(function (x) { return x.id === id; }); if (p) { var pn = ''; try { var pp = typeof plsList === 'function' ? plsList().find(function (x) { return x.id === p.pl; }) : null; pn = pp && pp.name || ''; } catch (e) {} return pn || (p.name || '').replace(/\s*\(GM\)/, '') || '이름 없음'; }
+    } catch (e) {}
+    try {   // 고른 PL이 없으면: 이 기기의 내 PC 목록 → 로그인 기기에 연결된 PC 이름 → 접속 표시 이름 순서로 찾아요
+      var raw = typeof myRaw === 'function' ? myRaw() : [], pls = typeof plsList === 'function' ? plsList() : [];
+      var hit = raw.map(function (x) { return pls.find(function (q) { return q.id === x; }); }).find(Boolean); if (hit && hit.name) return hit.name;
+      var st = (typeof AUTH_S !== 'undefined' && AUTH_S.st) || {}; if (st.pcn && st.pcn !== 'GM') return String(st.pcn).split(',')[0].trim();
+      var pn2 = typeof presName === 'function' ? presName() : ''; if (pn2) return pn2;
     } catch (e) {}
     return '손님';
   }
