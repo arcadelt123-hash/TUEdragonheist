@@ -2185,6 +2185,11 @@
 
     .pc-tb .tb-rs { position: absolute; right: -7px; bottom: -7px; width: 12px; height: 12px; border: 2px solid #e6b24a; background: #fff8e0; border-radius: 3px; cursor: nwse-resize; touch-action: none; }
     .tb-nums { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; font-size: .72rem; } .tb-nums input[type=number] { width: 52px; font-size: .72rem; padding: 1px 3px; }
+
+    /* 상점 구경 (보기 전용) */
+    .shop-watch-bar{margin:0 0 8px;padding:6px 10px;border:1px solid #8a6a2a;border-radius:6px;background:rgba(255,246,220,.92);color:#3a2a10;font-size:13px;line-height:1.5}
+    .shop-watch-bar .watch-ok{margin-left:6px;padding:2px 10px;border:1px solid #8a6a2a;border-radius:4px;background:#7a1f1f;color:#fff3dc;cursor:pointer;font-size:12px}
+    .shop-watch .bg-act,.shop-watch .bg-who{pointer-events:none;opacity:.55}
 </style>
 <link rel="preconnect" href="https://cdn.tailwindcss.com">
 <script>/* 캐릭터 시트가 쓸 라이브러리를 한가할 때 미리 받아 둠 */(function(){function pf(){['https://cdn.tailwindcss.com'].forEach(function(u){var l=document.createElement('link');l.rel='prefetch';l.as='script';l.href=u;document.head.appendChild(l);});}if('requestIdleCallback' in window)window.addEventListener('load',function(){requestIdleCallback(pf,{timeout:4000});});else window.addEventListener('load',function(){setTimeout(pf,2500);});})();</script>
@@ -5202,6 +5207,7 @@
     function shopLivePush() {
       try {
         if (!(window.__fbx && __fbx.ok()) || (AUTH_S.gm && !plView())) return;
+        if (window.__shopWatch) { if (__shopLiveSent) { __fbx.set('shop/live/u_' + PRES.id, null); __shopLiveSent = ''; } return; }
         const inShop = state.viewMode === 'journal' && state.jView === 'shop'; let pc = null, by0 = null; try { by0 = shopBuyer(); pc = by0.pc; } catch (e) {}
         let plN = ''; try { plN = presName(); } catch (e) {} if (!plN && pc) { try { plN = dvPlName(pc.pc) || ''; } catch (e) {} }
         let mine = ''; try { mine = (by0 ? by0.pcs : []).map(p => p.name).filter(Boolean).join(', '); } catch (e) {}
@@ -5217,7 +5223,7 @@
       } catch (e) {}
     }
     window.__shopLive = {};
-    (function () { let n = 0; const t = setInterval(() => { if (window.__fbx) { clearInterval(t); __fbx.watch('shop/stock', shopStockApply); __fbx.watch('shop/live', v => { window.__shopLive = v || {}; }); } else if (++n > 60) clearInterval(t); }, 1000); })();
+    (function () { let n = 0; const t = setInterval(() => { if (window.__fbx) { clearInterval(t); __fbx.watch('shop/stock', shopStockApply); __fbx.watch('shop/live', v => { window.__shopLive = v || {}; try { shopWatchFollow(); } catch (e) {} }); } else if (++n > 60) clearInterval(t); }, 1000); })();
     setInterval(shopLivePush, 2000);
     function shopLiveList() { const now = Date.now(); return Object.keys(window.__shopLive || {}).map(k => Object.assign({ id: k }, window.__shopLive[k])).filter(x => x && now - (x.t || 0) < 60000); }
     function shopLiveGo(pcId, sid) { try { if ((state.boardTex.pcs || []).some(x => x.id === pcId)) state.shopPc = pcId; if (sid) state.shopId = sid; state.shopSel = null; setViewMode('journal', ''); jSet('jView', 'shop'); const o = document.getElementById('shoplive-ov'); if (o) o.remove(); } catch (e) {} }
@@ -6782,6 +6788,7 @@
       return { gp, sp, cp };
     }
     function shopBuyer() {
+      if (window.__shopWatch) { const wp = (state.boardTex.pcs || []).find(p => p.id === window.__shopWatch); if (wp) { state.shopPc = wp.id; return { pcs: [wp], shared: false, pc: wp, watch: true }; } window.__shopWatch = null; }
       const pcs = (state.boardTex.pcs || []).filter(p => !p.off && canEditPc(p.id));
       let id = state.shopPc;
       if (id !== '-' && !pcs.some(p => p.id === id)) { let me = ''; try { me = landMe(); } catch (e) {} id = pcs.some(p => p.id === me) ? me : (pcs.length ? pcs[0].id : '-'); state.shopPc = id; }
@@ -6878,7 +6885,7 @@
       return escapeHtml(t.fromName) + ' → ' + escapeHtml(t.toName) + ': ' + (a.join(' + ') || '없음') + '  ⇄  ' + (b.join(' + ') || '없음');
     }
     function trDraft() { const d = state.tradeDraft = state.tradeDraft || { to: '', give: [], take: [], pay: '', ask: '', note: '' }; return d; }
-    function trPick(side, i) {
+    function trPick(side, i) { if (window.__shopWatch) { showToast('구경 중에는 거래할 수 없어요.'); return; }
       const dr = trDraft(), L = dr[side], have = side === 'give' ? (shopBuyer().pc ? shopDetail(shopBuyer().pc).items[i] : null) : (trPc(dr.to) ? shopDetail(trPc(dr.to)).items[i] : null); if (!have) return;
       if (have.equipped && side === 'give') { showToast('장착 중인 물건은 거래할 수 없어요. 먼저 장착을 풀어 주세요.'); return; }
       const ex = L.find(x => x.i === i), max = Number(have.qty) || 1;
@@ -6913,6 +6920,7 @@
       return h + '</div>';
     }
     function trSend() {
+      if (window.__shopWatch) { showToast('구경 중에는 거래할 수 없어요.'); return; }
       const by = shopBuyer(), me = by.pc, dr = trDraft(), to = trPc(dr.to); if (!me || !to) return;
       const pay = trCp(dr.pay), ask = trCp(dr.ask);
       if (!dr.give.length && !dr.take.length && !pay && !ask) { showToast('주고받을 것을 골라 주세요.'); return; }
@@ -6922,12 +6930,12 @@
       try { window.__fbcSend && window.__fbcSend({ ev: 'trade', t: '[거래 제안] ' + trSummary(t).replace(/&[a-z#0-9]+;/g, '') }); } catch (e) {}
       persistState(); showToast(t.toName + '에게 거래 제안을 보냈어요. 상대가 수락하면 처리돼요.'); renderShop();
     }
-    function trClose(id, st, why) {
+    function trClose(id, st, why) { if (window.__shopWatch) { showToast('구경 중에는 거래할 수 없어요.'); return; }
       const t = trList().find(x => x.id === id); if (!t || t.st !== 'wait') return; t.st = st; t.tEnd = Date.now(); if (why) t.why = why;
       try { window.__fbcSend && window.__fbcSend({ ev: 'trade', t: '[거래 ' + ({ no: '거절', cancel: '취소', fail: '실패' }[st] || st) + '] ' + trSummary(t).replace(/&[a-z#0-9]+;/g, '') }); } catch (e) {}
       persistState(); renderShop();
     }
-    function trAccept(id) {
+    function trAccept(id) { if (window.__shopWatch) { showToast('구경 중에는 거래할 수 없어요.'); return; }
       const t = trList().find(x => x.id === id); if (!t || t.st !== 'wait') return;
       const A = trPc(t.from), B = trPc(t.to); if (!A || !B) { trClose(id, 'fail', 'PC를 찾지 못했어요'); return; }
       const dA = shopDetail(A), dB = shopDetail(B);
@@ -7001,10 +7009,31 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       }
       h += `<div class="bg-detail">${dt}</div></div>`;
       area.innerHTML = h;
+      shopWatchDeco(area);
+    }
+    // ---- 상점 구경 (Roll20 '구경하기' 링크) — 다른 PC가 쇼핑하는 화면을 따라 보기만 해요 ----
+    function shopWatchDeco(area) {
+      area.classList.toggle('shop-watch', !!window.__shopWatch); if (!window.__shopWatch) return;
+      const p = (state.boardTex.pcs || []).find(x => x.id === window.__shopWatch), lv = window.__shopWatchLive;
+      const bar = document.createElement('div'); bar.className = 'shop-watch-bar';
+      bar.innerHTML = `<b>${escapeHtml((p && p.name) || 'PC')}</b>의 상점을 구경하는 중이에요 · 보기만 할 수 있어요` + (lv ? (lv.i ? ` · 지금 보는 물건: <b>${escapeHtml(lv.i)}</b>` : '') : ' · <span style="opacity:.7">지금은 상점을 보고 있지 않아요</span>') + ' <button type="button" class="watch-ok" onclick="shopWatchStop()">그만 보기</button>';
+      const tr = area.querySelector('.bg-trade'); if (tr) tr.insertBefore(bar, tr.firstChild);
+    }
+    function shopWatchStop() { window.__shopWatch = null; window.__shopWatchLive = null; state.shopPc = null; state.shopSel = null; try { renderShop(); } catch (e) {} }
+    function shopWatchFollow() {
+      if (!window.__shopWatch) return;
+      const now = Date.now(), lv = Object.values(window.__shopLive || {}).filter(x => x && x.pid === window.__shopWatch && now - (x.t || 0) < 60000).sort((a, b) => (b.t || 0) - (a.t || 0))[0] || null;
+      const key = lv ? [lv.sid, lv.i].join('|') : '', old = window.__shopWatchKey || ''; window.__shopWatchLive = lv;
+      if (key === old) return; window.__shopWatchKey = key;
+      if (lv && lv.sid && shopsList().some(s => s.id === lv.sid)) state.shopId = lv.sid;
+      state.shopSel = null;
+      if (lv && lv.i) { const sh = shopsList().find(s => s.id === state.shopId); const it = sh && (sh.items || []).find(x => { try { return shopRes(x).name === lv.i; } catch (e) { return false; } }); if (it) state.shopSel = { w: 's', k: it.id }; }
+      try { if (state.viewMode === 'journal' && state.jView === 'shop') renderShop(); } catch (e) {}
     }
         function shopFilterKeep() { const v = (document.getElementById('shop-q') || {}).value, p = (document.getElementById('shop-q') || {}).selectionStart; renderShop(); const e = document.getElementById('shop-q'); if (e) { e.focus(); try { e.setSelectionRange(p, p); } catch (x) {} } }
     function shopBuy(sid, iid, nOver, done) {
       const fin = ok => { try { done && done(ok); } catch (e) {} };
+      if (window.__shopWatch) { showToast('구경 중에는 살 수 없어요.'); fin(false); return; }
       const sh = shopsList().find(s => s.id === sid), it = sh && (sh.items || []).find(x => x.id === iid), by = shopBuyer(); if (!it || !by) { fin(false); return; }
       if (sh.off && !(AUTH_S.gm && !plView())) { showToast('지금은 이 상인이 장사를 하지 않아요.'); fin(false); return; }
       if (it.hide && !(AUTH_S.gm && !plView())) { showToast('지금은 살 수 없는 물건이에요.'); fin(false); return; }
@@ -7073,6 +7102,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
     function shopDragOver(e, z) { if (__shopDragK == null) return; e.preventDefault(); try { e.dataTransfer.dropEffect = 'move'; } catch (_) {} z.classList.add('sd-over'); }
     function shopDrop(e, z) { if (__shopDragK == null) return; e.preventDefault(); z.classList.remove('sd-over'); const k = __shopDragK; __shopDragK = null; shopSell(k, true); }
     function shopSell(k, ask) {
+      if (window.__shopWatch) { showToast('구경 중에는 팔 수 없어요.'); return; }
       const by = shopBuyer(); if (!by) return; const d = shopData(by), x = d.items[k]; if (!x) return;
       if (x.equipped) { showToast('장착 중인 물건은 팔 수 없어요.'); return; }
       const sh = shopsList().find(s => s.id === state.shopId); if (!sh || sh.off) { showToast('이 상인은 지금 물건을 사지 않아요.'); return; }
@@ -7095,6 +7125,7 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       showToast('판매 요청을 보냈어요. GM이 확인하면 대금이 들어와요.'); renderShop();
     }
     function shopSellCancel(k) {
+      if (window.__shopWatch) { showToast('구경 중에는 바꿀 수 없어요.'); return; }
       const by = shopBuyer(); if (!by) return; const d = shopData(by), x = d.items[k]; if (!x) return;
       const b = state.boardTex; b.sellReq = Array.isArray(b.sellReq) ? b.sellReq : [];
       const q = x.sellPend ? b.sellReq.find(r => r.id === x.sellPend) : (by.shared ? b.sellReq.find(r => r.sid && r.sid === x._sid) : null), id = x.sellPend || (q && q.id);
@@ -9822,6 +9853,15 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
     });
     (function () { try { const m = String(location.hash || '').match(/^#r20bag=(.+)$/); if (!m) return; const raw = decodeURIComponent(m[1]);
       r20Wait(() => { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} r20BagApply(raw); }); } catch (e) {} })();
+    // Roll20 '구경하기' 링크: ...#shopwatch=Tulian&shop=잡화점 → 로그인 뒤 그 PC의 상점 화면을 보기 전용으로 따라가요
+    (function () { try { const m = String(location.hash || '').match(/^#shopwatch=([^&]*)(?:&shop=(.*))?$/); if (!m) return; const pn = decodeURIComponent(m[1]), sn = decodeURIComponent(m[2] || ''); let n = 0;
+      const t = setInterval(() => { if (++n > 360) { clearInterval(t); return; } if (document.getElementById('auth-ov') || !((state.boardTex || {}).pcs || []).length) return; clearInterval(t);
+        try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+        const sq = x => String(x || '').replace(/\s+/g, '').toLowerCase(), pc = (state.boardTex.pcs || []).find(p => sq(p.name) === sq(pn));
+        if (!pc) { showToast('구경할 PC를 찾지 못했어요.'); return; }
+        const shops = shopsList(), sh = (sn && shops.find(s => sq(s.name) === sq(sn))) || (sn && shops.find(s => sq(s.name).includes(sq(sn))));
+        window.__shopWatch = pc.id; window.__shopWatchKey = ''; if (sh) state.shopId = sh.id; state.shopSel = null;
+        try { setViewMode('journal', ''); jSet('jView', 'shop'); } catch (e) {} try { shopWatchFollow(); renderShop(); } catch (e) {} }, 500); } catch (e) {} })();
     // Roll20 !상점열기 링크: ...#shop=잡화점&pc=Tulian  → 로그인 뒤 그 PC로 그 상점을 바로 열어요
     (function () { try { const m = String(location.hash || '').match(/^#shop=([^&]*)&pc=(.*)$/); if (!m) return; const sn = decodeURIComponent(m[1]), pn = decodeURIComponent(m[2]); let n = 0;
       const t = setInterval(() => { if (++n > 360) { clearInterval(t); return; } if (document.getElementById('auth-ov') || !((state.boardTex || {}).pcs || []).length) return; clearInterval(t);
