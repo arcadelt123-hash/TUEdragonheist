@@ -12050,7 +12050,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       { sel: '.bg-who', name: '가방 고르기', desc: '공용 가방과 PC중에 하나를 선택할 수 있어요.' },
       { sel: '.bg-shops .bg-tab:not(.ghost)', name: '상점', desc: '상점 이름이에요.' },
       { sel: '.bg-cols', name: '사고팔기', desc: '아이템을 드래그해서 판매나 구매를 할 수 있어요.' }] },
-    '#lg-modal': { title: '세션 로그', autoSide: 'below', loose: 1, intro: '회차별 세션 로그를 읽고, 대사에 메모를 남기는 창이에요.', auto: true, ex: ['#lg-list', '#lg-main'], notes: [
+    '#lg-modal': { title: '세션 로그', autoSide: 'below', loose: 1, drop: { '메모': 200 }, intro: '회차별 세션 로그를 읽고, 대사에 메모를 남기는 창이에요.', auto: true, ex: ['#lg-list', '#lg-main'], notes: [
       { sel: '#lg-main .lg-cast', first: 1, name: '등장인물', desc: '등장한 PC와 NPC를 안내해요. 첫 번째가 PC, 두 번째가 NPC에요. 기본적으로 접혀 있어요.' },
       { sel: '#lg-main .lg-qadd-b', first: 1, name: '퀘스트', desc: '연결된 퀘스트 목록이에요. 좌클릭하면 연결된 퀘스트를 확인하고, 새로 연결할 수도 있어요.' },
       { sel: '#lg-main .lg-m[data-i]', first: 4, inView: 1, mask: 1, bdy: 30, name: '로그 메모', desc: '로그를 드래그해서 그 부분에 메모를 남길 수 있어요.' }] },
@@ -12209,7 +12209,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     var out = [], seenL = {}, cards = { n: 0, el: null }, rule = ruleFor(sc);
     if (withTop) { var tb = document.querySelector('.top-bar'); if (tb) collect(tb, { x: 0, y: 0 }, out, seenL, { n: 0 }); out.forEach(function (o) { o.top = 1; }); var fab = document.getElementById('fbc-fab'); if (fab && vis(fab)) out.push({ el: fab, off: { x: 0, y: 0 }, top: 1, name: '채팅', desc: '채팅이 입력되면 노란 빛으로 빛납니다. 클릭하면 현재 접속한 사람이 보입니다. 실시간 채팅이 가능합니다.' }); }
     if (!rule || rule.auto) {
-      var n0 = out.length; collect(sc.scope, { x: 0, y: 0, skipTop: !!sc.base, auto: 1, ex: rule && rule.ex }, out, seenL, cards); if (rule && rule.autoSide) out.slice(n0).forEach(function (o) { o.side = rule.autoSide; });
+      var n0 = out.length; collect(sc.scope, { x: 0, y: 0, skipTop: !!sc.base, auto: 1, ex: rule && rule.ex }, out, seenL, cards); if (rule && rule.autoSide) out.slice(n0).forEach(function (o) { o.side = rule.autoSide; if (rule.drop && rule.drop[o.name]) o.dy = rule.drop[o.name]; });
       if (!rule && cards.n) out.push({ el: cards.el.el, off: { x: 0, y: 0 }, name: '카드·항목 (' + cards.n + '개)', desc: '눌러서 자세히 열어 볼 수 있는 항목들이에요.' });
     }
     if (rule) (rule.notes || []).forEach(function (n) {
@@ -12260,12 +12260,14 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       var mb0 = it.el && it.el.closest && it.el.closest('.modal-box,.modal-content,[role=dialog]'), mr = mb0 ? mb0.getBoundingClientRect() : null;
       if (it.side === 'below') c.unshift([x0 + r.width / 2 - bw / 2, Math.min(y0 + r.height + 2, innerHeight - bh - 4)], [x0 + r.width / 2 - bw / 2, y0 + r.height - bh - 30]);
       if (it.side === 'right') { c.unshift([x0 + r.width + 6, y0], [x0 + r.width + 6, y0 + r.height - bh]); if (mr) c.splice(2, 0, [mr.right + 8, y0], [mr.right + 8, y0 - bh / 2]); } else if (it.side === 'left') { c.unshift([x0 - bw - 6, y0], [x0 - bw - 6, y0 + r.height - bh]); if (mr) c.splice(2, 0, [mr.left - bw - 8, y0], [mr.left - bw - 8, y0 - bh / 2]); }
+      if (it.dy) c.unshift([x0 + r.width / 2 - bw / 2, y0 + r.height + it.dy], [x0 + r.width / 2 - bw / 2, y0 + r.height + it.dy + 40], [x0 + r.width - bw, y0 + r.height + it.dy]);
       if (it.mask) c = [[x0 + r.width + 8, y0], [x0 + r.width - bw, y0 - bh - 6], [x0 + r.width - bw, y0 + r.height + 6], [x0 - bw - 8, y0]];
       for (var k = 0; k < c.length && !pos; k++) { var a = { l: c[k][0], t: c[k][1], r: c[k][0] + bw, b: c[k][1] + bh }; if (!hit(a)) pos = a; }
       if (!pos && (it.side === 'left' || it.side === 'right')) { var cols = [it.side === 'left' ? x0 - bw - 6 : x0 + r.width + 6]; try { var box2 = it.el.closest('.sidebar,.modal-box,.modal-content'); if (box2) { var br = box2.getBoundingClientRect(); cols.push(it.side === 'left' ? br.left + it.off.x - bw - 8 : br.right + it.off.x + 8); } } catch (x) {}
         cols.forEach(function (sx2) { for (var d2 = 0; d2 < 260 && !pos; d2 += 6) { [y0 + d2, y0 - d2].forEach(function (yy) { if (pos) return; var a3 = { l: sx2, t: yy, r: sx2 + bw, b: yy + bh }; if (!hit(a3)) pos = a3; }); } }); }
       if (!pos) { var x = Math.max(4, Math.min(W - bw - 4, x0)), y = y0 + r.height + 4; for (var n = 0; n < 60; n++) { var a2 = { l: x, t: y, r: x + bw, b: y + bh }; if (!hit(a2)) { pos = a2; break; } y += 8; if (y + bh > H - 4) { y = Math.max(4, y0 - bh - 4); x = Math.min(W - bw - 4, x + bw / 2); } } }
       var tbr = it.tb ? it.tb.getBoundingClientRect() : r, far = !pos || Math.max(Math.min(r.left, tbr.left) - pos.r, pos.l - Math.max(tbr.right, Math.min(r.right, tbr.right + 40)), Math.min(r.top, tbr.top) - pos.b, pos.t - Math.max(r.bottom, tbr.bottom)) > (it.side ? 240 : 48);   // 번호에서 멀리 떨어지면 말풍선 대신 목록으로
+      if (it.dy && pos) far = false;
       if (far && curLoose && it.tb) { var bc = [[tbr.right + 6, tbr.top - 2], [tbr.left, tbr.bottom + 4], [tbr.right + 6, tbr.bottom - bh], [tbr.left - bw - 6, tbr.top - 2], [tbr.left, tbr.top - bh - 4]]; pos = null; for (var q = 0; q < bc.length && !pos; q++) { var a4 = { l: bc[q][0], t: bc[q][1], r: bc[q][0] + bw, b: bc[q][1] + bh }; if (!hit(a4)) pos = a4; } if (!pos) pos = { l: Math.min(W - bw - 4, tbr.right + 6), t: Math.max(4, Math.min(H - bh - 4, tbr.top - 2)) }; pos.r = pos.l + bw; pos.b = pos.t + bh; far = false; }
       if (it.tb) it.tb.classList.toggle('nb', far);
       if (far) { m.style.display = 'none'; it.far = 1; anyFar = true; return; } it.far = 0;
