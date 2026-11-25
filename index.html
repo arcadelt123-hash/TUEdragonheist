@@ -12009,7 +12009,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       { fr: '#sheet-frame', sel: '#art-pop:has([data-a=in])', side: 'right', name: '일러스트 설정', desc: '장비 칸이 그림 밖에 붙는지, 안에 붙는지도 조정 가능합니다. 이미지를 변경할 때 기본 시트나 카드 일러스트에도 적용할지 체크할 수 있습니다.' },
       { fr: '#sheet-frame', sel: '#art-pop:not(:has([data-a=in]))', side: 'right', name: '일러스트 설정', desc: '이미지를 변경할 때 기본 시트나 카드 일러스트에도 적용할지 체크할 수 있습니다.' },
       { fr: '#sheet-frame', sel: '.bg3-c', first: 1, at: 'below', name: '빈 화면', desc: '빈 화면을 우클릭해서 텍스트 박스를 추가하거나, 다른 시트의 박스를 가져올 수 있습니다.' },
-      { fr: '#sheet-frame', sel: '.ns-root .ns-bl', first: 1, at: 'below', name: '빈 화면', desc: '빈 화면을 우클릭해서 텍스트 박스를 추가하거나, 다른 시트의 박스를 가져올 수 있습니다. 넣을 공간이 없으면 알려 드려요.' },
+      { fr: '#sheet-frame', sel: '.ns-root .ns-bl', first: 1, at: 'below', attach: '소지품 · 기록', name: '빈 화면', desc: '빈 화면을 우클릭해서 텍스트 박스를 추가하거나, 다른 시트의 박스를 가져올 수 있습니다. 넣을 공간이 없으면 알려 드려요.' },
       { fr: '#sheet-frame', sel: '#ns-pop .ns-sg', first: 1, name: '＋ / －', desc: '눌러 수입인지 지출인지 골라요.' },
       { fr: '#sheet-frame', sel: '#ns-pop .ns-cp', first: 1, name: '동전', desc: 'GP, SP, CP인지 골라요.' },
       { fr: '#sheet-frame', sel: '#ns-pop .ns-plus', name: '줄 추가', desc: 'GP, SP, CP를 따로따로 얻거나 잃은 경우, 줄을 추가해서 함께 기록할 수 있어요.' },
@@ -12114,7 +12114,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       if (n.inView) els = els.filter(function (e) { var r = e.getBoundingClientRect(); return r.top >= 0 && r.bottom <= H0; });
       if (n.first) els = els.slice(0, n.first);
       if (!els.length) return;
-      out.push({ el: els[0], els: els, off: off, name: n.name, desc: n.desc, mask: n.mask, at: n.at, side: n.side, bpos: n.bpos, bb: n.bb, icon: icoHtml(els[0]) });
+      out.push({ el: els[0], els: els, off: off, name: n.name, desc: n.desc, mask: n.mask, at: n.at, side: n.side, bpos: n.bpos, bb: n.bb, attach: n.attach, icon: icoHtml(els[0]) });
     });
     return out.slice(0, 45);
   }
@@ -12137,14 +12137,14 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     items.forEach(function (it) { it.r = rectOf(it); });
     items.forEach(function (it) {
       var r = it.r;
-      if (it.tb) { if (!r) it.tb.style.display = 'none'; else { it.tb.style.display = ''; if (it.bpos === 'bottom') { it.tb.style.left = Math.max(2, r.left + r.width / 2 - 10) + 'px'; it.tb.style.top = Math.max(2, Math.min(innerHeight - 24, r.bottom - 26)) + 'px'; } else if (it.bpos === 'left') { it.tb.style.left = Math.max(2, r.left - 24) + 'px'; it.tb.style.top = Math.max(2, r.top + r.height / 2 - 10) + 'px'; } else { it.tb.style.left = Math.max(2, r.left - 8) + 'px'; it.tb.style.top = Math.max(2, r.top - 8) + 'px'; } } }
+      if (it.tb) { if (!r) it.tb.style.display = 'none'; else { it.tb.style.display = ''; if (it.tgt && it.tgt.tb && it.tgt.tb.style.left) { it.tb.style.left = (parseFloat(it.tgt.tb.style.left) + 24) + 'px'; it.tb.style.top = it.tgt.tb.style.top; } else if (it.bpos === 'bottom') { it.tb.style.left = Math.max(2, r.left + r.width / 2 - 10) + 'px'; it.tb.style.top = Math.max(2, Math.min(innerHeight - 24, r.bottom - 26)) + 'px'; } else if (it.bpos === 'left') { it.tb.style.left = Math.max(2, r.left - 24) + 'px'; it.tb.style.top = Math.max(2, r.top + r.height / 2 - 10) + 'px'; } else { it.tb.style.left = Math.max(2, r.left - 8) + 'px'; it.tb.style.top = Math.max(2, r.top - 8) + 'px'; } } }
       if (it.mk) { if (!r) it.mk.style.display = 'none'; else Object.assign(it.mk.style, { display: '', left: r.left - 3 + 'px', top: r.top - 3 + 'px', width: r.width + 6 + 'px', height: r.height + 6 + 'px' }); }
     });
     var placed = [], pr = panel && !panel.classList.contains('min') ? panel.getBoundingClientRect() : null;
     if (pr) placed.push({ l: pr.left, t: pr.top, r: pr.right, b: pr.bottom });
     if (topPanel) { var tr = topPanel.getBoundingClientRect(); placed.push({ l: tr.left, t: tr.top, r: tr.right, b: tr.bottom }); }
     items.forEach(function (it) { if (it.r && it.at !== 'center' && (it.mask || it.r.width * it.r.height < W * H * 0.03)) placed.push({ l: it.r.left - 1, t: it.r.top - 1, r: it.r.right + 1, b: it.r.bottom + 1 }); });
-    try { var cnt = 0; [].forEach.call(document.querySelectorAll('button,select,input:not([type=hidden]),textarea,a[href],[onclick]'), function (el) { if (cnt > 500 || mine(el)) return; var r = el.getBoundingClientRect(); if (r.width < 4 || r.height < 4 || r.bottom < 0 || r.top > H || r.right < 0 || r.left > W || r.width * r.height > W * H * 0.15) return; if (!vis(el)) return; cnt++; placed.push({ l: r.left, t: r.top, r: r.right, b: r.bottom }); }); } catch (e) {}
+    try { var cnt = 0; [].forEach.call(document.querySelectorAll('button,select,input:not([type=hidden]),textarea,a[href],[onclick]'), function (el) { if (cnt > 500 || mine(el) || (curScope && !curScope.contains(el))) return; var r = el.getBoundingClientRect(); if (r.width < 4 || r.height < 4 || r.bottom < 0 || r.top > H || r.right < 0 || r.left > W || r.width * r.height > W * H * 0.15) return; if (!vis(el)) return; cnt++; placed.push({ l: r.left, t: r.top, r: r.right, b: r.bottom }); }); } catch (e) {}
     function hit(a) { if (a.l < 2 || a.t < 2 || a.r > W - 2 || a.b > H - 2) return true; for (var k = 0; k < placed.length; k++) { var p = placed[k]; if (a.l < p.r + 3 && a.r > p.l - 3 && a.t < p.b + 3 && a.b > p.t - 3) return true; } return false; }
     items.forEach(function (it) {
       var m = it.bb; if (!m) return; var r = it.r;
@@ -12167,7 +12167,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     if (anyFar && panel && !panel._autoList && !panel.classList.contains('min')) { panel._autoList = 1; panel.classList.add('list'); }   // 접혀 있으면 그대로 (번호를 누르면 펼쳐져요)
     if (hl && hl._it && hl._it.r) { var r2 = hl._it.r; Object.assign(hl.style, { display: '', left: r2.left - 4 + 'px', top: r2.top - 4 + 'px', width: r2.width + 8 + 'px', height: r2.height + 8 + 'px' }); }
   }
-  var topPanel = null, tPos = null;
+  var topPanel = null, tPos = null, curScope = null;
   function dragBy(hd, el, done) {   // 안내창 옮기기: 지도·시트 위로 지나가도 끊기지 않게 포인터를 붙잡아요
     hd.style.touchAction = 'none';
     hd.addEventListener('pointerdown', function (e) {
@@ -12181,11 +12181,12 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
   }
   function close(mark) { if (mark && cur) markSeen(cur); if (layer) layer.remove(); if (panel) { pPos = { l: panel.style.left, t: panel.style.top }; panel.remove(); } if (topPanel) topPanel.remove(); layer = panel = topPanel = null; items = []; cur = ''; }
   function show(sc) {
-    css(); close(false); if (sc.quiet) return; var rl0 = ruleFor(sc); if (rl0 && rl0.intro) sc.intro = rl0.intro; if (rl0 && rl0.title) sc.title = rl0.title; var withTop = !!sc.base; items = build(sc, withTop); if (!items.length && (!sc.intro || !sc.base)) return; cur = sc.key;
+    css(); close(false); if (sc.quiet) return; curScope = sc.base ? null : sc.scope; var rl0 = ruleFor(sc); if (rl0 && rl0.intro) sc.intro = rl0.intro; if (rl0 && rl0.title) sc.title = rl0.title; var withTop = !!sc.base; items = build(sc, withTop); if (!items.length && (!sc.intro || !sc.base)) return; cur = sc.key;
     layer = document.createElement('div'); layer.id = 'tut-layer';
     var topN = items.filter(function (x) { return x.top; }).length, NOBB = !!(rl0 && rl0.nobb); items.forEach(function (it, i) { it.no = it.top ? i + 1 : i - topN + 1; });
     items.forEach(function (it, i) { if (it.mask) { var mk = document.createElement('div'); mk.className = 'mk'; it.mk = mk; layer.appendChild(mk); } var b = document.createElement('div'); b.className = 'tb' + (it.top ? ' top nb' : '') + (NOBB && !it.top && !it.bb ? ' nb' : ''); b.textContent = it.no; b.dataset.i = i; it.tb = b; layer.appendChild(b); });
-    items.forEach(function (it, i) { if (it.top || (NOBB && !it.bb)) return; var m = document.createElement('div'); m.className = 'bb'; m.innerHTML = '<span class="bn">' + it.no + '</span><b>' + E(it.name) + '</b>' + (it.desc ? '<br>' + E(it.desc) : ''); it.bb = m; layer.appendChild(m); });
+    items.forEach(function (it, i) { if (it.top || (NOBB && !it.bb) || it.attach) return; var m = document.createElement('div'); m.className = 'bb'; m.innerHTML = '<span class="bn">' + it.no + '</span><b>' + E(it.name) + '</b>' + (it.desc ? '<br>' + E(it.desc) : ''); it.bb = m; layer.appendChild(m); });
+    items.forEach(function (it) { if (!it.attach) return; var tg = items.filter(function (x) { return x.name === it.attach && x.bb; })[0]; if (!tg) { it.attach = ''; var m = document.createElement('div'); m.className = 'bb'; m.innerHTML = '<span class="bn">' + it.no + '</span><b>' + E(it.name) + '</b>' + (it.desc ? '<br>' + E(it.desc) : ''); it.bb = m; layer.appendChild(m); return; } it.tgt = tg; tg.bb.innerHTML += '<div style="margin-top:4px;padding-top:4px;border-top:1px dashed rgba(160,110,40,.45)"><span class="bn">' + it.no + '</span><b>' + E(it.name) + '</b>' + (it.desc ? '<br>' + E(it.desc) : '') + '</div>'; });   // 다른 번호의 설명 상자에 함께 넣기
     var hl = document.createElement('div'); hl.className = 'hl'; hl.style.display = 'none'; layer.appendChild(hl); document.body.appendChild(layer);
     if (view() === 'pick') layer.classList.add('pick');
     layer.addEventListener('click', function (e) { var b = e.target.closest('.tb'); if (!b || !(layer.classList.contains('pick') || b.classList.contains('nb'))) return; var i = +b.dataset.i, it = items[i]; if (!it) return;
