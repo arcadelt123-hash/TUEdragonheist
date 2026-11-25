@@ -11504,7 +11504,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     try { F.cfg = JSON.parse(raw); } catch (e) { return Promise.resolve(); }
     $('fbc-fab').style.display = 'block'; setSt('연결 중…'); F.room = roomId();
     return loadSdk().then(function (S) {
-      F.api = S; var app = S.app.initializeApp(F.cfg, 'chat'); var au = S.auth.getAuth(app);
+      F.api = S; var app = null; try { app = (S.app.getApps ? S.app.getApps() : []).find(function (x) { return x.name === 'chat'; }) || null; } catch (e) {} if (!app) { try { app = S.app.initializeApp(F.cfg, 'chat'); } catch (e) { app = S.app.getApp('chat'); } } var au = S.auth.getAuth(app);
       return S.auth.signInAnonymously(au).then(function () { F.db = S.db.getDatabase(app); });
     }).then(function () {
       var S = F.api.db, r = S.query(S.ref(F.db, 'rooms/' + F.room + '/chat'), S.limitToLast(200));
