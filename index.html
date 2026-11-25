@@ -11950,6 +11950,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     '상점 이름·설명': '상점 이름과 설명을 바꿔요.', '상점 그림': '상인 그림을 정해요.', '상점 배경': '상점 화면 배경을 정해요.', 'NPC 불러오기': '도감의 NPC를 상인으로 써요.',
     '이동 경로 (그리기 · 저장 · 올리기)': '이동 경로를 보고 그려요. 새 경로는 지도를 클릭할 때마다 꺾는 점이 찍히고, 점마다 이름·도착 날짜·있었던 일을 적을 수 있어요(모두 선택).',
     '접속 중 표시': '누군가 들어오면 띠링 소리가 나며 불이 켜집니다. 누군지는 채팅창에서 확인해야 합니다. 나갈 때도 소리가 납니다. 사이트 밖에 있으면 소리가 나지 않습니다.',
+    '퀘스트 보드': '퀘스트를 메모지 형식으로 배치하고, 메모를 붙일 수 있습니다.', '도감': '등장인물들을 한 눈에 볼 수 있습니다.', '상점': '아이템을 주고받을 수 있습니다.',
     '새로고침': '서버에서 최신 내용을 다시 불러와요.', '전체': '모든 분류를 보여요.', '닫기': '이 창을 닫아요.', '저장': '바꾼 내용을 저장해요.', '취소': '바꾸지 않고 닫아요.'
   };
 
@@ -12040,6 +12041,10 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     'board': { auto: false, notes: [
       { sel: '.board-tools .btn-tab', name: '보드 고르기', desc: '보드판을 고르거나 새로 만들고, 폴더·태그로 거르거나 타임라인으로 바꿔요.' },
       { sel: '.board-tools > .btn-secondary', name: '보드 설정', desc: '이 보드의 배경과 모양을 정해요.' }].concat(BT, [
+      { sel: '#ctx-menu .cx-search', side: 'right', name: '검색창', desc: '검색창입니다.' },
+      { sel: '#ctx-menu [data-row=tool]', side: 'right', name: '연결 · 가져오기', desc: '왼쪽부터; 메모와 메모를 연결할 수 있습니다. 아이템, 이미지, 인물을 가져올 수 있습니다.' },
+      { sel: '#ctx-menu [data-row=icon]', side: 'left', name: '퀘스트 메뉴', desc: '왼쪽부터; 수정, 메모 꾸미기, 퀘스트 상태 전환, 퀘스트 삭제.' },
+      { sel: '#ctx-menu .cx-sec:has(button[onclick^="setLayer"])', side: 'right', name: '레이어', desc: '카드가 놓이는 층이에요. 배경 · 퀘스트 종이 · 메모 · 아이템 순으로 위에 쌓이고, 맨 위로는 같은 층 안에서 가장 위로 올려요.' },
       { sel: '#main-content-area', name: '보드', desc: '카드를 끌어 옮기고, 우클릭으로 메뉴를 열어요. 카드끼리 선으로 이어 관계를 표시해요. 휠로 확대·축소해요.', at: 'center' }]) },
     'journal:pc': { auto: false, notes: [JT, { sel: '.j-pcs', name: '일지 고르기', desc: '누구의 일지를 볼지 골라요.' }].concat(BT, [{ sel: '#main-content-area', name: '일지', desc: '고른 PC의 일지와 메모를 모아 둔 곳이에요.', at: 'center' }]) },
     'journal:items': { auto: false, notes: [JT, { sel: '.j-pcs', name: '가방 고르기', desc: '전체 · PC별 · 공용 가방 중에서 볼 곳을 골라요. 필터로 분류를 걸러요.' }].concat(BT, [{ sel: '.board-tools > .btn-secondary', name: '필터·설정', desc: '보일 분류와 창고 모양을 정해요.' },
