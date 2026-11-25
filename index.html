@@ -7199,20 +7199,24 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
         <label style="display:flex;gap:8px;align-items:center">기본 재고<input type="number" id="tp-st" min="0" value="5" style="${sel};width:80px"><span style="font-size:11px;opacity:.65">비우면 무제한</span></label>
         <div style="display:flex;gap:12px;flex-wrap:wrap"><label><input type="radio" name="tp-m" value="new" checked> 새 상점으로 만들기</label><label${cur ? '' : ' style="opacity:.5"'}><input type="radio" name="tp-m" value="cur"${cur ? '' : ' disabled'}> 지금 상점(${E(cur ? cur.name || '' : '없음')})에 추가</label></div>
         <div id="tp-v" style="height:34vh;overflow:auto;border:1px solid #c9bb98;border-radius:8px;background:#fffaf0;padding:4px 8px;font-size:12px"></div>
-        <div style="display:flex;gap:8px;align-items:center"><span id="tp-n" style="flex:1;font-size:12px"></span><button class="btn btn-secondary" id="tp-x">닫기</button><button class="btn btn-primary" id="tp-ok">진열하기</button></div></div>`;
+        <div style="display:flex;gap:8px;align-items:center"><span id="tp-n" style="flex:1;font-size:12px"></span><button class="btn btn-secondary" id="tp-ex" title="목록에서 넣지 않을 물건을 골라 빼요">몇 개 빼기</button><button class="btn btn-secondary" id="tp-x">닫기</button><button class="btn btn-primary" id="tp-ok">진열하기</button></div></div>`;
       document.body.appendChild(ov);
       const q = s => ov.querySelector(s), pv = () => Number((ov.querySelector('[name=tp-p]:checked') || {}).value) || 0;
       const nm = it => { const b = it.r && SHOP_CMAP[it.r]; return it.n || (b ? koN(b) : '?'); };
+      const EX = new Set(); let exOn = false; const ik = it => it.r ? 'r:' + it.r : 'n:' + it.n;
       const rows = () => { const t = SHOP_TPL[Number(q('#tp-k').value) || 0], l = q('#tp-l').value; return { t, L: t.i.filter(it => l === '' || it.l[Number(l)] !== '-') }; };
       const draw = () => { const { t, L } = rows(), p = pv();
-        q('#tp-v').innerHTML = L.map(it => { const b = it.r && SHOP_CMAP[it.r]; return `<div style="display:flex;gap:8px;padding:2px 0;border-bottom:1px dashed #e0d4b4"><span style="flex:1">${E(nm(it))}${it.o ? ' <span style="color:#8a5a00">✝ 신도 전용</span>' : ''}${b ? ` <span style="opacity:.55">${E(b.n)}</span>` : ''}${it.r && !b ? ' <span style="color:#b00">(카탈로그에 없음)</span>' : ''}</span><b>${shopPriceTxt(it.p[p])}</b></div>`; }).join('') || '<div style="padding:12px;text-align:center">이 지역 칸에 표시된 품목이 없어요.</div>';
-        q('#tp-n').textContent = L.length + '개' + (t.cap ? ' · 하루 매입 한도 ' + [t.cap, Math.round(t.cap * .75), t.cap * 1.5][p] + ' gp' : ''); };
-      ov.addEventListener('change', draw); ov.addEventListener('input', e => { if (e.target.id !== 'tp-st') draw(); });
+        q('#tp-v').innerHTML = L.map(it => { const b = it.r && SHOP_CMAP[it.r], k = ik(it), off = EX.has(k); return `<div style="display:flex;gap:8px;padding:2px 0;border-bottom:1px dashed #e0d4b4;${off ? 'opacity:.45;text-decoration:line-through;' : ''}${exOn ? 'cursor:pointer;' : ''}"${exOn ? ` data-tk="${E(k)}"` : ''}>${exOn ? `<input type="checkbox" data-tk="${E(k)}"${off ? '' : ' checked'} style="margin:0;align-self:center" title="체크를 풀면 이 물건은 빼고 진열해요">` : ''}<span style="flex:1">${E(nm(it))}${it.o ? ' <span style="color:#8a5a00">✝ 신도 전용</span>' : ''}${b ? ` <span style="opacity:.55">${E(b.n)}</span>` : ''}${it.r && !b ? ' <span style="color:#b00">(카탈로그에 없음)</span>' : ''}</span><b>${shopPriceTxt(it.p[p])}</b></div>`; }).join('') || '<div style="padding:12px;text-align:center">이 지역 칸에 표시된 품목이 없어요.</div>';
+        const nx = L.filter(it => EX.has(ik(it))).length; q('#tp-ex').textContent = exOn ? '빼기 끝' : (nx ? '빼기 고치기 (' + nx + ')' : '몇 개 빼기'); q('#tp-n').textContent = (nx ? L.length - nx + '개 진열 (' + nx + '개 뺌)' : L.length + '개') + (t.cap ? ' · 하루 매입 한도 ' + [t.cap, Math.round(t.cap * .75), t.cap * 1.5][p] + ' gp' : ''); };
+      ov.addEventListener('change', e => { const k = e.target && e.target.dataset && e.target.dataset.tk; if (k) { if (e.target.checked) EX.delete(k); else EX.add(k); } draw(); });
+      ov.addEventListener('click', e => { const row = e.target.closest && e.target.closest('div[data-tk]'); if (!row || e.target.tagName === 'INPUT') return; const k = row.dataset.tk; if (EX.has(k)) EX.delete(k); else EX.add(k); draw(); });
+      q('#tp-ex').onclick = () => { exOn = !exOn; draw(); }; ov.addEventListener('input', e => { if (e.target.id !== 'tp-st' && !(e.target.dataset && e.target.dataset.tk)) draw(); });
       ov.addEventListener('pointerdown', e => { if (e.target === ov) ov.remove(); });
       q('#tp-x').onclick = () => ov.remove();
       q('#tp-ok').onclick = () => {
-        const { t, L } = rows(), p = pv(), stv = q('#tp-st').value.trim(), stock = stv === '' ? null : Math.max(0, Math.floor(Number(stv) || 0));
+        const { t, L: L0 } = rows(), L = L0.filter(it => !EX.has(ik(it))), p = pv(), stv = q('#tp-st').value.trim(), stock = stv === '' ? null : Math.max(0, Math.floor(Number(stv) || 0));
         const mode = (ov.querySelector('[name=tp-m]:checked') || {}).value; let s;
+        if (!L.length) { showToast('진열할 물건이 없어요. 뺀 걸 다시 넣어 주세요.'); return; }
         if (mode === 'cur' && cur) s = cur;
         else { const cap = t.cap ? [t.cap, Math.round(t.cap * .75), t.cap * 1.5][p] : 0; s = { id: 'sh_' + Date.now().toString(36), name: t.n, desc: [['', '(싸게)', '(비싸게)'][p], cap ? '하루 매입 한도 ' + cap + ' gp' : ''].filter(Boolean).join(' '), items: [] }; shopsList().push(s); }
         s.items = s.items || []; const have = new Set(s.items.map(i => i.ref ? 'r:' + i.ref : 'n:' + (i.name || i.n || ''))); let n = 0;
@@ -12253,7 +12257,7 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
     var q = root.querySelectorAll('button, select, input:not([type=hidden]), textarea, a[href], [role=button], [onclick]');
     [].forEach.call(q, function (el) {
       if (mine(el) || !vis(el)) return; if (off.skipTop && el.closest('.top-bar,#fbc-pan,#fbc-fab,#fbc-bub')) return; if (off.ex && off.ex.some(function (x) { return el.closest(x); })) return; if (el.parentElement && el.parentElement.closest('button,a,[onclick]') && el.matches('[onclick]:not(button)')) return;
-      if (off.auto) { var vt = el.tagName === 'SELECT' ? ((el.options[el.selectedIndex] || {}).text || '') : /INPUT|TEXTAREA/.test(el.tagName) ? (el.value || el.placeholder || '') : (el.innerText || ''); if (/[가-힣]/.test(vt)) return; }   // 한글로 보이게 적힌 건 번호·설명 생략
+      if (off.auto) { var vt = el.tagName === 'SELECT' ? ((el.options[el.selectedIndex] || {}).text || '') : /INPUT|TEXTAREA/.test(el.tagName) ? (/^(radio|checkbox)$/i.test(el.type || '') ? ((el.closest('label') || {}).innerText || '') : (el.value || el.placeholder || '')) : (el.innerText || ''); if (/[가-힣]/.test(vt)) return; }   // 한글로 보이게 적힌 건 번호·설명 생략
       var L = label(el); if (!L || /^[\d\s.,:/+\-×%]+$/.test(L)) return;
       var r = el.getBoundingClientRect(); var rect = { x: r.left + off.x, y: r.top + off.y, w: r.width, h: r.height };
       if (rect.y > innerHeight + 200) return;
