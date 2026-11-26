@@ -2129,6 +2129,7 @@
     #fan-cap { text-align: center; max-width: 620px; margin: 4px auto 18px; color: #3b2410; }
     #fan-cap .fan-nm { display: none !important; }
     #tcg-ov.foc-card .tcg-flip { filter: drop-shadow(0 0 10px #f6d58a) drop-shadow(0 0 3px #f6d58a); }
+    .tcg-multi { flex-wrap: nowrap !important; }
     #tcg-ov.foc-card .tcg-mc:not(.sel) .tcg-flip { filter: none; } #tcg-ov.foc-deck .tcg-mc .tcg-flip { filter: none; }
     #tcg-ov.foc-deck .ts-c.ctr { filter: drop-shadow(0 0 9px #f6d58a) drop-shadow(0 0 3px #fff3c4); }
     #tcg-ov.foc-deck #tcg-strip { box-shadow: inset 0 3px 0 rgba(246,213,138,.55); }
@@ -8077,17 +8078,19 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
       c.style.zIndex = Math.round(100 - Math.abs(th) + f * 20); c.style.opacity = op.toFixed(2); c.style.pointerEvents = hid ? 'none' : ''; }); }
     // 부채꼴 카드를 위로 끌어 올리면 지금 카드 옆에 함께 펼침 (최대 5장)
     let tcgMulti = [], tcgMSel = -1, tcgMN = 0;
+    // 한 줄에 들어가는 만큼만 (원래 크기의 85% 아래로 작아지면 더 안 뽑아요, 최대 5장)
+    function tcgMaxN() { const ah = innerHeight - 170 - 20, full = Math.min(370, (ah - 8 - 38) * 0.72), min = full * 0.85; return Math.max(2, Math.min(5, Math.floor((innerWidth - 28 + 8) / (min + 8)))); }
     function tcgStripAdd(k, id) {
       const key = k + ':' + id; if (!tcgSpec) return;
       if ((tcgMulti.length ? tcgMulti : [tcgSpec]).some(m => m.curKey === key)) { showToast('이미 펼쳐진 카드예요'); return; }
-      if (tcgMulti.length >= 5) { showToast('한 번에 5장까지 볼 수 있어요'); return; }
+      if (tcgMulti.length >= tcgMaxN()) { showToast(tcgMaxN() < 5 ? '화면이 꽉 차서 더 뽑을 수 없어요' : '한 번에 5장까지 볼 수 있어요'); return; }
       if (!tcgMulti.length) { tcgSpec.fl = tcgFlipped; tcgMulti = [tcgSpec]; tcgMulti[0].old = 1; } else tcgMulti.forEach(m => { m.old = 1; });
       window.__tcgFan = 1; window.__tcgAdd = 1; try { if (k === 'pc') tcgPc(id); else tcgNpc(id); } finally { window.__tcgAdd = 0; }
     }
     function tcgRenderMulti() {
-      const ov = document.getElementById('tcg-ov'); if (!ov) return; const n = tcgMulti.length, rows = n <= 3 ? 1 : 2, cols = Math.ceil(n / rows);
+      const ov = document.getElementById('tcg-ov'); if (!ov) return; const n = tcgMulti.length, rows = 1, cols = n;   // 여러 장은 한 줄로만
       if (tcgMSel < 0 || tcgMSel >= n || n !== tcgMN) tcgMSel = n - 1; tcgMN = n;
-      const ah = innerHeight - 170 - 20, cw = Math.max(70, Math.min(370, (innerWidth - 28 - 8 * (cols - 1)) / cols, (ah / rows - 8 - (tcgMulti.some(s => s.edit) ? 38 : 0)) * 0.72));
+      const ah = innerHeight - 170 - 20, cw = Math.max(70, Math.min(370, Math.floor((innerWidth - 34 - 8 * (cols - 1)) / cols), (ah / rows - 8 - (tcgMulti.some(s => s.edit) ? 38 : 0)) * 0.72));
       ov.innerHTML = `<div class="tcg-multi" style="--cw:${cw.toFixed(0)}px;max-width:${(cw * cols + 8 * cols).toFixed(0)}px">${tcgMulti.map((sp, i) => { const bk = sp.backFn ? sp.backFn() : ''; return `<div class="tcg-mc${sp.old && !sp.fresh ? ' old' : ''}${i === tcgMSel ? ' sel' : ''}"><div class="tcg-flip${sp.fl ? ' flip' : ''}" data-mi="${i}"><div class="tf-in"><div class="tf-f">${tcgFront(sp, false)}</div><div class="tf-b">${bk}</div></div></div>${sp.edit ? tcgSheetBtn(sp, i) : ''}</div>`; }).join('')}</div>`;
       tcgMulti.forEach(m => { m.old = 0; });
       tcgStrip(ov);
@@ -12275,9 +12278,9 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       { sel: '#pcc-box button[onclick="pcTxtFree()"]', name: '텍스트 위치 조절', desc: '' },
       { sel: '#pcc-box button[onclick="pccAltTog()"]', name: '본모습 추가', desc: '' },
       { sel: '#pcc-box button[onclick="pccNmEdit()"], #pcc-box #pcc-ali', name: '이름 수정', desc: '첫번째 줄은 본명, 두번째 줄은 별명, 쉼표로 구분.' }] },
-    '#tcg-ov': { title: '카드', intro: '↑ 뽑은 카드 · ↓ 카드 덱 고르기 (고른 쪽이 빛나요) · ←/→ 카드면 여러 장 중 고르기(한 장이면 뒤집기), 덱이면 넘기기 · A/D 고른 카드 뒤집기 · Enter 카드면 시트 열기, 덱이면 가운데 카드를 옆에 더 뽑기 (5장까지) · Esc 닫기', notes: [
+    '#tcg-ov': { title: '카드', intro: '↑ 뽑은 카드 · ↓ 카드 덱 고르기 (고른 쪽이 빛나요) · ←/→ 카드면 여러 장 중 고르기(한 장이면 뒤집기), 덱이면 넘기기 · A/D 고른 카드 뒤집기 · Enter 카드면 시트 열기, 덱이면 가운데 카드를 옆에 더 뽑기 (한 줄이 꽉 차면 그만) · Esc 닫기', notes: [
       { sel: '#tcg-ov .tcg-flip', first: 1, side: 'left', name: '뽑은 카드', desc: '↑ 키로 고르면 빛나요. 여러 장이면 ←/→ 로 골라요. A/D 키나 좌우로 끌면 뒤집혀요. Enter 키로 시트를 열어요. 우클릭: 꾸미기' },
-      { sel: '#tcg-strip .ts-c.ctr', dyn: '#tcg-strip .ts-c.ctr', side: 'above', name: '카드 덱', desc: '↓ 키로 고르면 가운데 카드가 빛나요. ←/→ 키로 넘기고, Enter 키로 가운데 카드를 지금 카드 옆에 더 뽑아요 (5장까지).' },
+      { sel: '#tcg-strip .ts-c.ctr', dyn: '#tcg-strip .ts-c.ctr', side: 'above', name: '카드 덱', desc: '↓ 키로 고르면 가운데 카드가 빛나요. ←/→ 키로 넘기고, Enter 키로 가운데 카드를 지금 카드 옆에 더 뽑아요. 한 줄로만 놓이고, 화면이 꽉 차면 더 안 뽑혀요 (최대 5장).' },
       { sel: '#tcg-ov .tcg-bar .b-brush', name: '꾸미기', desc: '' },
       { sel: '#tcg-ov .tcg-bar button[title="시트 열기"]', name: '시트 열기', desc: '' },
       { sel: '#tcg-ov .tcg-bar button[title="내용 수정"]', name: '내용 수정', desc: '' },
