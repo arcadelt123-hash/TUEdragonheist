@@ -2129,6 +2129,7 @@
     #fan-cap { text-align: center; max-width: 620px; margin: 4px auto 18px; color: #3b2410; }
     #fan-cap .fan-nm { display: none !important; }
     #tcg-ov.foc-card .tcg-flip { filter: drop-shadow(0 0 10px #f6d58a) drop-shadow(0 0 3px #f6d58a); }
+    #tcg-ov.foc-card .tcg-mc:not(.sel) .tcg-flip { filter: none; } #tcg-ov.foc-deck .tcg-mc .tcg-flip { filter: none; }
     #tcg-ov.foc-deck .ts-c.ctr { filter: drop-shadow(0 0 9px #f6d58a) drop-shadow(0 0 3px #fff3c4); }
     #tcg-ov.foc-deck #tcg-strip { box-shadow: inset 0 3px 0 rgba(246,213,138,.55); }
     .pcl-token.tkn-clr .tk-nm { background: transparent !important; border-color: transparent !important; box-shadow: none !important; color: #fff !important; text-shadow: 0 0 3px #000, 0 0 3px #000, 0 1px 2px #000; }
@@ -8169,14 +8170,22 @@ const gmv = gm && !plView(), tgt = shopCicTgt(), cnt = {}; (sh.items || []).forE
     function tcgFocMark() { const ov = document.getElementById('tcg-ov'); if (!ov) return; const st = document.getElementById('tcg-strip'); if (!st) tcgFoc = 'card'; ov.classList.toggle('foc-deck', tcgFoc === 'deck'); ov.classList.toggle('foc-card', tcgFoc === 'card' && !!st); const o = st && tcgStripCenter(); if (o) o.cs.forEach((c, i) => c.classList.toggle('ctr', i === o.bi)); }
     document.addEventListener('scroll', e => { if (e.target && e.target.id === 'tcg-strip') tcgFocMark(); }, true);
     new MutationObserver(() => { const ov = document.getElementById('tcg-ov'); if (!ov) { tcgFoc = 'card'; return; } if (!ov._fm) { ov._fm = 1; tcgFoc = 'card'; } tcgFocMark(); }).observe(document.body, { childList: true, subtree: true });
+    // 한 장이든 여러 장이든 같은 키: ↑ 뽑은 카드 / ↓ 카드 덱 · ←/→ 카드면 여러 장 중 고르기(한 장이면 뒤집기), 덱이면 넘기기 · A/D 고른 카드 뒤집기 · Enter 카드면 시트, 덱이면 가운데 카드를 옆에 더 뽑기
+    function tcgSelMark() { document.querySelectorAll('.tcg-mc').forEach((c, i) => c.classList.toggle('sel', i === tcgMSel)); }
+    function tcgFlipSel() { if (tcgMulti.length > 1) { const m = tcgMulti[tcgMSel]; if (!m) return; m.fl = !m.fl; const el = document.querySelector('.tcg-flip[data-mi="' + tcgMSel + '"]'); if (el) el.classList.toggle('flip', !!m.fl); } else tcgFlip(); }
     window.addEventListener('keydown', e => {
-      if (!document.getElementById('tcg-ov') || tcgMulti.length > 1 || tcgPanel || e.ctrlKey || e.metaKey || e.altKey || /INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || '') || (e.target && e.target.isContentEditable)) return;
-      const k = (e.key || '').toLowerCase(), hasDeck = !!document.getElementById('tcg-strip'); let hd = true;
-      if (k === 'a' || k === 'd') tcgFlip();
+      if (!document.getElementById('tcg-ov') || tcgPanel || e.ctrlKey || e.metaKey || e.altKey || /INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || '') || (e.target && e.target.isContentEditable)) return;
+      const k = (e.key || '').toLowerCase(), hasDeck = !!document.getElementById('tcg-strip'), multi = tcgMulti.length > 1; let hd = true;
+      if (k === 'a' || k === 'd') tcgFlipSel();
       else if (e.key === 'ArrowUp') { tcgFoc = 'card'; tcgFocMark(); }
       else if (e.key === 'ArrowDown') { if (hasDeck) { tcgFoc = 'deck'; tcgFocMark(); } }
-      else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { if (tcgFoc === 'deck' && hasDeck) { tcgStripGo(e.key === 'ArrowLeft' ? -1 : 1); setTimeout(tcgFocMark, 350); } else tcgFlip(); }
-      else if (e.key === 'Enter') { if (tcgFoc === 'deck' && hasDeck) { const o = tcgStripCenter(); if (o && o.cs[o.bi]) o.cs[o.bi].click(); } else if (tcgSpec && tcgSpec.edit) tcgEdit(); else hd = false; }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { const d = e.key === 'ArrowLeft' ? -1 : 1;
+        if (tcgFoc === 'deck' && hasDeck) { tcgStripGo(d); setTimeout(tcgFocMark, 350); }
+        else if (multi) { tcgMSel = Math.max(0, Math.min(tcgMulti.length - 1, tcgMSel + d)); tcgSelMark(); }
+        else tcgFlip(); }
+      else if (e.key === 'Enter') {
+        if (tcgFoc === 'deck' && hasDeck) { const o = tcgStripCenter(), c = o && o.cs[o.bi]; if (c) tcgStripAdd(c.dataset.k, c.dataset.id); }
+        else { const sp = multi ? tcgMulti[tcgMSel] : tcgSpec; if (sp && sp.edit) tcgEdit(multi ? tcgMSel : undefined); else hd = false; } }
       else hd = false;
       if (hd) { e.preventDefault(); e.stopImmediatePropagation(); }
     }, true);
@@ -12266,9 +12275,9 @@ function addTimelineNote(at) { tlNoteOpen(null, at); }
       { sel: '#pcc-box button[onclick="pcTxtFree()"]', name: '텍스트 위치 조절', desc: '' },
       { sel: '#pcc-box button[onclick="pccAltTog()"]', name: '본모습 추가', desc: '' },
       { sel: '#pcc-box button[onclick="pccNmEdit()"], #pcc-box #pcc-ali', name: '이름 수정', desc: '첫번째 줄은 본명, 두번째 줄은 별명, 쉼표로 구분.' }] },
-    '#tcg-ov': { title: '카드', intro: '↑ 뽑은 카드 · ↓ 카드 덱 고르기 (고른 쪽이 빛나요) · ←/→ 고른 쪽 조정 · A/D 카드 뒤집기 · Enter 카드면 시트 열기, 덱이면 가운데 카드 뽑기 · Esc 닫기', notes: [
-      { sel: '#tcg-ov .tcg-flip', first: 1, name: '뽑은 카드', desc: '↑ 키로 고르면 빛나요. ←/→ 나 A/D 키, 또는 좌우로 끌면 뒤집혀요. Enter 키로 시트를 열어요. 우클릭: 꾸미기' },
-      { sel: '#tcg-strip .ts-c.ctr', dyn: '#tcg-strip .ts-c.ctr', side: 'above', name: '카드 덱', desc: '↓ 키로 고르면 가운데 카드가 빛나요. ←/→ 키로 넘기고, Enter 키로 가운데 카드를 뽑아요.' },
+    '#tcg-ov': { title: '카드', intro: '↑ 뽑은 카드 · ↓ 카드 덱 고르기 (고른 쪽이 빛나요) · ←/→ 카드면 여러 장 중 고르기(한 장이면 뒤집기), 덱이면 넘기기 · A/D 고른 카드 뒤집기 · Enter 카드면 시트 열기, 덱이면 가운데 카드를 옆에 더 뽑기 (5장까지) · Esc 닫기', notes: [
+      { sel: '#tcg-ov .tcg-flip', first: 1, side: 'left', name: '뽑은 카드', desc: '↑ 키로 고르면 빛나요. 여러 장이면 ←/→ 로 골라요. A/D 키나 좌우로 끌면 뒤집혀요. Enter 키로 시트를 열어요. 우클릭: 꾸미기' },
+      { sel: '#tcg-strip .ts-c.ctr', dyn: '#tcg-strip .ts-c.ctr', side: 'above', name: '카드 덱', desc: '↓ 키로 고르면 가운데 카드가 빛나요. ←/→ 키로 넘기고, Enter 키로 가운데 카드를 지금 카드 옆에 더 뽑아요 (5장까지).' },
       { sel: '#tcg-ov .tcg-bar .b-brush', name: '꾸미기', desc: '' },
       { sel: '#tcg-ov .tcg-bar button[title="시트 열기"]', name: '시트 열기', desc: '' },
       { sel: '#tcg-ov .tcg-bar button[title="내용 수정"]', name: '내용 수정', desc: '' },
